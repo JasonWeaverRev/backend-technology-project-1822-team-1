@@ -1,0 +1,12 @@
+{
+  "name": "technology-project-1822-team-1",
+  "version": "1.0.0",
+  "description": "Text goes here\r RICKY RICKY RICKY\r Aaron Cordeau",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
