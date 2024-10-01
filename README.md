@@ -60,14 +60,14 @@ PUT	/profile/:userId	Update a user’s profile
 Encounters
 ```
 Method	Endpoint	Description
-POST	/encounters	Create a new encounter
-GET	/encounters/:userId	Get all encounters by a user
+POST	/encounters	                Create a new encounter
+GET	/encounters/:userId	        Get all encounters by a user
 PUT	/encounters/:encounterId	Update an existing encounter
 DELETE	/encounters/:encounterId	Delete an encounter
 ```
 Campaigns 
 ```
-POST	/campaigns	Create a campaign folder
+POST	/campaigns	        Create a campaign folder
 GET	/campaigns/:userId	View campaigns for a user
 PUT	/campaigns/:campaignId	Update a campaign
 DELETE	/campaigns/:campaignId	Delete a campaign
