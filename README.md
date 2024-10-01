@@ -52,7 +52,7 @@ POST	/auth/login	Log in an existing user
 ```
 User Profile
 ```
-Method	Endpoint	Description
+Method	Endpoint	        Description
 GET	/profile/:userId	View a user’s profile
 PUT	/profile/:userId	Update a user’s profile
 ```
