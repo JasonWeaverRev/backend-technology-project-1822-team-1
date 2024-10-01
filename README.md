@@ -152,6 +152,13 @@ Technologies Used
 	•	JWT: Authentication using JSON Web Tokens.
 	•	BCrypt: Password hashing and encryption.
 	•	Postman: Testing for API routes.
+	•	Axios: API fetch requests
+	•	Winston: Logging library for managing error, info, and debug logs 			in the application.
+ 	•	Jest: Testing framework used for the unit and integration tests to 			ensure the application works as expected. 
+ 
+
+ 
+ 
 Running Tests
 
 	1.	Ensure all dependencies are installed:
