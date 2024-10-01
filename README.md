@@ -155,8 +155,9 @@ Technologies Used
 	•	Axios: API fetch requests
 	•	Winston: Logging library for managing error, info, and debug logs 			in the application.
  	•	Jest: Testing framework used for the unit and integration tests to 			ensure the application works as expected. 
- 
-
+  	•	UUID: Library for generating universally unique identifiers.
+   	•	AWS Document Client: AWS SDK’s DynamoDB DocumentClient for interacting 			with DynamoDB in a simpler, object-oriented way.
+  
  
  
 Running Tests
