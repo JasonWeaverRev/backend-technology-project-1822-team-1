@@ -2,9 +2,9 @@
 
 ## This is the backend for the Dungeons and Dragons Encounter Management application. It provides the API for user authentication, encounter creation, campaign management, and forum interactions.
 
-Table of Contents
+*Table of Contents*
 
-  1.	Installation
+  	1.	Installation
 	2.	API Documentation
 	3.	Features
 	4.	Database Schema
@@ -13,7 +13,7 @@ Table of Contents
 	7.	Running Tests
 	8.	Contributors
 
-Installation
+**Installation**
 
 Prerequisites
 
@@ -24,16 +24,55 @@ Prerequisites
 Getting Started
 
 	1.	Clone the repository:
+ ``` https://github.com/JasonWeaverRev/backend-technology-project-1822-team-1.git```
  
 	2.	Navigate into the project directory: 
  
+ ```cd dnd-encounter-management-backend 	```
+ 
  	3.	Install dependencies:
   
-  	4.	Set up environment variables (see Environment Variables).
+```npm install ```
+  
+  	4.	Set up environment variables
    
 	5.	Start the server:
+ 
+```npm start```
    
  	6.	The server will start on http://localhost:3000.
+
+**API Documentation**
+
+Authentication
+```
+Method	Endpoint	Description
+POST	/auth/register	Register a new user
+POST	/auth/login	Log in an existing user
+```
+User Profile
+```
+Method	Endpoint	Description
+GET	/profile/:userId	View a user’s profile
+PUT	/profile/:userId	Update a user’s profile
+```
+
+Encounters
+```
+Method	Endpoint	Description
+POST	/encounters	Create a new encounter
+GET	/encounters/:userId	Get all encounters by a user
+PUT	/encounters/:encounterId	Update an existing encounter
+DELETE	/encounters/:encounterId	Delete an encounter
+```
+Campaigns 
+```
+
+```
+
+
+
+
 
 Features
 
@@ -49,68 +88,60 @@ Database Schema
 The backend uses DynamoDB to store data. Below are some key collections and their fields:
 
 User 
-
+```
 {
   "UserID": "UUID",
   "Username": "string",
   "Password": "hashedString",
-  "Email": "string@example.com",
-  "Encounters": [
-    {
-      "EncounterID": "UUID",
-      "ChallengeRating": 5,
-      "MonsterTypes": ["Dragon", "Goblin"],
-      "Environment": "Forest"
-    }
-  ],
-  "Collections": ["FolderID1", "FolderID2"],
+  "Email": "user@example.com",
+  "ProfilePicture": "https://example.com/images/profile.jpg",
+  "AboutMe": "I love DnD!",
+  "Encounters": ["EncounterID1", "EncounterID2"],
+  "Collections": ["CampaignID1", "CampaignID2"],
   "ForumPosts": ["PostID1", "PostID2"],
-  "LikedPosts": ["PostID1", "PostID3"]
+  "LikedPosts": ["PostID1", "PostID3"],
+  "CreationTime": "2024-10-01T10:00:00Z"
 }
+```
 
 Encounter
-
+```
 {
   "EncounterID": "UUID",
-  "FolderID": "FolderID1",
-  "ChallengeRating": 5,
-  "MonsterTypes": ["Dragon", "Goblin"],
-  "MonsterURLs": ["https://monsterapi.com/dragon", "https://monsterapi.com/goblin"],
-  "Environment": "Forest",
-  "CreatedAt": "2024-10-01T10:00:00Z",
-  "UpdatedAt": "2024-10-01T12:00:00Z"
+  "Monsters": [
+    {
+      "Name": "Goblin",
+      "API_URL": "https://dndapi.com/monsters/goblin"
+    },
+    {
+      "Name": "Dragon",
+      "API_URL": "https://dndapi.com/monsters/dragon"
+    }
+  ],
+  "Saves": 10
 }
-
+```
 
 Campaign
-
+```
 {
-  "FolderID": "UUID",
-  "UserID": "UUID",
-  "FolderName": "My Epic Campaign",
-  "EncounterIDs": ["EncounterID1", "EncounterID2"],
-  "CreatedAt": "2024-10-01T10:00:00Z",
-  "UpdatedAt": "2024-10-01T12:00:00Z"
+  "CampaignID": "UUID",
+  "Encounters": ["EncounterID1", "EncounterID2", "EncounterID3"]
 }
 
+```
 Forum Post
-
+```
 {
   "PostID": "UUID",
   "WrittenBy": "Username",
-  "Title": "Encounter Tips",
-  "Body": "Here's how to make your encounters more exciting...",
-  "Likes": 10,
-  "Comments": [
-    {
-      "CommentID": "UUID",
-      "WrittenBy": "AnotherUser",
-      "Content": "Great tips!",
-      "CreatedAt": "2024-10-01T11:00:00Z"
-    }
-  ]
+  "Title": "My Epic Encounter",
+  "Body": "Here's a great encounter with a dragon and goblins. [Encounter Details]",
+  "Likes": 20,
+  "Dislikes": 2,
+  "RepliesTo": "PostID123" // This would be null or omitted if it's an independent post
 }
-
+```
 Technologies Used
 
 	•	Node.js: JavaScript runtime for building the backend.
