@@ -67,11 +67,12 @@ DELETE	/encounters/:encounterId	Delete an encounter
 ```
 Campaigns 
 ```
+POST	/campaigns	Create a campaign folder
+GET	/campaigns/:userId	View campaigns for a user
+PUT	/campaigns/:campaignId	Update a campaign
+DELETE	/campaigns/:campaignId	Delete a campaign
 
 ```
-
-
-
 
 
 Features
@@ -142,6 +143,7 @@ Forum Post
   "RepliesTo": "PostID123" // This would be null or omitted if it's an independent post
 }
 ```
+
 Technologies Used
 
 	•	Node.js: JavaScript runtime for building the backend.
