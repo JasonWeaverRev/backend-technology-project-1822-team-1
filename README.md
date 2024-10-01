@@ -43,6 +43,74 @@ Features
 	•	Campaign Organization: Encounters can be organized into campaigns with subfolders.
 	•	Forum Interaction: Users can post about their encounters, comment on posts, and like/dislike posts.
 	•	Moderator Tools: Admins can delete problematic comments and posts.
+   
+Database Schema
+
+The backend uses DynamoDB to store data. Below are some key collections and their fields:
+
+User 
+
+{
+  "UserID": "UUID",
+  "Username": "string",
+  "Password": "hashedString",
+  "Email": "string@example.com",
+  "Encounters": [
+    {
+      "EncounterID": "UUID",
+      "ChallengeRating": 5,
+      "MonsterTypes": ["Dragon", "Goblin"],
+      "Environment": "Forest"
+    }
+  ],
+  "Collections": ["FolderID1", "FolderID2"],
+  "ForumPosts": ["PostID1", "PostID2"],
+  "LikedPosts": ["PostID1", "PostID3"]
+}
+
+Encounter
+
+{
+  "EncounterID": "UUID",
+  "FolderID": "FolderID1",
+  "ChallengeRating": 5,
+  "MonsterTypes": ["Dragon", "Goblin"],
+  "MonsterURLs": ["https://monsterapi.com/dragon", "https://monsterapi.com/goblin"],
+  "Environment": "Forest",
+  "CreatedAt": "2024-10-01T10:00:00Z",
+  "UpdatedAt": "2024-10-01T12:00:00Z"
+}
+
+
+Campaign
+
+{
+  "FolderID": "UUID",
+  "UserID": "UUID",
+  "FolderName": "My Epic Campaign",
+  "EncounterIDs": ["EncounterID1", "EncounterID2"],
+  "CreatedAt": "2024-10-01T10:00:00Z",
+  "UpdatedAt": "2024-10-01T12:00:00Z"
+}
+
+Forum Post
+
+{
+  "PostID": "UUID",
+  "WrittenBy": "Username",
+  "Title": "Encounter Tips",
+  "Body": "Here's how to make your encounters more exciting...",
+  "Likes": 10,
+  "Comments": [
+    {
+      "CommentID": "UUID",
+      "WrittenBy": "AnotherUser",
+      "Content": "Great tips!",
+      "CreatedAt": "2024-10-01T11:00:00Z"
+    }
+  ]
+}
+
 Technologies Used
 
 	•	Node.js: JavaScript runtime for building the backend.
