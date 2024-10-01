@@ -115,18 +115,17 @@ Technologies Used
 
 	•	Node.js: JavaScript runtime for building the backend.
 	•	Express.js: Web framework for handling API routes.
-	•	MongoDB: NoSQL database for storing data.
+	•	DynamoDB: NoSQL database for storing data.
 	•	JWT: Authentication using JSON Web Tokens.
-	•	Mongoose: ODM for MongoDB, used to model data.
 	•	BCrypt: Password hashing and encryption.
-	•	Mocha/Chai: Testing framework for API routes.
+	•	Postman: Testing for API routes.
 Running Tests
 
 	1.	Ensure all dependencies are installed:
 			 npm install 
     
  	2.	Run the test suite:
-  			nom test 
+  			npm test 
      
      Test coverage includes API endpoints, database operations, and authentication flows.
 
