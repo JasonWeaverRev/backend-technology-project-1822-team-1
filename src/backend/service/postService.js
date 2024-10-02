@@ -12,7 +12,6 @@ const postDAO = require("../dao/postDAO");
  */
 async function deletePostByIdAdmin(postID) {
     
-
     // Validate that the post id is present in the request body
     if(!postID || !postID.post_id) {
         return -1;
