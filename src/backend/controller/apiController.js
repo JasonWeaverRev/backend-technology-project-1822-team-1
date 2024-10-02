@@ -8,7 +8,7 @@ const postRouter = require('../middleware/postRouter.js');
 
 
 /**
- * Server routing stemming from the /api resource
+ * Server routing stemming from the / resource
  */
 app.use(express.json());
 app.use('/api/forum', postRouter);
