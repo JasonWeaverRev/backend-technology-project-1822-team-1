@@ -11,8 +11,74 @@ const {
     ScanCommand,
     QueryCommand
 } = require("@aws-sdk/lib-dynamodb");
-const logger= require("../util/logger");
+const {logger} = require("../utils/logger");
 
 // Table and DynamoDB Document information
 const client = new DynamoDBClient({region: "us-east-1"});
 const documentClient = DynamoDBDocumentClient.from(client);
+
+const TableName = 'Delver-Forum-Post';
+
+/**
+ * TABLE METHODS
+ */
+
+/**
+ * Deletes a specific post using admin privileges  
+ * 
+ * @param postID id of the post to be deleted by an admin
+ * @returns meta data of the request
+ */
+async function deletePostByIdAdmin(postID, crTime) {
+
+    // Retrieve a post (TBC to DELETE)
+    const command = new DeleteCommand( {
+        TableName,
+        Key: {
+            post_id: postID,
+            creation_time: crTime
+        }
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
+/**
+ * Retrieves a post using a post id
+ * 
+ * @param postID ID of the post to be retrieved
+ * @returns the post with the same post ID, or null
+ */
+async function getPostById(postID) {
+
+    // Create a query finding the post with its ID as the key condition
+    const command = new QueryCommand( {
+        TableName,
+        KeyConditionExpression: "#id = :id",
+        ExpressionAttributeNames: {
+            "#id": "post_id"
+        },
+        ExpressionAttributeValues: {
+            ":id": postID
+        }
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data.Items[0];
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
+module.exports = {
+    deletePostByIdAdmin,
+    getPostById
+}
