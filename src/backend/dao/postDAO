@@ -44,21 +44,15 @@ async function createPost(Item) {
     }
 }
 
+
+
 /**
- * ==========
- * TO DO
- * ==========
-<<<<<<< HEAD
  * 
-=======
->>>>>>> US2-T1
- */
-/**
- * Creates a new reply and adds it to the 
- * 
+ * @param replyID 
  * @param parent_id 
+ * @param crTime 
  */
-async function addReply(parent_id, crTime) {
+async function addReplyToParentList(replyID, parent_id, crTime) {
     const command = new UpdateCommand( {
         TableName,
         Key: {
@@ -67,7 +61,7 @@ async function addReply(parent_id, crTime) {
         },
         UpdateExpression: 'SET replies = list_append(if_not_exists(replies, :emptyList), :newString)',
         ExpressionAttributeValues: {
-            ":newString": [parent_id],
+            ":newString": [replyID],
             ":emptyList": []
         }
     });
@@ -78,7 +72,6 @@ async function addReply(parent_id, crTime) {
     } catch(err) {
         logger.error(err);
     }
-    
 }
 
 
@@ -88,7 +81,7 @@ async function addReply(parent_id, crTime) {
  * @param postID id of the post to be deleted by an admin
  * @returns meta data of the request
  */
-async function deletePostByIdAdmin(postID, crTime) {
+async function deletePostById(postID, crTime) {
 
     // delete a post
     const command = new DeleteCommand( {
@@ -107,6 +100,40 @@ async function deletePostByIdAdmin(postID, crTime) {
         logger.error(err);
     }
 }
+
+
+/**
+ * Removes a reply post_id from the replies list of a parent post 
+ * 
+ * @param replyID reply id to be removed
+ * @param parent_id post id of the post containing the replies list
+ * @param crTime parent post creation time (for sort key specification)
+ */
+async function removeReplyFromParent(replyID, parent_id, crTime) {
+   
+    // Get index of reply post inside the parent's replies list
+    const parent_post = await getPostById(parent_id);
+    const ind = parent_post.replies.indexOf(replyID); 
+   
+    // Update command to remove the index in the replies list
+    const command = new UpdateCommand ( {
+        TableName,
+        Key: {
+            post_id: parent_id,
+            creation_time: crTime
+        },
+        UpdateExpression: `REMOVE replies[${ind}]`,
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
 
 /**
  * Retrieves a post using a post id
@@ -138,7 +165,9 @@ async function getPostById(postID) {
 }
 
 module.exports = {
-    deletePostByIdAdmin,
+    deletePostById,
     getPostById,
-    createPost
+    createPost,
+    addReplyToParentList,
+    removeReplyFromParent
 }

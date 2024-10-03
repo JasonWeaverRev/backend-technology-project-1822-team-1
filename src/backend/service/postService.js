@@ -2,8 +2,10 @@
  * Performs business logic for the Ticket DB
  */
 const uuid = require("uuid");
+
+// Local module imports
 const postDAO = require("../dao/postDAO");
-const {format } = require("winston");
+const { logger } = require("../utils/logger");
 
 /**
  * TEST ARROW METHOD
@@ -22,28 +24,37 @@ const {format } = require("winston");
  * @param {*} postID id of the post to be deleted
  * @returns -1 if the request body was not valid, 0 if the post does not exist, 1 if the post was found and deleted, -2 if errors arose in the DAO during deletion
  */
-async function deletePostByIdAdmin(postID) {
-    
+async function deletePostById(postID) {
     // Validate that the post id is present in the request body
-    if(!postID || !postID.post_id) {
-        return -1;
+    if(!postID) {
+        logger.info(`Failed Admin post deletion attempt: Invalid post ID`);
+        throw { status: 401, message: `Error: Please input a valid post ID [post_id = 'id']`};
     }
 
     // Validate if the post exists
-    foundPost = await getPostById(postID.post_id);
-
+    foundPost = await getPostById(postID);
     if(foundPost) {
-        let data = await postDAO.deletePostByIdAdmin(foundPost.post_id, foundPost.creation_time);
+        // If the post-to-be-deleted has a parent, remove the reply from the parent's reply list
+        if(foundPost.parent_id) {
+            const parentPost = await getPostById(foundPost.parent_id);
+            const parentData = await postDAO.removeReplyFromParent(postID, parentPost.post_id, parentPost.creation_time);
+        }
+
+        // Delete the post
+        let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
 
         // If errors arise during deletion
         if(!data) {
-            return -2;
+            logger.info(`Failed Admin post deletion attempt: Unexpected error occured during deletion`);
+            throw { status: 400, message: `Error: Encountered an unexpected error during deletion`};
         }
+
         return 1;
     }
 
     // Post was not found
-    return 0;
+    logger.info(`Failed Admin post deletion attempt: Post not found from given post ID`);
+    throw { status: 404, message: `Error: Post was not found with id of: ${postID}`};
 }
 
 /**
@@ -53,7 +64,7 @@ async function deletePostByIdAdmin(postID) {
  * @returns meta data of the post creation if successful, or null otherwise
  */
 async function createPost(postContents) {
-    
+
     if (validatePost(postContents)) {
         // Add the new post information
         let data = await postDAO.createPost({
@@ -68,7 +79,9 @@ async function createPost(postContents) {
     }
 
     // Invalid post
-    return null;
+    logger.info(`Failed forum post creation attempt: Invalid title, body, or written_by fields`);
+    throw { status: 400, message: `Error: Please enter a valid title, body, and user information`};
+
 }
 
 /**
@@ -78,41 +91,44 @@ async function createPost(postContents) {
  */
 async function createReply(replyCont, parent_id) {
 
-    console.log("Below is the parent id: ");
-    console.log(parent_id);
-    console.log("")
-
     // Validate reply contents
     if (validateReply(replyCont, parent_id)) {
         
-<<<<<<< HEAD
-        // If the parent post exists, add it to the forum post 
-=======
         // If the parent post exists, add it to the forum post
->>>>>>> US2-T1
-        parentPost = await getPostById(parent_id);
+
+        const parentPost = await getPostById(parent_id);
         
         if(parentPost) {
+            // Create new reply
             reply = {
                 post_id: uuid.v4(),
                 ...replyCont,
-                parent_id,
                 creation_time: new Date().toISOString(),
+                parent_id,
                 likes: 0,
                 replies: []
             };
-
             let data = await postDAO.createPost(reply);
+
+            // Add the reply to the parent reply list
+
+            let parentData = await postDAO.addReplyToParentList(reply.post_id, parent_id, parentPost.creation_time);
+
+            if (!parentData) {
+                logger.info(`Failed forum reply comment creation failed: Error found in adding the reply to the parent reply list`);
+                throw { status: 400, message: `Error: Could not add your reply to the OP's reply list`};
+            }
+
             return data;
         }
-
         // Parent comment not found
-        return -1;
-
+        logger.info(`Failed forum reply comment creation failed: Parent post not found`);
+        throw { status: 400, message: `Error: Could not find post you are replying to`};
     }
 
     // Parent post not found
-    return 0;
+    logger.info(`Failed forum reply comment creation failed: Invalid reply contents`);
+    throw { status: 400, message: `Error: Invalid reply post contents. Make sure to have a 'body' and 'written by' in the request body`};
 }
 
 
@@ -126,6 +142,7 @@ async function createReply(replyCont, parent_id) {
  * @returns true if the post is valid for creation, false otherwise 
  */
 function validatePost(postContents) {
+
     return (
         postContents.title && 
         postContents.body &&
@@ -165,7 +182,7 @@ async function getPostById(postID) {
 }
 
 module.exports = {
-    deletePostByIdAdmin,
+    deletePostById,
     getPostById,
     createPost,
     createReply
