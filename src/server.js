@@ -1,11 +1,16 @@
+// Module imports
 require("dotenv").config();
-const express = require("express");
-const app = express();
+
+// Local project import
 const { logger } = require("./backend/utils/logger");
+const app = require('./backend/controller/apiController.js');
 
-app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+/**
+ * Server Port and general setup
+ */
+const PORT = 3000;
+
 
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);

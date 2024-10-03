@@ -85,7 +85,11 @@ async function createReply(replyCont, parent_id) {
     // Validate reply contents
     if (validateReply(replyCont, parent_id)) {
         
+<<<<<<< HEAD
         // If the parent post exists, add it to the forum post 
+=======
+        // If the parent post exists, add it to the forum post
+>>>>>>> US2-T1
         parentPost = await getPostById(parent_id);
         
         if(parentPost) {
