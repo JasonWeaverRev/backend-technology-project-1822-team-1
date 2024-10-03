@@ -33,8 +33,14 @@ async function deletePostById(postID) {
 
     // Validate if the post exists
     foundPost = await getPostById(postID);
-
     if(foundPost) {
+        // If the post-to-be-deleted has a parent, remove the reply from the parent's reply list
+        if(foundPost.parent_id) {
+            parentPost = await getPostById(foundPost.parent_id);
+            const parentData = await postDAO.removeReplyFromParent(postID, parentPost.post_id, parentPost.creation_time);
+        }
+
+        // Delete the post
         let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
 
         // If errors arise during deletion
@@ -85,10 +91,6 @@ async function createPost(postContents) {
  */
 async function createReply(replyCont, parent_id) {
 
-    console.log("Below is the parent id: ");
-    console.log(parent_id);
-    console.log("")
-
     // Validate reply contents
     if (validateReply(replyCont, parent_id)) {
         
@@ -102,24 +104,31 @@ async function createReply(replyCont, parent_id) {
                 post_id: uuid.v4(),
                 ...replyCont,
                 creation_time: new Date().toISOString(),
+                parent_id,
                 likes: 0,
                 replies: []
             };
             let data = await postDAO.createPost(reply);
 
             // Add the reply to the parent reply list
+
             let parentData = await postDAO.addReplyToParentList(reply.post_id, parent_id, parentPost.creation_time);
+
+            if (!parentData) {
+                logger.info(`Failed forum reply comment creation failed: Error found in adding the reply to the parent reply list`);
+                throw { status: 400, message: `Error: Could not add your reply to the OP's reply list`};
+            }
 
             return data;
         }
-
         // Parent comment not found
-        return -1;
-
+        logger.info(`Failed forum reply comment creation failed: Parent post not found`);
+        throw { status: 400, message: `Error: Could not find post you are replying to`};
     }
 
     // Parent post not found
-    return 0;
+    logger.info(`Failed forum reply comment creation failed: Invalid reply contents`);
+    throw { status: 400, message: `Error: Invalid reply post contents. Make sure to have a 'body' and 'written by' in the request body`};
 }
 
 

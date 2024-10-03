@@ -101,6 +101,40 @@ async function deletePostById(postID, crTime) {
     }
 }
 
+
+/**
+ * Removes a reply post_id from the replies list of a parent post 
+ * 
+ * @param replyID reply id to be removed
+ * @param parent_id post id of the post containing the replies list
+ * @param crTime parent post creation time (for sort key specification)
+ */
+async function removeReplyFromParent(replyID, parent_id, crTime) {
+   
+    // Get index of reply post inside the parent's replies list
+    const parent_post = await getPostById(parent_id);
+    const ind = parent_post.replies.indexOf(replyID); 
+   
+    // Update command to remove the index in the replies list
+    const command = new UpdateCommand ( {
+        TableName,
+        Key: {
+            post_id: parent_id,
+            creation_time: crTime
+        },
+        UpdateExpression: `REMOVE replies[${ind}]`,
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
+
 /**
  * Retrieves a post using a post id
  * 
@@ -134,5 +168,6 @@ module.exports = {
     deletePostById,
     getPostById,
     createPost,
-    addReplyToParentList
+    addReplyToParentList,
+    removeReplyFromParent
 }
