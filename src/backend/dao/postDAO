@@ -17,11 +17,66 @@ const {logger} = require("../utils/logger");
 const client = new DynamoDBClient({region: "us-east-1"});
 const documentClient = DynamoDBDocumentClient.from(client);
 
-const TableName = 'Delver-Forum-Post';
+const TableName = 'Delver_Forum_Posts';
 
 /**
  * TABLE METHODS
  */
+
+/**
+ * Creates a new post to the forums table
+ * 
+ * @param Item post to be created
+ */
+async function createPost(Item) {
+    // Create new put command with the post meta data
+    const command = new PutCommand( {
+        TableName,
+        Item
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch(err) {
+        logger.error(err); 
+    }
+}
+
+/**
+ * ==========
+ * TO DO
+ * ==========
+ */
+/**
+ * Creates a new reply and adds it to the 
+ * 
+ * @param parent_id 
+ */
+async function addReply(parent_id, crTime) {
+    const command = new UpdateCommand( {
+        TableName,
+        Key: {
+            post_id: parent_id,
+            creation_time: crTime
+        },
+        UpdateExpression: 'SET replies = list_append(if_not_exists(replies, :emptyList), :newString)',
+        ExpressionAttributeValues: {
+            ":newString": [parent_id],
+            ":emptyList": []
+        }
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch(err) {
+        logger.error(err);
+    }
+    
+}
+
 
 /**
  * Deletes a specific post using admin privileges  
@@ -31,7 +86,7 @@ const TableName = 'Delver-Forum-Post';
  */
 async function deletePostByIdAdmin(postID, crTime) {
 
-    // Retrieve a post (TBC to DELETE)
+    // delete a post
     const command = new DeleteCommand( {
         TableName,
         Key: {
@@ -80,5 +135,6 @@ async function getPostById(postID) {
 
 module.exports = {
     deletePostByIdAdmin,
-    getPostById
+    getPostById,
+    createPost
 }

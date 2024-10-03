@@ -3,6 +3,18 @@
  */
 const uuid = require("uuid");
 const postDAO = require("../dao/postDAO");
+const {format } = require("winston");
+
+/**
+ * TEST ARROW METHOD
+ * ============================================
+ *  const getSomething = (target, index) => {
+ *      stuff goes here
+ *  }; 
+ * ============================================
+ */
+
+
 
 /**
  * Deletes a post by its ID
@@ -35,6 +47,110 @@ async function deletePostByIdAdmin(postID) {
 }
 
 /**
+ * Validates and creates a new post to the Delver Forum Posts table
+ * 
+ * @param {*} postContents contents of the post, including title (optional?) and body
+ * @returns meta data of the post creation if successful, or null otherwise
+ */
+async function createPost(postContents) {
+    
+    if (validatePost(postContents)) {
+        // Add the new post information
+        let data = await postDAO.createPost({
+            post_id: uuid.v4(),
+            ...postContents,
+            // written by
+            creation_time: new Date().toISOString(),
+            likes: 0,
+            replies: []
+        });
+        return data;
+    }
+
+    // Invalid post
+    return null;
+}
+
+/**
+ * Validates and creates a new reply underneath a forum post to the Delver Forum Posts table
+ * 
+ * @param {*} replyCont 
+ */
+async function createReply(replyCont, parent_id) {
+
+    console.log("Below is the parent id: ");
+    console.log(parent_id);
+    console.log("")
+
+    // Validate reply contents
+    if (validateReply(replyCont, parent_id)) {
+        
+        // If the parent post exists, add it to the forum post
+        parentPost = await getPostById(parent_id);
+        
+        if(parentPost) {
+            reply = {
+                post_id: uuid.v4(),
+                ...replyCont,
+                parent_id,
+                creation_time: new Date().toISOString(),
+                likes: 0,
+                replies: []
+            };
+
+            let data = await postDAO.createPost(reply);
+            return data;
+        }
+
+        // Parent comment not found
+        return -1;
+
+    }
+
+    // Parent post not found
+    return 0;
+}
+
+
+/**
+ * Validates the contents of a post. The post is valid if:
+ * 
+ *  - There exists a title, body, and written_by element
+ *  - The body is not empty
+ * 
+ * @param {*} postContents
+ * @returns true if the post is valid for creation, false otherwise 
+ */
+function validatePost(postContents) {
+    return (
+        postContents.title && 
+        postContents.body &&
+        postContents.written_by &&
+        (postContents.body.length > 0)
+    )
+}
+
+/**
+ * Validates the contents of a reply comment. The post is valid if:
+ * 
+ *  - There exists a body, and written_by element, and the parent post id
+ *  - The body is not empty
+ *  - The parent post id is not empty
+ * 
+ * @param {*} replyCont
+ * @returns true if the reply is valid for creation, false otherwise 
+ */
+function validateReply(replyCont, parent_id) {
+    return (
+        replyCont.body &&
+        replyCont.written_by &&
+        parent_id &&
+        (replyCont.body.length > 0) &&
+        (parent_id.length > 0)
+    )
+}
+
+/**
  * Retrieve a post by its post ID
  * 
  * @param {*} postID ID of the post to retrieve
@@ -46,5 +162,7 @@ async function getPostById(postID) {
 
 module.exports = {
     deletePostByIdAdmin,
-    getPostById
+    getPostById,
+    createPost,
+    createReply
 }
