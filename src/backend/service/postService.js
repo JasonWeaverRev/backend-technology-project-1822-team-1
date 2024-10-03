@@ -175,7 +175,7 @@ function validateReply(replyCont, parent_id) {
  * Retrieve a post by its post ID
  * 
  * @param {*} postID ID of the post to retrieve
- * @returns the post, or null if the post does not exist
+ * @returns the post, or null if the post does not exist 
  */
 async function getPostById(postID) {
     return await postDAO.getPostById(postID);
