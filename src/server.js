@@ -15,13 +15,10 @@ const postRouter = require('./backend/controller/postRouter.js');
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
-app.use("/api/users", userController);
-
-
-
 /**
  * Routing setup
  */
+app.use("/api/users", userController);
 app.use('/api/forum', postRouter);
 
 
