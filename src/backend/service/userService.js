@@ -2,7 +2,7 @@ const userDao = require("../dao/userDao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { logger } = require("../utils/logger");
-const secret = process.send.JWT_SECRET;
+const secret = process.env.JWT_SECRET;
 
 const loginUser = async (identifier, password) => {
   if (!identifier || !password) {
@@ -12,14 +12,12 @@ const loginUser = async (identifier, password) => {
 
   try {
     const user = identifier.includes("@")
-      ? await userDao.getUserByUsername(identifier)
-      : userDao.getUserByEmail(identifier);
+      ? await userDao.getUserByEmail(identifier)
+      : await userDao.getUserByUsername(identifier);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       logger.info(
-        `Failed login attempt: Invalid credentials for ${
-          username ? username : email
-        }`
+        `Failed login attempt: Invalid credentials for ${identifier}`
       );
       throw { status: 401, message: "Invalid username/email or password" };
     }
