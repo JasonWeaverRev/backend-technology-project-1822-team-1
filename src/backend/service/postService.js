@@ -63,14 +63,16 @@ async function deletePostById(postID) {
  * @param {*} postContents contents of the post, including title (optional?) and body
  * @returns meta data of the post creation if successful, or null otherwise
  */
-async function createPost(postContents) {
+async function createPost(postContents, user) {
 
-    if (validatePost(postContents)) {
+    console.log(user);
+
+    if (validatePost(postContents, user)) {
         // Add the new post information
         let data = await postDAO.createPost({
             post_id: uuid.v4(),
             ...postContents,
-            // written by
+            written_by: user.username,
             creation_time: new Date().toISOString(),
             likes: 0,
             replies: []
@@ -89,10 +91,10 @@ async function createPost(postContents) {
  * 
  * @param {*} replyCont 
  */
-async function createReply(replyCont, parent_id) {
+async function createReply(replyCont, parent_id, user) {
 
     // Validate reply contents
-    if (validateReply(replyCont, parent_id)) {
+    if (validateReply(replyCont, parent_id, user)) {
         
         // If the parent post exists, add it to the forum post
 
@@ -103,6 +105,7 @@ async function createReply(replyCont, parent_id) {
             reply = {
                 post_id: uuid.v4(),
                 ...replyCont,
+                written_by: user.username,
                 creation_time: new Date().toISOString(),
                 parent_id,
                 likes: 0,
@@ -141,12 +144,12 @@ async function createReply(replyCont, parent_id) {
  * @param {*} postContents
  * @returns true if the post is valid for creation, false otherwise 
  */
-function validatePost(postContents) {
+function validatePost(postContents, user) {
 
     return (
         postContents.title && 
         postContents.body &&
-        postContents.written_by &&
+        user.username &&
         (postContents.body.length > 0)
     )
 }
@@ -161,11 +164,11 @@ function validatePost(postContents) {
  * @param {*} replyCont
  * @returns true if the reply is valid for creation, false otherwise 
  */
-function validateReply(replyCont, parent_id) {
+function validateReply(replyCont, parent_id, user) {
     return (
         replyCont.body &&
-        replyCont.written_by &&
         parent_id &&
+        user.username &&
         (replyCont.body.length > 0) &&
         (parent_id.length > 0)
     )

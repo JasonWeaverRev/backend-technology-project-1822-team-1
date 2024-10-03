@@ -6,11 +6,12 @@ const postRouter = express.Router();
 
 // Local project imports
 const postService = require('../service/postService');
+const {verifyToken, verifyAdminToken} = require('../middleware/authMiddleware');
 
 /**
  * Delete a specific post
  */
-postRouter.delete('/', async (req, res) => {
+postRouter.delete('/', verifyAdminToken, async (req, res) => {
     
     const {post_id} = req.body;
 
@@ -27,10 +28,10 @@ postRouter.delete('/', async (req, res) => {
 /**
  * Add a new post
  */
-postRouter.post('/', async (req, res) => {
+postRouter.post('/', verifyToken, async (req, res) => {
 
     try {
-        const data = await postService.createPost(req.body);
+        const data = await postService.createPost(req.body, req.user);
         res.status(201).json({message: `Successfully created new post!`, PostInformation: req.body});
 
     } catch (err) {
@@ -41,10 +42,10 @@ postRouter.post('/', async (req, res) => {
 /**
  * Add a new reply comment
  */
-postRouter.post('/:postId', async (req, res) => {
+postRouter.post('/:postId', verifyToken, async (req, res) => {
     
     try {
-        const data = await postService.createReply(req.body, req.params.postId);
+        const data = await postService.createReply(req.body, req.params.postId, req.user);
         res.status(201).json({message: `Successfully created new post!`, PostInformation: req.body});
 
     } catch (err) {
