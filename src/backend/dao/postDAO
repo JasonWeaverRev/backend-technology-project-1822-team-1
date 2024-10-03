@@ -44,17 +44,15 @@ async function createPost(Item) {
     }
 }
 
+
+
 /**
- * ==========
- * TO DO
- * ==========
- */
-/**
- * Creates a new reply and adds it to the 
  * 
+ * @param replyID 
  * @param parent_id 
+ * @param crTime 
  */
-async function addReply(parent_id, crTime) {
+async function addReplyToParentList(replyID, parent_id, crTime) {
     const command = new UpdateCommand( {
         TableName,
         Key: {
@@ -63,7 +61,7 @@ async function addReply(parent_id, crTime) {
         },
         UpdateExpression: 'SET replies = list_append(if_not_exists(replies, :emptyList), :newString)',
         ExpressionAttributeValues: {
-            ":newString": [parent_id],
+            ":newString": [replyID],
             ":emptyList": []
         }
     });
@@ -74,7 +72,6 @@ async function addReply(parent_id, crTime) {
     } catch(err) {
         logger.error(err);
     }
-    
 }
 
 
@@ -84,7 +81,7 @@ async function addReply(parent_id, crTime) {
  * @param postID id of the post to be deleted by an admin
  * @returns meta data of the request
  */
-async function deletePostByIdAdmin(postID, crTime) {
+async function deletePostById(postID, crTime) {
 
     // delete a post
     const command = new DeleteCommand( {
@@ -134,7 +131,8 @@ async function getPostById(postID) {
 }
 
 module.exports = {
-    deletePostByIdAdmin,
+    deletePostById,
     getPostById,
-    createPost
+    createPost,
+    addReplyToParentList
 }

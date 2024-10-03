@@ -11,19 +11,15 @@ const postService = require('../service/postService');
  * Delete a specific post
  */
 postRouter.delete('/', async (req, res) => {
-    const data = await postService.deletePostByIdAdmin(req.body);
+    
+    const {post_id} = req.body;
 
-    if (data === 0) {
-        res.status(404).json({message: `Error: Post was not found`});
-    }
-    else if (data === -1) {
-        res.status(400).json({message: `Error: Please input a valid post ID [post_id = 'id']`});
-    }
-    else if (data === -2) {
-        res.status(400).json({message: `Error: Post deletion encountered a problem`});
-    }
-    else {
+    try {
+        await postService.deletePostById(post_id);
+
         res.status(200).json({message: `Successfully deleted the post!`});
+    } catch(err) {
+        res.status(err.status || 400).json({ message: err.message });
     }
 
 });
@@ -32,12 +28,13 @@ postRouter.delete('/', async (req, res) => {
  * Add a new post
  */
 postRouter.post('/', async (req, res) => {
-    const data = await postService.createPost(req.body);
-    if (data) {
+
+    try {
+        const data = await postService.createPost(req.body);
         res.status(201).json({message: `Successfully created new post!`, PostInformation: req.body});
-    }
-    else {
-        res.status(400).json({message: `Error: Post could not be created`, receivedData: req.body});
+
+    } catch (err) {
+        res.status(err.status || 400).json({message: err.message});
     }
 });
 
