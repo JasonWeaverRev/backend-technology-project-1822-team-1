@@ -113,7 +113,7 @@ async function createReply(replyCont, parent_id, user) {
             };
             let data = await postDAO.createPost(reply);
 
-            // Add the reply to the parent reply list
+            // Add the reply to the parent reply list 
 
             let parentData = await postDAO.addReplyToParentList(reply.post_id, parent_id, parentPost.creation_time);
 

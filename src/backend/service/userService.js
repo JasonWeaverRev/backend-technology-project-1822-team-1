@@ -28,11 +28,11 @@ const loginUser = async (identifier, password) => {
     // const userEncounterData = await encounterDao.getEncounterById(
     //   user.encounters[0]
     // );
-    // console.log(userEncounterData);
+    // console.log(userEncounterData); fd
 
     const token = jwt.sign(
       {
-        username: user.username,
+        username: user.username, 
         email: user.email,
         role: user.role,
         about_me: user.about_me,

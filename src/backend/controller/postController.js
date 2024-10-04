@@ -9,7 +9,7 @@ const postService = require('../service/postService');
 const {verifyToken, verifyAdminToken} = require('../middleware/authMiddleware');
 
 /**
- * Delete a specific post
+ * Delete a specific post through Admin
  */
 postRouter.delete('/', verifyAdminToken, async (req, res) => {
     

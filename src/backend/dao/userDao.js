@@ -71,14 +71,14 @@ const getUserByUsername = async (username) => {
 
     const data = await documentClient.send(command);
 
-    const encounterIds = [];
-    data.Items[0].encounters.L.forEach((idx) => {
-      encounterIds.push(idx.S);
-    });
+    // const encounterIds = [];
+    // data.Items[0].encounters.L.forEach((idx) => {
+    //   encounterIds.push(idx.S);
+    // });
 
-    const encounterData = await encounterDao.getBatchEncountersbyId(
-      encounterIds
-    );
+    // const encounterData = await encounterDao.getBatchEncountersbyId(
+    //   encounterIds
+    // );
 
     const userData = (data.Items || []).map((item) => ({
       password: item.password.S,
@@ -89,7 +89,7 @@ const getUserByUsername = async (username) => {
       email: item.email.S,
       profile_pic: item.profile_pic.S,
       encounter_campaigns: item.encounter_campaigns.L,
-      encounters: encounterData,
+      // encounters: encounterData,
       interacted_posts: item.interacted_posts.L,
       forum_posts: item.forum_posts.L,
     }));
