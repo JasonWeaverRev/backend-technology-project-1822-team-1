@@ -7,6 +7,7 @@ const app = express();
 const { logger } = require("./backend/utils/logger");
 const postRouter = require('./backend/controller/postController.js');
 const userController = require("./backend/controller/userController");
+const commentRouter = require("./backend/controller/commentController");
 
 
 /**
@@ -27,6 +28,8 @@ app.use(loggerMiddleware);
  */
 app.use("/api/users", userController);
 app.use('/api/forum', postRouter);
+app.use('/api/forum/comment', commentRouter);
+
 
 
 // Port listen

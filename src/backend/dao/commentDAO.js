@@ -1,69 +1,141 @@
-// Importing DynamoDB client and document client for operations
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
     DynamoDBDocumentClient,
     GetCommand,
-    PutCommand,
-    UpdateCommand,
-    DeleteCommand,
-    QueryCommand
+    UpdateCommand
 } = require("@aws-sdk/lib-dynamodb");
 
-// Import your logger or other utilities as needed
-const { logger } = require("../utils/logger");
-
-// Create DynamoDB and Document Client instances
 const client = new DynamoDBClient({ region: "us-east-1" });
 const documentClient = DynamoDBDocumentClient.from(client);
 
-// Define your table name (replace with the actual table name you're using)
 const TableName = 'Delver_Forum_Posts';
 
-const updateCommentByUser = async (postID, creationTime, newCommentText) => {
-    const command = new UpdateCommand({
-        TableName: 'Delver_Forum_Posts',
-        Key: {
-            post_id: postID,
-            creation_time: creationTime // Post's creation time, not the comment's
-        },
-        UpdateExpression: 'SET comments[$commentIndex].body = :newBody',
-        ConditionExpression: 'comments[$commentIndex].creation_time = :commentCreationTime',
-        ExpressionAttributeValues: {
-            ':newBody': newCommentText,
-            ':commentCreationTime': creationTime // This is the comment's creation time
-        }
-    });
+/**
+ * Function to get a post by ID from DynamoDB
+ */
+const getPostById = async (postID, postCreationTime) => {
+    console.log(`Fetching post with ID: ${postID} and creation time: ${postCreationTime}`);
 
     try {
-        const data = await documentClient.send(command);
-        return data;
+        const command = new GetCommand({
+            TableName: TableName,
+            Key: {
+                post_id: postID,
+                creation_time: postCreationTime
+            }
+        });
+
+        const result = await documentClient.send(command);
+
+        if (!result.Item) {
+            console.log("No post found with this postID and creationTime.");
+            return null;  // Post not found
+        }
+
+        console.log("Post retrieved:", JSON.stringify(result.Item, null, 2));
+        return result.Item;  // Return the post object
     } catch (err) {
-        console.error(err);
+        console.error("Error fetching post by ID:", err);
+        return null;
     }
 };
 
-const deleteCommentByUser = async (postID, commentCreationTime) => {
-    const post = await getPostById(postID);  // Fetch the post containing the comment
-    const commentIndex = post.comments.findIndex(c => c.creation_time === commentCreationTime);
-    
+/**
+ * Update a comment if it exists in the post
+ */
+const updateCommentByUser = async (postID, postCreationTime, commentCreationTime, body) => {
+    const post = await getPostById(postID, postCreationTime);
+
+    if (!post) {
+        return 0;  // Post not found
+    }
+
+    // Ensure the replies array exists
+    if (!Array.isArray(post.replies)) {
+        console.log("Replies array not found in post.");
+        return -2;  // No replies array found
+    }
+
+    const commentIndex = post.replies.findIndex(reply => reply.creation_time === commentCreationTime);
+
     if (commentIndex === -1) {
         return 0;  // Comment not found
     }
 
+    // Update the comment's body
+    post.replies[commentIndex].body = body;
+
     const command = new UpdateCommand({
-        TableName: 'Delver_Forum_Posts',
+        TableName: TableName,
         Key: {
             post_id: postID,
-            creation_time: post.creation_time  // Post's creation time
+            creation_time: postCreationTime
         },
-        UpdateExpression: `REMOVE comments[${commentIndex}]`
+        UpdateExpression: 'SET replies = :updatedReplies',
+        ExpressionAttributeValues: {
+            ':updatedReplies': post.replies
+        }
     });
 
     try {
-        const data = await documentClient.send(command);
+        await documentClient.send(command);
+        return 1;  // Successfully updated
+    } catch (err) {
+        console.error("Error updating comment:", err);
+        return -2;  // Update failed
+    }
+};
+
+/**
+ * Delete a comment from a post if it exists
+ */
+const deleteCommentByUser = async (postID, postCreationTime, commentCreationTime) => {
+    const post = await getPostById(postID, postCreationTime);
+
+    if (!post) {
+        return 0;  // Post not found
+    }
+
+    // Ensure the replies array exists
+    if (!Array.isArray(post.replies)) {
+        console.log("Replies array not found in post.");
+        return -2;  // No replies array found
+    }
+
+    const commentIndex = post.replies.findIndex(reply => reply.creation_time === commentCreationTime);
+
+    if (commentIndex === -1) {
+        console.log("Comment not found in post.");
+        return 0;  // Comment not found
+    }
+
+    // Remove the comment from the replies array
+    post.replies.splice(commentIndex, 1);
+
+    const command = new UpdateCommand({
+        TableName: TableName,
+        Key: {
+            post_id: postID,
+            creation_time: postCreationTime
+        },
+        UpdateExpression: 'SET replies = :updatedReplies',
+        ExpressionAttributeValues: {
+            ':updatedReplies': post.replies
+        }
+    });
+
+    try {
+        await documentClient.send(command);
+        console.log("Comment deleted successfully.");
         return 1;  // Successfully deleted
     } catch (err) {
-        console.error(err);
+        console.error("Error during deletion:", err);
         return -2;  // Deletion failed
     }
+};
+
+module.exports = {
+    updateCommentByUser,
+    deleteCommentByUser,
+    getPostById
 };
