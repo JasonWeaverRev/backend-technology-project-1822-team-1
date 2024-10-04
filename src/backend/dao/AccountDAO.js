@@ -47,9 +47,10 @@ async function getUserByEmail(email) {
 async function getUserByUsername(username) {
     const command = new QueryCommand({
         TableName,
-        KeyConditionExpression: "#id = :id",
-        ExpressionAttributeNames: {"#id": "username"},
-        ExpressionAttributeValues: {":id": username}
+        IndexName: "username-index",
+        KeyConditionExpression: "#username = :username",
+        ExpressionAttributeNames: { "#username": "username" },
+        ExpressionAttributeValues: { ":username": username }
     });
 
     try {

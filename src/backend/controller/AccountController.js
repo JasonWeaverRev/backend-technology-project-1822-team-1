@@ -22,6 +22,8 @@ const path = require('path');
             profile_pic : String	/resources/pictures/golem.png (example string?)
             role : String	admin / user
         }
+
+    The only fields required for REGISTRATION are email, username, password
 */
 
 /* GET user by email

@@ -61,7 +61,7 @@ async function registerUser(user) {
     }
 
     // Defaults role to "user" if not an "admin"
-    if (user.role.toLowerCase() !== "admin") {
+    if (!user.role || user.role.toLowerCase() !== "admin") {
         user.role = "user";
     }
 
