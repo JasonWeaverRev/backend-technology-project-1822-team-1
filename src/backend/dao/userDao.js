@@ -11,11 +11,29 @@ const {
   DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
-const client = new DynamoDBClient({ region: "us-east-1" });
+require('dotenv').config();
+const { logger } = require("../utils/logger"); // Assuming you have a logger utility
+
+
+
+
+const client = new DynamoDBClient({ 
+  region: "us-east-1" ,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+}
+
+});
 
 const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "Dungeon_Delver_Users";
+
+
+// Log which database you are connecting to
+logger.info(`Connecting to DynamoDB Table: ${TableName} in region: us-east-1`);
+
 
 const getUserByEmail = async (email) => {
   console.log("inside getUserByEmail");

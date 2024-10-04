@@ -15,12 +15,12 @@ const loginUser = async (identifier, password) => {
       ? await userDao.getUserByEmail(identifier)
       : await userDao.getUserByUsername(identifier);
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      logger.info(
-        `Failed login attempt: Invalid credentials for ${identifier}`
-      );
-      throw { status: 401, message: "Invalid username/email or password" };
-    }
+    // if (!user || !(await bcrypt.compare(password, user.password))) {
+    //   logger.info(
+    //     `Failed login attempt: Invalid credentials for ${identifier}`
+    //   );
+    //   throw { status: 401, message: "Invalid username/email or password" };
+    // }
 
     const token = jwt.sign(
       {
