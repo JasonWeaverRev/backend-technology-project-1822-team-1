@@ -1,37 +1,24 @@
 // Module imports
 require("dotenv").config();
-<<<<<<< HEAD
-
-// Local project import
-const { logger } = require("./backend/utils/logger");
-const app = require('./backend/controller/apiController.js');
-
-
-/**
- * Server Port and general setup
- */
-const PORT = 3000;
-
-=======
 const express = require("express");
 const app = express();
 
 // Local project import
 const { logger } = require("./backend/utils/logger");
-const postRouter = require('./backend/controller/postRouter.js');
+const postRouter = require('./backend/controller/postController.js');
+const userController = require("./backend/controller/userController");
 
 
 /**
  * Server Port and general setup
  */
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.use(express.json());
-
->>>>>>> US2-T1
 
 /**
  * Routing setup
  */
+app.use("/api/users", userController);
 app.use('/api/forum', postRouter);
 
 

@@ -36,7 +36,7 @@ async function deletePostById(postID) {
     if(foundPost) {
         // If the post-to-be-deleted has a parent, remove the reply from the parent's reply list
         if(foundPost.parent_id) {
-            const parentPost = await getPostById(foundPost.parent_id);
+            parentPost = await getPostById(foundPost.parent_id);
             const parentData = await postDAO.removeReplyFromParent(postID, parentPost.post_id, parentPost.creation_time);
         }
 
@@ -63,14 +63,16 @@ async function deletePostById(postID) {
  * @param {*} postContents contents of the post, including title (optional?) and body
  * @returns meta data of the post creation if successful, or null otherwise
  */
-async function createPost(postContents) {
+async function createPost(postContents, user) {
 
-    if (validatePost(postContents)) {
+    console.log(user);
+
+    if (validatePost(postContents, user)) {
         // Add the new post information
         let data = await postDAO.createPost({
             post_id: uuid.v4(),
             ...postContents,
-            // written by
+            written_by: user.username,
             creation_time: new Date().toISOString(),
             likes: 0,
             replies: []
@@ -89,20 +91,21 @@ async function createPost(postContents) {
  * 
  * @param {*} replyCont 
  */
-async function createReply(replyCont, parent_id) {
+async function createReply(replyCont, parent_id, user) {
 
     // Validate reply contents
-    if (validateReply(replyCont, parent_id)) {
+    if (validateReply(replyCont, parent_id, user)) {
         
         // If the parent post exists, add it to the forum post
 
-        const parentPost = await getPostById(parent_id);
+        parentPost = await getPostById(parent_id);
         
         if(parentPost) {
             // Create new reply
             reply = {
                 post_id: uuid.v4(),
                 ...replyCont,
+                written_by: user.username,
                 creation_time: new Date().toISOString(),
                 parent_id,
                 likes: 0,
@@ -141,12 +144,12 @@ async function createReply(replyCont, parent_id) {
  * @param {*} postContents
  * @returns true if the post is valid for creation, false otherwise 
  */
-function validatePost(postContents) {
+function validatePost(postContents, user) {
 
     return (
         postContents.title && 
         postContents.body &&
-        postContents.written_by &&
+        user.username &&
         (postContents.body.length > 0)
     )
 }
@@ -161,11 +164,11 @@ function validatePost(postContents) {
  * @param {*} replyCont
  * @returns true if the reply is valid for creation, false otherwise 
  */
-function validateReply(replyCont, parent_id) {
+function validateReply(replyCont, parent_id, user) {
     return (
         replyCont.body &&
-        replyCont.written_by &&
         parent_id &&
+        user.username &&
         (replyCont.body.length > 0) &&
         (parent_id.length > 0)
     )
@@ -175,7 +178,7 @@ function validateReply(replyCont, parent_id) {
  * Retrieve a post by its post ID
  * 
  * @param {*} postID ID of the post to retrieve
- * @returns the post, or null if the post does not exist
+ * @returns the post, or null if the post does not exist 
  */
 async function getPostById(postID) {
     return await postDAO.getPostById(postID);
