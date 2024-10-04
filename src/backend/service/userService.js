@@ -10,7 +10,7 @@ const loginUser = async (identifier, password) => {
     logger.info(`Failed login attempt: Invalid credentials`);
     throw { status: 400, message: "Invalid username/email or password" };
   }
-
+  //console.log(password);
   try {
     const user = identifier.includes("@")
       ? await userDao.getUserByEmail(identifier)
