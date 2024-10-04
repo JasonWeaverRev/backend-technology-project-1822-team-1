@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const AccountService = require("../service/AccountService");
-const { authenticateToken, authenticateManagerToken } = require("./Middleware");
-const jwt = require("jsonwebtoken");
+// const { authenticateToken, authenticateManagerToken } = require("./Middleware");
+// const jwt = require("jsonwebtoken");
 const fs = require('fs');
 const path = require('path');
-const secretKey = fs.readFileSync(path.join(__dirname, '../../secretkey.txt'), 'utf8').trim();
+// const secretKey = fs.readFileSync(path.join(__dirname, '../../secretkey.txt'), 'utf8').trim();
 
 /*
     DDUser Object Model
@@ -78,37 +78,5 @@ router.post("/register", async (req, res) => {
     }
 });
 
-// POST login (example if you want to add JWT-based login)
-router.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const user = await AccountService.getUserByEmail(email);
-
-        if (user && password === user.password) {
-            const token = jwt.sign(
-                { email: user.email, role: user.role },
-                secretKey,
-                { expiresIn: "1d" }
-            );
-            return res.status(200).json({ message: "Login successful", token });
-        } else {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-    } catch (error) {
-        console.error("Error during login:", error);
-        return res.status(500).json({ message: "Internal server error" });
-    }
-});
-
-// Protected route (user-level)
-router.get("/protected", authenticateToken, (req, res) => {
-    res.json({ message: "This is a protected route", user: req.user });
-});
-
-// Manager-only protected route
-router.get("/manager-protected", authenticateManagerToken, (req, res) => {
-    res.json({ message: "This is a manager-only protected route", user: req.user });
-});
 
 module.exports = router;
