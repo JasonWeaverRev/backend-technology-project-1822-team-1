@@ -5,7 +5,7 @@ const {
     PutCommand,
     QueryCommand
 } = require("@aws-sdk/lib-dynamodb");
-const client = new DynamoDBClient({region: "us-west-1"});
+const client = new DynamoDBClient({region: "us-east-1"});
 const documentClient = DynamoDBDocumentClient.from(client);
 const TableName = "Dungeon_Delver_Users";
 

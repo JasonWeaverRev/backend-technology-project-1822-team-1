@@ -43,6 +43,11 @@ async function registerUser(user) {
         throw new Error("Invalid email format.");
     }
 
+    // Check that the username is not an email
+    if (username.includes('@')) {
+        throw new Error("Username cannot contain an '@' symbol.");
+    }
+
     // Checks password length (may require other condiditons in future)
     if (password.length < 8) {
         throw new Error("Your password must be at least 8 characters long")
@@ -63,6 +68,8 @@ async function registerUser(user) {
     // Defaults role to "user" if not an "admin"
     if (!user.role || user.role.toLowerCase() !== "admin") {
         user.role = "user";
+    } else {
+        user.role = "admin";
     }
 
     // Gets current date
