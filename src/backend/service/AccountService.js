@@ -72,7 +72,7 @@ async function registerUser(user) {
     const newUser = {
         email,
         username,
-        hashedPassword,
+        password: hashedPassword,
         role
     }
 
