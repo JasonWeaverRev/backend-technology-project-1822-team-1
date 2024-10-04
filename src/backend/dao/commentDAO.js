@@ -1,59 +1,69 @@
-const commentDAO = require('../dao/commentDAO');
+// Importing DynamoDB client and document client for operations
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const {
+    DynamoDBDocumentClient,
+    GetCommand,
+    PutCommand,
+    UpdateCommand,
+    DeleteCommand,
+    QueryCommand
+} = require("@aws-sdk/lib-dynamodb");
 
-/**
- * Updates a comment if it belongs to the user making the request
- * 
- * @param {String} postID - ID of the post containing the comment
- * @param {String} creationTime - Creation time of the comment (used as a key)
- * @param {String} newCommentText - The new text of the comment
- * @param {String} username - Username of the user making the request
- * @returns {Number} - 1 if successful, -1 if unauthorized, 0 if not found
- */
-async function updateComment(postID, creationTime, newCommentText, username) {
-    // Fetch the comment to ensure it exists
-    const comment = await commentDAO.getCommentById(postID, creationTime);
+// Import your logger or other utilities as needed
+const { logger } = require("../utils/logger");
 
-    if (!comment) {
+// Create DynamoDB and Document Client instances
+const client = new DynamoDBClient({ region: "us-east-1" });
+const documentClient = DynamoDBDocumentClient.from(client);
+
+// Define your table name (replace with the actual table name you're using)
+const TableName = 'Delver_Forum_Posts';
+
+const updateCommentByUser = async (postID, creationTime, newCommentText) => {
+    const command = new UpdateCommand({
+        TableName: 'Delver_Forum_Posts',
+        Key: {
+            post_id: postID,
+            creation_time: creationTime // Post's creation time, not the comment's
+        },
+        UpdateExpression: 'SET comments[$commentIndex].body = :newBody',
+        ConditionExpression: 'comments[$commentIndex].creation_time = :commentCreationTime',
+        ExpressionAttributeValues: {
+            ':newBody': newCommentText,
+            ':commentCreationTime': creationTime // This is the comment's creation time
+        }
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+const deleteCommentByUser = async (postID, commentCreationTime) => {
+    const post = await getPostById(postID);  // Fetch the post containing the comment
+    const commentIndex = post.comments.findIndex(c => c.creation_time === commentCreationTime);
+    
+    if (commentIndex === -1) {
         return 0;  // Comment not found
     }
 
-    // Check if the user requesting the update is the comment's author
-    if (comment.written_by !== username) {
-        return -1;  // Unauthorized: User is not the owner of the comment
+    const command = new UpdateCommand({
+        TableName: 'Delver_Forum_Posts',
+        Key: {
+            post_id: postID,
+            creation_time: post.creation_time  // Post's creation time
+        },
+        UpdateExpression: `REMOVE comments[${commentIndex}]`
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        return 1;  // Successfully deleted
+    } catch (err) {
+        console.error(err);
+        return -2;  // Deletion failed
     }
-
-    // If the user owns the comment, proceed to update it
-    const result = await commentDAO.updateCommentByUser(postID, creationTime, newCommentText);
-    return result ? 1 : -2;  // Return success or failure
-}
-
-/**
- * Deletes a comment if it belongs to the user making the request
- * 
- * @param {String} postID - ID of the post containing the comment
- * @param {String} creationTime - Creation time of the comment (used as a key)
- * @param {String} username - Username of the user making the request
- * @returns {Number} - 1 if successful, -1 if unauthorized, 0 if not found
- */
-async function deleteComment(postID, creationTime, username) {
-    // Fetch the comment to ensure it exists
-    const comment = await commentDAO.getCommentById(postID, creationTime);
-
-    if (!comment) {
-        return 0;  // Comment not found
-    }
-
-    // Check if the user requesting the deletion is the comment's author
-    if (comment.written_by !== username) {
-        return -1;  // Unauthorized: User is not the owner of the comment
-    }
-
-    // If the user owns the comment, proceed to delete it
-    const result = await commentDAO.deleteCommentByUser(postID, creationTime);
-    return result ? 1 : -2;  // Return success or failure
-}
-
-module.exports = {
-    updateComment,
-    deleteComment
 };

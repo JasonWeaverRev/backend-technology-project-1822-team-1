@@ -99,6 +99,8 @@ async function createReply(replyCont, parent_id, user) {
         // If the parent post exists, add it to the forum post
 
         parentPost = await getPostById(parent_id);
+
+        console.log(parentPost);
         
         if(parentPost) {
             // Create new reply
