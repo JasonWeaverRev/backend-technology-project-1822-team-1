@@ -11,6 +11,8 @@ const {
   DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
+const encounterDao = require("../dao/encounterDao");
+
 const client = new DynamoDBClient({ region: "us-east-1" });
 
 const documentClient = DynamoDBDocumentClient.from(client);
@@ -23,7 +25,6 @@ const TableName = "Dungeon_Delver_Users";
  * @returns 
  */
 const getUserByEmail = async (email) => {
-  console.log("inside getUserByEmail");
   try {
     const command = new GetCommand({
       TableName,
@@ -31,8 +32,19 @@ const getUserByEmail = async (email) => {
     });
 
     const data = await documentClient.send(command);
-    return data.Item || null;
+
+    const userData = data.Item;
+
+    if (userData && userData.encounters && userData.encounters.length > 0) {
+      const encounterData = await encounterDao.getBatchEncountersbyId(
+        userData.encounters
+      );
+      userData.encounters = encounterData;
+    }
+
+    return userData || null;
   } catch (err) {
+    console.error(err);
     throw { status: 500, message: "Error retrieving  user by email" };
   }
 };
@@ -59,6 +71,15 @@ const getUserByUsername = async (username) => {
 
     const data = await documentClient.send(command);
 
+    const encounterIds = [];
+    data.Items[0].encounters.L.forEach((idx) => {
+      encounterIds.push(idx.S);
+    });
+
+    const encounterData = await encounterDao.getBatchEncountersbyId(
+      encounterIds
+    );
+
     const userData = (data.Items || []).map((item) => ({
       password: item.password.S,
       about_me: item.about_me.S,
@@ -68,7 +89,7 @@ const getUserByUsername = async (username) => {
       email: item.email.S,
       profile_pic: item.profile_pic.S,
       encounter_campaigns: item.encounter_campaigns.L,
-      encounters: item.encounters.L,
+      encounters: encounterData,
       interacted_posts: item.interacted_posts.L,
       forum_posts: item.forum_posts.L,
     }));
