@@ -33,26 +33,16 @@ async function updateComment(post_id, post_creation_time, comment_creation_time,
 /**
  * Deletes a comment if it belongs to the user making the request
  */
-async function deleteComment(post_id, post_creation_time, comment_creation_time, username) {
-    console.log(`Deleting comment for post_id: ${post_id}, post_creation_time: ${post_creation_time}, comment_creation_time: ${comment_creation_time}, username: ${username}`);
+async function deleteComment(post_id, post_creation_time, comment_id, username) {
+    console.log(`Deleting comment for post_id: ${post_id}, post_creation_time: ${post_creation_time}, comment_id: ${comment_id}, username: ${username}`);
     
-    // Fetch the post to ensure it exists
-    const post = await commentDAO.getPostById(post_id, post_creation_time);
+    // Fetch the comment to ensure it exists
+    const comment = await commentDAO.getCommentById(comment_id);
 
-    if (!post) {
-        console.log("Post not found");
-        return 0;  // Post not found
-    }
-
-    // Find the comment in the post's replies
-    const commentIndex = post.replies.findIndex(reply => reply.creation_time === comment_creation_time);
-
-    if (commentIndex === -1) {
+    if (!comment) {
         console.log("Comment not found");
         return 0;  // Comment not found
     }
-
-    const comment = post.replies[commentIndex];
 
     // Check if the user requesting the deletion is the comment's author
     if (comment.written_by !== username) {
@@ -61,7 +51,7 @@ async function deleteComment(post_id, post_creation_time, comment_creation_time,
     }
 
     // Proceed to delete the comment
-    const result = await commentDAO.deleteCommentByUser(post_id, post_creation_time, comment_creation_time);
+    const result = await commentDAO.deleteCommentByUser(post_id, post_creation_time, comment_id);
     return result === 1 ? 1 : -2;  // Return success or failure
 }
 
