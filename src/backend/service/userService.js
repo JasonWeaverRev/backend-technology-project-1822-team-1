@@ -37,7 +37,7 @@ const loginUser = async (identifier, password) => {
         role: user.role,
         about_me: user.about_me,
         encounter_campaigns: user.encounter_campaigns,
-        encouters: user.encounters,
+        encounters: user.encounters,
         forum_posts: user.forum_posts,
         interacted_posts: user.interacted_posts,
         profile_pic: user.profile_pic,

@@ -27,6 +27,11 @@ const TableName = "Dungeon_Delver_Users";
 logger.info(`Connecting to DynamoDB Table: ${TableName} in region: us-east-1`);
 
 
+/**
+ * 
+ * @param {*} email 
+ * @returns 
+ */
 const getUserByEmail = async (email) => {
   try {
     const command = new GetCommand({
@@ -52,7 +57,13 @@ const getUserByEmail = async (email) => {
   }
 };
 
+/**
+ * 
+ * @param {*} username 
+ * @returns 
+ */
 const getUserByUsername = async (username) => {
+  
   try {
     const command = new QueryCommand({
       TableName,
