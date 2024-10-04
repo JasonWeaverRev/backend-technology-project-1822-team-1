@@ -1,11 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const AccountService = require("../service/AccountService");
-// const { authenticateToken, authenticateManagerToken } = require("./Middleware");
-// const jwt = require("jsonwebtoken");
-const fs = require('fs');
-const path = require('path');
-// const secretKey = fs.readFileSync(path.join(__dirname, '../../secretkey.txt'), 'utf8').trim();
 
 /*
     DDUser Object Model
@@ -78,6 +73,7 @@ router.post("/register", async (req, res) => {
         const newUser = await AccountService.registerUser(req.body);
         return res.status(201).json({ message: "New user registered", newUser });
     } catch (error) {
+        console.error(error);
         return res.status(400).json({ message: error.message });
     }
 });

@@ -1,4 +1,5 @@
 const AccountDao = require("../dao/AccountDAO");
+const bcrypt = require("bcrypt");
 
 /*
     DDUser Object Model
@@ -30,7 +31,7 @@ async function getUserByUsername(username) {
 }
 
 async function registerUser(user) {
-    const {email, username, password} = user;
+    const {email, username, password, role} = user;
 
     // Validate required fields
     if (!email || !username || !password) {
@@ -65,17 +66,27 @@ async function registerUser(user) {
         throw new Error("Username is already registered");
     }
 
+    const saltRounds = 10;
+    hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newUser = {
+        email,
+        username,
+        hashedPassword,
+        role
+    }
+
     // Defaults role to "user" if not an "admin"
     if (!user.role || user.role.toLowerCase() !== "admin") {
-        user.role = "user";
+        newUser.role = "user";
     } else {
-        user.role = "admin";
+        newUser.role = "admin";
     }
 
     // Gets current date
-    user.creation_time = new Date().toJSON().slice(0, 10);
-
-    const registeredUser = await AccountDao.registerUser(user);
+    newUser.creation_time = new Date().toJSON().slice(0, 10);
+    
+    const registeredUser = await AccountDao.registerUser(newUser);
     return registeredUser;
 }
 
