@@ -15,8 +15,6 @@ const loginUser = async (identifier, password) => {
       ? await userDao.getUserByEmail(identifier)
       : await userDao.getUserByUsername(identifier);
 
-    console.log(user);
-
     // if (!user || !(await bcrypt.compare(password, user.password))) {
     //   logger.info(
     //     `Failed login attempt: Invalid credentials for ${identifier}`

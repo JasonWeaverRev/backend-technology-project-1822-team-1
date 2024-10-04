@@ -17,6 +17,11 @@ const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "Dungeon_Delver_Users";
 
+/**
+ * 
+ * @param {*} email 
+ * @returns 
+ */
 const getUserByEmail = async (email) => {
   console.log("inside getUserByEmail");
   try {
@@ -32,7 +37,13 @@ const getUserByEmail = async (email) => {
   }
 };
 
+/**
+ * 
+ * @param {*} username 
+ * @returns 
+ */
 const getUserByUsername = async (username) => {
+  
   try {
     const command = new QueryCommand({
       TableName,
