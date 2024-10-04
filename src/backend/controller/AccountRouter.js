@@ -10,21 +10,21 @@ const path = require('path');
 /*
     DDUser Object Model
         {
-            email : String
+            email : String   -partition key
             about_me : String
-            encounter_campaigns : List
+            enounter_campaigns : List
             creation_time : String
-            encounters : List
-            forum_posts : List
-            interacted_posts : List
-            password : String
-            username : String
-            profile_pic : String
-            role : String (admin / user)
+            enounters : List	Still in progress, but would contain a list of encounters
+            forum_posts : List	Still in progress, but would contain a list of posts
+            interacted_posts : List	Still in progress, but would contain a list of interacted posts
+            password : String	golemguy420
+            username : String	xXgolemzlifeXx
+            profile_pic : String	/resources/pictures/golem.png (example string?)
+            role : String	admin / user
         }
 */
 
-// GET user by email
+/* GET user by email
 router.get("/email", async (req, res) => {
     const emailQuery = req.query.email;
 
@@ -45,8 +45,9 @@ router.get("/email", async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 });
+*/
 
-// GET user by username
+/* GET user by username
 router.get("/username", async (req, res) => {
     const usernameQuery = req.query.username;
 
@@ -67,8 +68,9 @@ router.get("/username", async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 });
+*/
 
-// POST register user
+// POST user registration
 router.post("/register", async (req, res) => {
     try {
         const newUser = await AccountService.registerUser(req.body);
