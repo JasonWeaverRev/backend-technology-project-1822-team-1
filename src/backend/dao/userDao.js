@@ -51,44 +51,6 @@ const getUserByUsername = async (username) => {
 
     const data = await documentClient.send(command);
 
-    // const encounterIds = [];
-    // data.Items[0].encounters.L.forEach((idx) => {
-    //   encounterIds.push(idx.S);
-    // });
-
-    // const encounterData = await encounterDao.getBatchEncountersbyId(
-    //   encounterIds
-    // );
-
-    // const encounterCampaigns = [];
-    // data.Items[0].encounter_campaigns.L.forEach((idx) => {
-    //   encounterCampaigns.push(idx.S);
-    // });
-
-    // const interactedPosts = [];
-    // data.Items[0].interacted_posts.L.forEach((idx) => {
-    //   interactedPosts.push(idx.S);
-    // });
-
-    // const forumPosts = [];
-    // data.Items[0].forum_posts.L.forEach((idx) => {
-    //   forumPosts.push(idx.S);
-    // });
-
-    // const userData = (data.Items || []).map((item) => ({
-    //   password: item.password.S,
-    //   about_me: item.about_me.S,
-    //   role: item.role.S,
-    //   creation_time: item.creation_time.S,
-    //   username: item.username.S,
-    //   email: item.email.S,
-    //   profile_pic: item.profile_pic.S,
-    //   encounter_campaigns: encounterCampaigns,
-    //   encounters: encounterData,
-    //   interacted_posts: interactedPosts,
-    //   forum_posts: forumPosts,
-    // }));
-
     return data.Items[0] || null;
   } catch (err) {
     throw { status: 500, message: "Error retrieving user by username" };
