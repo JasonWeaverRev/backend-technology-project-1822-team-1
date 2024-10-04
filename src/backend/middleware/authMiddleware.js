@@ -16,3 +16,5 @@ const verifyToken = (req, res, next) => {
     res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 };
+
+module.exports = { verifyToken };
