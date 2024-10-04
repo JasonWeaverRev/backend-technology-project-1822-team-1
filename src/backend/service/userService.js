@@ -29,7 +29,7 @@ const loginUser = async (identifier, password) => {
     //   user.encounters[0]
     // );
     // console.log(userEncounterData);
-
+    console.log(secret);
     const token = jwt.sign(
       {
         username: user.username,
@@ -49,6 +49,7 @@ const loginUser = async (identifier, password) => {
     logger.info(`Successful login by ${user.username}`);
     return token;
   } catch (err) {
+    console.error(err);
     throw err.status ? err : { status: 500, message: "Internal server error" };
   }
 };

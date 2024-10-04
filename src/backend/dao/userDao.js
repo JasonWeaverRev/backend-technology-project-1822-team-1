@@ -11,6 +11,9 @@ const {
   DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
+const { logger } = require("../utils/logger"); // Assuming you have a logger utility
+
+
 const encounterDao = require("../dao/encounterDao");
 
 const client = new DynamoDBClient({ region: "us-east-1" });
