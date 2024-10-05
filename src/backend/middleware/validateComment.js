@@ -2,16 +2,19 @@
  * Middleware to validate the request body for comment operations
  */
 const validateComment = (req, res, next) => {
-    const { postID, creationTime, newCommentText } = req.body;
+    console.log('ValidateComment middleware called');
+    console.log('Request body:', req.body);
 
-    // Check if postID and creationTime are present for both PUT and DELETE requests
-    if (!postID || !creationTime) {
-        return res.status(400).json({ message: "postID and creationTime are required." });
+    const { comment_id, comment_creation_time, body } = req.body;
+
+    // For both PUT and DELETE requests, ensure comment_id and comment_creation_time are present
+    if (!comment_id || !comment_creation_time) {
+        return res.status(400).json({ message: "comment_id and comment_creation_time are required." });
     }
 
-    // For PUT requests (update), ensure newCommentText is present
-    if (req.method === 'PUT' && !newCommentText) {
-        return res.status(400).json({ message: "newCommentText is required for updating comments." });
+    // For PUT requests (update), ensure body is present
+    if (req.method === 'PUT' && !body) {
+        return res.status(400).json({ message: "body is required for updating comments." });
     }
 
     next(); // Proceed to the next middleware or controller

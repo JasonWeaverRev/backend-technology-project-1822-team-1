@@ -42,29 +42,32 @@ const getPostById = async (postID, creationTime) => {
     }
 };
 
-const getCommentById = async (commentID) => {
-    console.log(`Fetching comment with ID: ${commentID}`);
+const getCommentById = async (commentID, creationTime) => {
+    if (!commentID || !creationTime) {
+        console.error("commentID and creationTime are required.");
+        return null;
+    }
+
+    console.log(`Fetching comment with ID: ${commentID} and creation time: ${creationTime}`);
 
     try {
-        const command = new QueryCommand({
+        const command = new GetCommand({
             TableName: TableName,
-            KeyConditionExpression: 'post_id = :commentID',
-            ExpressionAttributeValues: {
-                ':commentID': commentID
+            Key: {
+                post_id: commentID,
+                creation_time: creationTime
             }
         });
 
         const result = await documentClient.send(command);
 
-        if (!result.Items || result.Items.length === 0) {
-            console.log("No comment found with this commentID.");
+        if (!result.Item) {
+            console.log("No comment found with this commentID and creationTime.");
             return null;  // Comment not found
         }
 
-        // Assuming there's only one comment per post_id
-        const comment = result.Items[0];
-        console.log("Comment retrieved:", JSON.stringify(comment, null, 2));
-        return comment;
+        console.log("Comment retrieved:", JSON.stringify(result.Item, null, 2));
+        return result.Item;  // Return the comment object
     } catch (err) {
         console.error("Error fetching comment by ID:", err);
         return null;
@@ -74,42 +77,30 @@ const getCommentById = async (commentID) => {
 /**
  * Update a comment if it exists in the post
  */
-const updateCommentByUser = async (postID, postCreationTime, commentCreationTime, body) => {
-    const post = await getPostById(postID, postCreationTime);
-
-    if (!post) {
-        return 0;  // Post not found
+const updateCommentByUser = async (commentID, commentCreationTime, body) => {
+    if (!commentID || !commentCreationTime) {
+        console.error("commentID and commentCreationTime are required.");
+        return -2;  // Update failed
     }
-
-    // Ensure the replies array exists
-    if (!Array.isArray(post.replies)) {
-        console.log("Replies array not found in post.");
-        return -2;  // No replies array found
-    }
-
-    const commentIndex = post.replies.findIndex(reply => reply.creation_time === commentCreationTime);
-
-    if (commentIndex === -1) {
-        return 0;  // Comment not found
-    }
-
-    // Update the comment's body
-    post.replies[commentIndex].body = body;
 
     const command = new UpdateCommand({
         TableName: TableName,
         Key: {
-            post_id: postID,
-            creation_time: postCreationTime
+            post_id: commentID,
+            creation_time: commentCreationTime
         },
-        UpdateExpression: 'SET replies = :updatedReplies',
+        UpdateExpression: 'SET #body = :body',
+        ExpressionAttributeNames: {
+            '#body': 'body'
+        },
         ExpressionAttributeValues: {
-            ':updatedReplies': post.replies
+            ':body': body
         }
     });
 
     try {
         await documentClient.send(command);
+        console.log("Comment updated successfully.");
         return 1;  // Successfully updated
     } catch (err) {
         console.error("Error updating comment:", err);
@@ -120,8 +111,8 @@ const updateCommentByUser = async (postID, postCreationTime, commentCreationTime
 /**
  * Delete a comment from a post if it exists
  */
-const deleteCommentByUser = async (postID, postCreationTime, commentID) => {
-    console.log(`Fetching post with ID: ${postID} and post creation time: ${postCreationTime}`);
+const deleteCommentByUser = async (postID, postCreationTime, commentID, commentCreationTime) => {
+    console.log(`Deleting comment with ID: ${commentID} and creation time: ${commentCreationTime} from post with ID: ${postID} and creation time: ${postCreationTime}`);
     
     // Fetch the post
     const post = await getPostById(postID, postCreationTime);
@@ -130,14 +121,13 @@ const deleteCommentByUser = async (postID, postCreationTime, commentID) => {
         return 0;  // Post not found
     }
 
-    // Find the index of the comment ID in the replies array
+    // Remove the comment ID from the replies array
     const commentIndex = post.replies.indexOf(commentID);
     if (commentIndex === -1) {
         console.log("Comment ID not found in replies.");
         return 0;  // Comment not found
     }
 
-    // Remove the comment ID from the replies array
     post.replies.splice(commentIndex, 1);
     console.log('Updated replies array after removing comment:', JSON.stringify(post.replies, null, 2));
 
@@ -162,20 +152,12 @@ const deleteCommentByUser = async (postID, postCreationTime, commentID) => {
         return -2;  // Error during update
     }
 
-    // Fetch the comment to get creation_time
-    const comment = await getCommentById(commentID);
-
-    if (!comment) {
-        console.log("Comment not found for deletion.");
-        return 0;  // Comment not found
-    }
-
     // Delete the comment from the table
     const deleteCommand = new DeleteCommand({
         TableName: TableName,
         Key: {
             post_id: commentID,
-            creation_time: comment.creation_time
+            creation_time: commentCreationTime
         }
     });
 
