@@ -33,16 +33,7 @@ const getUserByEmail = async (email) => {
 
     const data = await documentClient.send(command);
 
-    const userData = data.Item;
-
-    if (userData && userData.encounters && userData.encounters.length > 0) {
-      const encounterData = await encounterDao.getBatchEncountersbyId(
-        userData.encounters
-      );
-      userData.encounters = encounterData;
-    }
-
-    return userData || null;
+    return data.Item || null;
   } catch (err) {
     console.error(err);
     throw { status: 500, message: "Error retrieving  user by email" };
@@ -71,6 +62,7 @@ const getUserByUsername = async (username) => {
 
     const data = await documentClient.send(command);
 
+<<<<<<< HEAD
     // const encounterIds = [];
     // data.Items[0].encounters.L.forEach((idx) => {
     //   encounterIds.push(idx.S);
@@ -95,6 +87,9 @@ const getUserByUsername = async (username) => {
     }));
 
     return userData[0] || null;
+=======
+    return data.Items[0] || null;
+>>>>>>> merge-US3-US4
   } catch (err) {
     throw { status: 500, message: "Error retrieving user by username" };
   }
