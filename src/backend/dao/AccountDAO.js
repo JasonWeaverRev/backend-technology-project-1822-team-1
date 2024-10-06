@@ -1,12 +1,20 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
-    DynamoDBDocumentClient,
-    GetCommand,
-    PutCommand,
-    QueryCommand
+  DynamoDBClient,
+  QueryCommand,
+  ScanCommand,
+} = require("@aws-sdk/client-dynamodb");
+const {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  UpdateCommand,
+  DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
-const client = new DynamoDBClient({region: "us-east-1"});
+
+const client = new DynamoDBClient({ region: "us-east-1" });
+
 const documentClient = DynamoDBDocumentClient.from(client);
+
 const TableName = "Dungeon_Delver_Users";
 
 /*
@@ -26,77 +34,112 @@ const TableName = "Dungeon_Delver_Users";
         }
 */
 
-// GET user by email (partition key)
-async function getUserByEmail(email) {
-    const command = new GetCommand({
-        TableName,
-        Key: { email }
-    });
+// // GET user by email (partition key)
+// async function getUserByEmail(email) {
+//   const command = new GetCommand({
+//     TableName,
+//     Key: { email },
+//   });
 
-    try {
-        const data = await documentClient.send(command);
-        return data.Item || null;
+//   try {
+//     const data = await documentClient.send(command);
+//     return data.Item || null;
+//   } catch (err) {
+//     console.error("Error fetching user by email:", err);
+//     return null;
+//   }
+// }
 
-    } catch (err) {
-        console.error("Error fetching user by email:", err);
-        return null;
-    }
-}
+// // GET user by username
+// async function getUserByUsername(username) {
+//   const command = new QueryCommand({
+//     TableName,
+//     IndexName: "username-index",
+//     KeyConditionExpression: "#username = :username",
+//     ExpressionAttributeNames: { "#username": "username" },
+//     ExpressionAttributeValues: { ":username": username },
+//   });
 
-// GET user by username
-async function getUserByUsername(username) {
-    const command = new QueryCommand({
-        TableName,
-        IndexName: "username-index",
-        KeyConditionExpression: "#username = :username",
-        ExpressionAttributeNames: { "#username": "username" },
-        ExpressionAttributeValues: { ":username": username }
-    });
-
-    try {
-        const data = await documentClient.send(command);
-        return data.Items.length === 0 ? null : data.Items[0];
-
-    } catch (err) {
-        console.error("Error fetching user by username:", err);
-        return null;
-    }
-}
+//   try {
+//     const data = await documentClient.send(command);
+//     return data.Items.length === 0 ? null : data.Items[0];
+//   } catch (err) {
+//     console.error("Error fetching user by username:", err);
+//     return null;
+//   }
+// }
 
 // POST user
 async function registerUser(user) {
-    const command = new PutCommand({
-        TableName,
-        Item: user
-    });
+  const command = new PutCommand({
+    TableName,
+    Item: user,
+  });
 
-    try {
-        const data = await documentClient.send(command);
-        return user;
-
-    } catch (err) {
-        console.error("Error registering user:", err);
-        return null;
-    }
+  try {
+    const data = await documentClient.send(command);
+    return user;
+  } catch (err) {
+    console.error("Error registering user:", err);
+    return null;
+  }
 }
 
 // Check if username is taken
 async function isUsernameTaken(username) {
-    const user = await getUserByUsername(username);
+  const user = await getUserByUsername(username);
 
-    return user !== null;
+  return user !== null;
 }
 
 // Check if email is taken
 async function isEmailTaken(email) {
-    const user = await getUserByEmail(email);
-    return user !== null;
+  const user = await getUserByEmail(email);
+  return user !== null;
 }
 
+const getUserByEmail = async (email) => {
+  try {
+    const command = new GetCommand({
+      TableName,
+      Key: { email },
+    });
+
+    const data = await documentClient.send(command);
+
+    return data.Item || null;
+  } catch (err) {
+    console.error(err);
+    throw { status: 500, message: "Error retrieving  user by email" };
+  }
+};
+
+const getUserByUsername = async (username) => {
+  try {
+    const command = new QueryCommand({
+      TableName,
+      IndexName: "username-index",
+      KeyConditionExpression: "#username = :username",
+      ExpressionAttributeNames: {
+        "#username": "username",
+      },
+      ExpressionAttributeValues: {
+        ":username": { S: username },
+      },
+    });
+
+    const data = await documentClient.send(command);
+
+    return data.Items[0] || null;
+  } catch (err) {
+    throw { status: 500, message: "Error retrieving user by username" };
+  }
+};
+
 module.exports = {
-    getUserByEmail,
-    getUserByUsername,
-    registerUser,
-    isUsernameTaken,
-    isEmailTaken
-}
+  getUserByEmail,
+  getUserByUsername,
+  registerUser,
+  isUsernameTaken,
+  isEmailTaken,
+};

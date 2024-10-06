@@ -69,14 +69,25 @@ router.get("/username", async (req, res) => {
 
 // POST user registration
 router.post("/register", async (req, res) => {
-    try {
-        const newUser = await AccountService.registerUser(req.body);
-        return res.status(201).json({ message: "New user registered", newUser });
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json({ message: error.message });
-    }
+  try {
+    const newUser = await AccountService.registerUser(req.body);
+    return res.status(201).json({ message: "New user registered", newUser });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ message: error.message });
+  }
 });
 
+router.post("/login", async (req, res) => {
+  const { identifier, password } = req.body;
+
+  try {
+    const token = await AccountService.loginUser(identifier, password);
+
+    res.status(200).json({ token });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
 
 module.exports = router;
