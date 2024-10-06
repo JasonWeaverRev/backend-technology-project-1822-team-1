@@ -1,4 +1,5 @@
 const commentDAO = require('../dao/commentDAO');
+const userDAO = require('../dao/userDAO'); // Import the user DAO to fetch user details
 
 /**
  * Updates a comment if it belongs to the user making the request
@@ -41,8 +42,12 @@ async function deleteComment(post_id, post_creation_time, comment_id, comment_cr
         return 0;  // Comment not found
     }
 
-    // Check if the user requesting the deletion is the comment's author
-    if (comment.written_by !== username) {
+    // Fetch the user's role from the database
+    const userRole = await userDAO.getUserRoleByUsername(username);
+    console.log(`User role: ${userRole}`);
+
+    // Check if the user is the author or an admin
+    if (comment.written_by !== username && userRole !== 'admin') {
         console.log('Not authorized');
         return -1;  // Unauthorized
     }

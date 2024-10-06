@@ -108,7 +108,33 @@ const getUserByUsername = async (username) => {
   }
 };
 
+
+const getUserRoleByUsername = async (username) => {
+  try {
+      const command = new GetCommand({
+          TableName: UserTableName,
+          Key: {
+              username: username
+          },
+          ProjectionExpression: 'role' // Fetch only the 'role' attribute
+      });
+
+      const result = await documentClient.send(command);
+
+      if (!result.Item) {
+          console.log("User not found.");
+          return null;
+      }
+
+      return result.Item.role;
+  } catch (err) {
+      console.error("Error fetching user role:", err);
+      return null;
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserByUsername,
+  getUserRoleByUsername
 };
