@@ -2,6 +2,8 @@
 const { logger } = require("../utils/logger");
 const axios = require("axios");
 const uuid = require("uuid");
+const fs = require("fs");
+const path = require("path");
 
 const dndApiUrlPath = "https://www.dnd5eapi.co";
 const dndBeyondUrlPath = "https://www.dndbeyond.com/monsters/";
