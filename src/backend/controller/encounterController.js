@@ -13,3 +13,5 @@ router.get("/monsters", async (req, res) => {
     res.status(err.status || 400).json({ message: err.message });
   }
 });
+
+module.exports = router;
