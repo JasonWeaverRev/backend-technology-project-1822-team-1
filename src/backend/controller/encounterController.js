@@ -14,4 +14,8 @@ router.get("/monsters", async (req, res) => {
   }
 });
 
+router.post("/encounter", async (req, res) => {
+  const { monsters, encounterTitle } = "";
+});
+
 module.exports = router;

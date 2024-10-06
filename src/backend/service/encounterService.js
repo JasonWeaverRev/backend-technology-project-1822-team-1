@@ -7,6 +7,16 @@ const path = require("path");
 
 const dndApiUrlPath = "https://www.dnd5eapi.co";
 const dndBeyondUrlPath = "https://www.dndbeyond.com/monsters/";
+
+/**
+ * CHALLENGE RATINGS
+ *
+ 0
+ 0.125
+ 0.25
+ 0.5
+ 1-30
+ */
 const monsterAmount = 5;
 
 // const DELETE_THIS_HARDCODE_MONSTERS = [
