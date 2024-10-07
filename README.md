@@ -47,32 +47,39 @@ Getting Started
 Authentication
 ```
 Method	Endpoint	Description
-POST	/auth/register	Register a new user
-POST	/auth/login	Log in an existing user
+POST	/api/users			Register a new user
+POST	/api/users/login		Log in an existing user
 ```
 User Profile
 ```
-Method	Endpoint	        Description
-GET	/profile/:getendpoint	View a user’s profile
-PUT	/profile/:putendpoint	Update a user’s profile
+Method	Endpoint	    	 	Description
+GET	/api/users/profile		View a user’s profile
+PUT	/api/users/profile		Update a user’s profile
 ```
-
 Encounters
 ```
-Method	Endpoint	Description
-POST	/encounters	                Create a new encounter
-GET	/encounters/:getendpoint	Get all encounters by a user
-PUT	/encounters/:putendpoint	Update an existing encounter
-DELETE	/encounters/:deleteenpoint	Delete an encounter
+Method	Endpoint			Description
+POST	/api/encounters	                Create a new encounter
+GET	/api/encounters			Get all encounters by a user
+PUT	/api/encounters			Update an existing encounter
+DELETE	/api/encounters			Delete an encounter
 ```
 Campaigns 
 ```
-POST	/campaigns	        	Create a campaign folder
-GET	/campaigns/:getendpoint 	View campaigns for a user
-PUT	/campaigns/:putendpoint	        Update a campaign
-DELETE	/campaigns/:deleteenpoint	Delete a campaign
-
+POST	/api/campaigns	        	Create a campaign folder
+GET	/api/campaigns		 	View campaigns for a user
+PUT	/api/campaigns			Update a campaign
+DELETE	/api/campaigns			Delete a campaign
 ```
+Forum
+```
+POST	/api/forum	        	Create a post
+GET	/api/forum			View a post
+PUT	/api/forum 		        Update a post
+DELETE	/api/forum			Delete a post
+POST	/api/forum	        	Create a comment
+PUT	/api/forum/comment 		Update an comment
+DELETE	/api/forum/comment		Delete a comment
 
 
 Features
@@ -91,24 +98,24 @@ The backend uses DynamoDB to store data. Below are some key collections and thei
 User 
 ```
 {
-  "UserID": "UUID",
-  "Username": "string",
-  "Password": "hashedString",
-  "Email": "user@example.com",
-  "ProfilePicture": "https://example.com/images/profile.jpg",
-  "AboutMe": "I love DnD!",
-  "Encounters": ["EncounterID1", "EncounterID2"],
-  "Collections": ["CampaignID1", "CampaignID2"],
-  "ForumPosts": ["PostID1", "PostID2"],
-  "LikedPosts": ["PostID1", "PostID3"],
-  "CreationTime": "2024-10-01T10:00:00Z"
+  "email": "user@example.com",
+  "username": "string",
+  "password": "hashedString",
+  "profile_pic": "https://example.com/images/profile.jpg",
+  "about_me": "I love DnD!",
+  "encounters": ["EncounterID1", "EncounterID2"],
+  "encounter_campaigns": ["CampaignID1", "CampaignID2"],
+  "forum_posts": ["PostID1", "PostID2"],
+  "interacted_posts": ["PostID1", "PostID3"],
+  "creation_time": "2024-10-01T10:00:00Z",
+  "role": "string"
 }
 ```
 
 Encounter
 ```
 {
-  "EncounterID": "UUID",
+  "encounter_iD": "UUID",
   "Monsters": [
     {
       "Name": "Goblin",
@@ -119,28 +126,32 @@ Encounter
       "API_URL": "https://dndapi.com/monsters/dragon"
     }
   ],
-  "Saves": 10
+  "Saves": 10, 
+  "creation_time": "2024-10-01T10:00:00Z"
 }
 ```
-
 Campaign
 ```
 {
-  "CampaignID": "UUID",
-  "Encounters": ["EncounterID1", "EncounterID2", "EncounterID3"]
+  "campaign_id": "UUID",
+  "campaign_title": "title",
+  "encounters": ["EncounterID1", "EncounterID2", "EncounterID3"]
 }
 
 ```
 Forum Post
 ```
 {
-  "PostID": "UUID",
-  "WrittenBy": "Username",
-  "Title": "My Epic Encounter",
-  "Body": "Here's a great encounter with a dragon and goblins. [Encounter Details]",
-  "Likes": 20,
-  "Dislikes": 2,
-  "RepliesTo": "PostID123" // This would be null or omitted if it's an independent post
+  "post_id": "UUID",
+  "creation_time": "2024-10-01T10:00:00Z"
+  "written_by": "Username",
+  "parent_id": "UUID",
+  "title": "My Epic Encounter",
+  "body": "Here's a great encounter with a dragon and goblins. [Encounter Details]",
+  "likes": 20,
+  "parent_id": 2,
+  "replies": "["ReplyID1", "ReplyID2", "ReplyID3"]" // This would be null or omitted if it's an independent post
+  
 }
 ```
 
