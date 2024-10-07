@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const AccountService = require("../service/AccountService");
+const AccountService = require("../service/accountService");
 
 /*
     DDUser Object Model
