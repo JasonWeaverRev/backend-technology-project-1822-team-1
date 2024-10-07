@@ -5,7 +5,7 @@ const uuid = require("uuid");
 
 // Local module imports
 const postDAO = require("../dao/postDao.js");
-const accountDAO = require("../dao/AccountDAO");
+const accountDAO = require("../dao/accountDao.js");
 const { logger } = require("../utils/logger");
 
 
@@ -25,21 +25,12 @@ async function deletePostById(postID) {
     // Validate if the post exists
     foundPost = await getPostById(postID);
     if(foundPost) {
-        // If the post-to-be-deleted has a parent, remove the reply from the parent's reply list
-        if(foundPost.parent_id) {
-            parentPost = await getPostById(foundPost.parent_id);
-            const parentData = await postDAO.removeReplyFromParent(postID, parentPost.post_id, parentPost.creation_time);
-        }
 
-        // If the post-to-be-deleted has a reply list, remove the parent from each reply
-        if(foundPost.replies.length > 0) {
-            childData = await removeParents(foundPost);
-        }
+        // Search for posts that have the to-be-deleted post as their parent, then remove their parent_ids
+        const childData = await removeParents(postID);
 
         // Delete the post
-        let userData = await accountDAO.deletePostFromUserForums(postID, foundPost.written_by);
         let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
-        
         
         // If errors arise during deletion
         if(!data) {
@@ -65,19 +56,15 @@ async function createPost(postContents, user) {
 
     if (validatePost(postContents, user)) {
         // Add the new post information
-        
         newPost = {
             post_id: uuid.v4(),
             ...postContents,
             written_by: user.username,
             creation_time: new Date().toISOString(),
-            likes: 0,
-            liked_by: [],
-            disliked_by: [],
-            replies: []
+            liked_by: [user.username],
+            disliked_by: []
         }
         let data = await postDAO.createPost(newPost);
-        let userData = await accountDAO.addPostToUserForumPosts(newPost.post_id, newPost.written_by);
 
         return data;
     }
@@ -99,8 +86,7 @@ async function createReply(replyCont, parent_id, user) {
     if (validateReply(replyCont, parent_id, user)) {
         
         // If the parent post exists, add it to the forum post
-
-        parentPost = await getPostById(parent_id);
+        const parentPost = await getPostById(parent_id);
         
         if(parentPost) {
             // Create new reply
@@ -110,23 +96,13 @@ async function createReply(replyCont, parent_id, user) {
                 written_by: user.username,
                 creation_time: new Date().toISOString(),
                 parent_id,
-                likes: 0,
                 liked_by: [],
-                disliked_by: [],
-                replies: []
+                disliked_by: []
             };
 
             let data = await postDAO.createPost(reply);
-            let userData = await accountDAO.addPostToUserForumPosts(reply.post_id, reply.written_by);
 
             // Add the reply to the parent reply list 
-
-            let parentData = await postDAO.addReplyToParentList(reply.post_id, parent_id, parentPost.creation_time);
-
-            if (!parentData) {
-                logger.info(`Failed forum reply comment creation failed: Error found in adding the reply to the parent reply list`);
-                throw { status: 400, message: `Error: Could not add your reply to the original poster's reply list`};
-            }
 
             return data;
         }
@@ -140,14 +116,14 @@ async function createReply(replyCont, parent_id, user) {
     throw { status: 400, message: `Error: Invalid reply post contents. Make sure to have a 'body' and 'written by' in the request body`};
 }
 
-// /**
-//  * Retrieves the newest added post to the forums for page/post sorting
-//  * 
-//  * @returns the newest added post 
-//  */
-// const getNewestPost = async () => {
-//     return await postDAO.getNewestPost();
-// }
+/**
+ * Retrieves the newest added post to the forums for page/post sorting
+ * 
+ * @returns the newest added post 
+ */
+const getNewestPost = async () => {
+    return await postDAO.getNewestPost();
+}
 
 
 /**
@@ -169,11 +145,11 @@ async function getPostById(postID) {
 /**
  * Removes the parent post's id from all of its children posts 
  * 
- * @param parentPost parent post to be removed from all children, containing parent post ID and reply list
+ * @param parentPostID parent_id to be removed from all posts
  */
-async function removeParents(parentPost) {
+async function removeParents(parentPostID) {
     //Get list of children
-    repList = parentPost.replies;
+    const repList = await postDAO.getPostsByParentId(parentPostID);
     
     //Remove parents from children one-by-one
     repList.forEach( async (replyID, i) => {
@@ -222,7 +198,6 @@ function validateReply(replyCont, parent_id, user) {
         (parent_id.length > 0)
     )
 }
-
 
 
 module.exports = {
