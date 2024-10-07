@@ -16,6 +16,7 @@ const { logger } = require("../utils/logger"); // Assuming you have a logger uti
 
 const encounterDao = require("../dao/encounterDao");
 
+
 const client = new DynamoDBClient({ region: "us-east-1" });
 
 const documentClient = DynamoDBDocumentClient.from(client);
@@ -110,28 +111,45 @@ const getUserByUsername = async (username) => {
 
 
 const getUserRoleByUsername = async (username) => {
+  console.log("getUserRoleByUsername called with username:", username);
+
+  if (typeof username !== 'string') {
+    console.error("Username is not a string. Converting to string.");
+    username = String(username);
+  }
+
   try {
-      const command = new GetCommand({
-          TableName: UserTableName,
-          Key: {
-              username: username
-          },
-          ProjectionExpression: 'role' // Fetch only the 'role' attribute
-      });
+    const command = new QueryCommand({
+      TableName,
+      IndexName: "username-index",
+      KeyConditionExpression: "#username = :username",
+      ExpressionAttributeNames: {
+        "#username": "username",
+        "#r": "role",
+      },
+      ExpressionAttributeValues: {
+        ":username": username,
+      },
+      ProjectionExpression: "#r",
+    });
 
-      const result = await documentClient.send(command);
+    const result = await documentClient.send(command);
 
-      if (!result.Item) {
-          console.log("User not found.");
-          return null;
-      }
-
-      return result.Item.role;
-  } catch (err) {
-      console.error("Error fetching user role:", err);
+    if (!result.Items || result.Items.length === 0) {
+      console.log("User not found.");
       return null;
+    }
+
+    const userRole = result.Items[0]['role'];
+    console.log("User role retrieved:", userRole);
+    return userRole;
+  } catch (err) {
+    console.error("Error fetching user role:", err);
+    return null;
   }
 };
+
+
 
 module.exports = {
   getUserByEmail,

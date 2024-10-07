@@ -1,4 +1,4 @@
-const commentDAO = require('../dao/commentDAO');
+const commentDAO = require('../dao/commentDao');
 const userDAO = require('../dao/userDAO'); // Import the user DAO to fetch user details
 
 /**
