@@ -37,7 +37,7 @@ async function getCampaignById(campaign_id) {
 async function createNewCampaign(campaign) {
     const command = new PutCommand({
         TableName,
-        Item: campaign
+        Item: campaign,
     })
 
     try {
@@ -57,14 +57,46 @@ async function addEncounterToCampaign(campaign_id, new_encounter) {
         ExpressionAttributeValues: {
             ':new_encounter': new_encounter
         },
-        ReturnValues: 'CAMPAIGN ENCOUNTER UPDATED'
+        ReturnValues: "APPEND SUCCESSFUL"
     })
 
     try {
         const data = await documentClient.send(command);
-        return campaign;
+        return data;
     } catch (err) {
         console.error("Error adding encounter to campaign: ", err);
+        return null;
+    }
+}
+
+async function removeEncounterFromCampaign(campaign_id, index) {
+    const command = new UpdateCommand({
+        TableName,
+        Key: {campaign_id},
+        UpdateExpression: `REMOVE encounters[${index}]`,
+        ReturnValues: "REMOVE SUCCESSFUL"
+    })
+
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch (err) {
+        console.error("Error removing encounter from campaign: ", err);
+        return null;
+    }
+}
+
+async function deleteCampaign(campaign_id) {
+    const command = new DeleteCommand({
+        TableName,
+        Key: {campaign_id}
+    })
+
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch (err) {
+        console.error("Error deleting item:", err);
         return null;
     }
 }
