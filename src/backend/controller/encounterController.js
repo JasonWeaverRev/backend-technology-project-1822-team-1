@@ -15,13 +15,27 @@ router.get("/monsters", async (req, res) => {
   }
 });
 
-router.post("/encounter", async (req, res) => {
+router.get("/encounter", async (req, res) => {
+  const encounter_id = req.query.encounter_id;
+
+  try {
+    const encounter = await encounterService.getEncounterById(encounter_id);
+
+    res.status(200).json({ encounter });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+router.post("/encounter", verifyToken, async (req, res) => {
   const { monsters, encounter_title } = req.body;
+  const username = req.user.username;
 
   try {
     const encounter = await encounterService.createNewEncounter(
       monsters,
-      encounter_title
+      encounter_title,
+      username
     );
 
     res.status(201).json({ encounter });

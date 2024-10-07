@@ -3,6 +3,7 @@ const { logger } = require("../utils/logger");
 const axios = require("axios");
 const uuid = require("uuid");
 const encounterDao = require("../dao/encounterDao");
+const accountDao = require("../dao/accountDAO");
 const fs = require("fs");
 const path = require("path");
 
@@ -81,13 +82,26 @@ const getMonstersByChallengeRating = async (challengeRating) => {
   }
 };
 
-const createNewEncounter = async (monsters, title) => {
+const getEncounterById = async (id) => {
+  if (!id || id.trim() === "") {
+    throw { status: 400, message: "Must provide id for the encounter" };
+  }
+
+  try {
+    const encounter = await encounterDao.getEncounterById(id);
+    return encounter;
+  } catch (err) {
+    throw err.status ? err : { status: 500, messsage: "Internal server error" };
+  }
+};
+
+const createNewEncounter = async (monsters, title, username) => {
   try {
     if (monsters.length <= 0) {
       throw { status: 400, message: "Must provide monsters for the encounter" };
     }
 
-    if (!title) {
+    if (!title || title.trim() === "") {
       throw { status: 400, message: "Must provide title for the encounter" };
     }
 
@@ -97,11 +111,15 @@ const createNewEncounter = async (monsters, title) => {
       monsters,
       saves: 0,
       creation_time: new Date().toISOString(),
+      created_by: username,
+      campaign_title: "",
     };
 
-    const newEncounterProcessed = await encounterDao.createEncounter(
-      newEncounter
-    );
+    console.log(newEncounter);
+
+    await encounterDao.createEncounter(newEncounter);
+
+    return newEncounter;
   } catch (err) {
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
   }
@@ -110,4 +128,5 @@ const createNewEncounter = async (monsters, title) => {
 module.exports = {
   getMonstersByChallengeRating,
   createNewEncounter,
+  getEncounterById,
 };

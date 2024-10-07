@@ -34,6 +34,19 @@ const getEncounterById = async (encounter_id) => {
   }
 };
 
+const createEncounter = async (encounter) => {
+  try {
+    const command = new PutCommand({
+      TableName,
+      Item: encounter,
+    });
+
+    await documentClient.send(command);
+  } catch (err) {
+    throw { status: 500, message: "Error creating new encounter" };
+  }
+};
+
 const getBatchEncountersbyId = async (encounter_ids) => {
   try {
     const batchGetCommand = new BatchGetCommand({
@@ -59,4 +72,4 @@ const getBatchEncountersbyId = async (encounter_ids) => {
   }
 };
 
-module.exports = { getEncounterById, getBatchEncountersbyId };
+module.exports = { getEncounterById, getBatchEncountersbyId, createEncounter };
