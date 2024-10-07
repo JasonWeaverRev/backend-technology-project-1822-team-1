@@ -8,15 +8,6 @@ const postDAO = require("../dao/postDao.js");
 const accountDAO = require("../dao/AccountDAO");
 const { logger } = require("../utils/logger");
 
-/**
- * TEST ARROW METHOD
- * ============================================
- *  const getSomething = (target, index) => {
- *      stuff goes here
- *  }; 
- * ============================================
- */
-
 
 /**
  * Deletes a post by its ID
@@ -50,7 +41,6 @@ async function deletePostById(postID) {
         let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
         
         
-
         // If errors arise during deletion
         if(!data) {
             logger.info(`Failed Admin post deletion attempt: Unexpected error occured during deletion`);
@@ -150,6 +140,31 @@ async function createReply(replyCont, parent_id, user) {
     throw { status: 400, message: `Error: Invalid reply post contents. Make sure to have a 'body' and 'written by' in the request body`};
 }
 
+// /**
+//  * Retrieves the newest added post to the forums for page/post sorting
+//  * 
+//  * @returns the newest added post 
+//  */
+// const getNewestPost = async () => {
+//     return await postDAO.getNewestPost();
+// }
+
+
+/**
+ * =======================
+ * HELPER FUNCTIONS BELOW
+ * =======================
+ */
+
+/**
+ * Retrieve a post by its post ID
+ * 
+ * @param {*} postID ID of the post to retrieve
+ * @returns the post, or null if the post does not exist 
+ */
+async function getPostById(postID) {
+    return await postDAO.getPostById(postID);
+}
 
 /**
  * Removes the parent post's id from all of its children posts 
@@ -167,7 +182,6 @@ async function removeParents(parentPost) {
 
     return 1;
 }
-
 
 
 /**
@@ -209,19 +223,12 @@ function validateReply(replyCont, parent_id, user) {
     )
 }
 
-/**
- * Retrieve a post by its post ID
- * 
- * @param {*} postID ID of the post to retrieve
- * @returns the post, or null if the post does not exist 
- */
-async function getPostById(postID) {
-    return await postDAO.getPostById(postID);
-}
+
 
 module.exports = {
     deletePostById,
     getPostById,
     createPost,
-    createReply
+    createReply,
+    getNewestPost
 }
