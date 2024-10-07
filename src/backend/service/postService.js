@@ -5,6 +5,7 @@ const uuid = require("uuid");
 
 // Local module imports
 const postDAO = require("../dao/postDAO");
+const userDAO = require("../dao/userDao");
 const { logger } = require("../utils/logger");
 
 /**
@@ -21,7 +22,7 @@ const { logger } = require("../utils/logger");
  * Deletes a post by its ID
  * 
  * @param {*} postID id of the post to be deleted
- * @returns -1 if the request body was not valid, 0 if the post does not exist, 1 if the post was found and deleted, -2 if errors arose in the DAO during deletion
+ * @returns 1 if the post was found and deleted, or throws an error otherwise
  */
 async function deletePostById(postID) {
     // Validate that the post id is present in the request body
@@ -39,8 +40,16 @@ async function deletePostById(postID) {
             const parentData = await postDAO.removeReplyFromParent(postID, parentPost.post_id, parentPost.creation_time);
         }
 
+        // If the post-to-be-deleted has a reply list, remove the parent from each reply
+        if(foundPost.replies.length > 0) {
+            childData = await removeParents(foundPost);
+        }
+
         // Delete the post
+        let userData = await userDAO.deletePostFromUserForums(postID, foundPost.written_by);
         let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
+        
+        
 
         // If errors arise during deletion
         if(!data) {
@@ -64,18 +73,22 @@ async function deletePostById(postID) {
  */
 async function createPost(postContents, user) {
 
-    console.log(user);
-
     if (validatePost(postContents, user)) {
         // Add the new post information
-        let data = await postDAO.createPost({
+        
+        newPost = {
             post_id: uuid.v4(),
             ...postContents,
             written_by: user.username,
             creation_time: new Date().toISOString(),
             likes: 0,
+            liked_by: [],
+            disliked_by: [],
             replies: []
-        });
+        }
+        let data = await postDAO.createPost(newPost);
+        let userData = await userDAO.addPostToUserForumPosts(newPost.post_id, newPost.written_by);
+
         return data;
     }
 
@@ -108,9 +121,13 @@ async function createReply(replyCont, parent_id, user) {
                 creation_time: new Date().toISOString(),
                 parent_id,
                 likes: 0,
+                liked_by: [],
+                disliked_by: [],
                 replies: []
             };
+
             let data = await postDAO.createPost(reply);
+            let userData = await userDAO.addPostToUserForumPosts(reply.post_id, reply.written_by);
 
             // Add the reply to the parent reply list 
 
@@ -118,7 +135,7 @@ async function createReply(replyCont, parent_id, user) {
 
             if (!parentData) {
                 logger.info(`Failed forum reply comment creation failed: Error found in adding the reply to the parent reply list`);
-                throw { status: 400, message: `Error: Could not add your reply to the OP's reply list`};
+                throw { status: 400, message: `Error: Could not add your reply to the original poster's reply list`};
             }
 
             return data;
@@ -132,6 +149,25 @@ async function createReply(replyCont, parent_id, user) {
     logger.info(`Failed forum reply comment creation failed: Invalid reply contents`);
     throw { status: 400, message: `Error: Invalid reply post contents. Make sure to have a 'body' and 'written by' in the request body`};
 }
+
+
+/**
+ * Removes the parent post's id from all of its children posts 
+ * 
+ * @param parentPost parent post to be removed from all children, containing parent post ID and reply list
+ */
+async function removeParents(parentPost) {
+    //Get list of children
+    repList = parentPost.replies;
+    
+    //Remove parents from children one-by-one
+    repList.forEach( async (replyID, i) => {
+        await postDAO.removeParent(replyID);
+    });
+
+    return 1;
+}
+
 
 
 /**

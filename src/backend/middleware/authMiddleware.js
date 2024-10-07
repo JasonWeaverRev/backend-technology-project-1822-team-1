@@ -29,7 +29,7 @@ const verifyAdminToken = (req, res, next) => {
         return res.status(403).json({ message: "Unauthorized: Invalid token" });
       }
 
-      if (user.role !== 'admin') {
+      if (user.role.S !== 'admin') {
         return res.status(403).json({message: "Unauthorized: Requires Admin permissions"});
       }
 

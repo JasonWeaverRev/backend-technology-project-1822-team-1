@@ -114,7 +114,15 @@ const getUserByEmail = async (email) => {
   }
 };
 
+
+/**
+ * 
+ * @param {*} username 
+ * @returns 
+ */
 const getUserByUsername = async (username) => {
+  
+
   try {
     const command = new QueryCommand({
       TableName,
@@ -124,7 +132,7 @@ const getUserByUsername = async (username) => {
         "#username": "username",
       },
       ExpressionAttributeValues: {
-        ":username": { S: username },
+        ":username": {S: username}
       },
     });
 
