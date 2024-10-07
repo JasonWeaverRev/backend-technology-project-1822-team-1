@@ -27,8 +27,8 @@ app.use(loggerMiddleware);
  * Routing setup
  */
 app.use("/api/users", userController);
-app.use('/api/forum', postRouter);
-app.use('/api/forum/comment', commentRouter);
+app.use('/api/forums', postRouter);
+app.use('/api/forums/comments', commentRouter);
 
 
 
