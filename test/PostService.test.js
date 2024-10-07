@@ -1,6 +1,6 @@
 // Setup post service and post dao to test post service
 const PostService = require("../src/backend/service/postService");
-const PostDao = require("../src/backend/dao/postDAO");
+const PostDao = require("../src/backend/dao/postDao.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 

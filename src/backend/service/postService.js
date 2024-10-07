@@ -4,8 +4,8 @@
 const uuid = require("uuid");
 
 // Local module imports
-const postDAO = require("../dao/postDAO");
-const userDAO = require("../dao/userDao");
+const postDAO = require("../dao/postDao");
+const accountDAO = require("../dao/AccountDAO");
 const { logger } = require("../utils/logger");
 
 /**
@@ -46,7 +46,7 @@ async function deletePostById(postID) {
         }
 
         // Delete the post
-        let userData = await userDAO.deletePostFromUserForums(postID, foundPost.written_by);
+        let userData = await accountDAO.deletePostFromUserForums(postID, foundPost.written_by);
         let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
         
         
@@ -87,7 +87,7 @@ async function createPost(postContents, user) {
             replies: []
         }
         let data = await postDAO.createPost(newPost);
-        let userData = await userDAO.addPostToUserForumPosts(newPost.post_id, newPost.written_by);
+        let userData = await accountDAO.addPostToUserForumPosts(newPost.post_id, newPost.written_by);
 
         return data;
     }
@@ -127,7 +127,7 @@ async function createReply(replyCont, parent_id, user) {
             };
 
             let data = await postDAO.createPost(reply);
-            let userData = await userDAO.addPostToUserForumPosts(reply.post_id, reply.written_by);
+            let userData = await accountDAO.addPostToUserForumPosts(reply.post_id, reply.written_by);
 
             // Add the reply to the parent reply list 
 

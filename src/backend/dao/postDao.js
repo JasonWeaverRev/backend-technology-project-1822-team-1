@@ -47,10 +47,11 @@ async function createPost(Item) {
 
 
 /**
+ * Adds a reply post_id to the parent
  * 
- * @param replyID 
- * @param parent_id 
- * @param crTime 
+ * @param replyID ID to add to the parent's reply list
+ * @param parent_id ID of parent post
+ * @param crTime creation time of the parent post
  */
 async function addReplyToParentList(replyID, parent_id, crTime) {
     const command = new UpdateCommand( {

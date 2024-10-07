@@ -19,7 +19,7 @@ app.use(express.json());
  * Routing setup
  */
 app.use('/api/forums', postRouter);
-app.use("/api/account", accountController);
+app.use("/api/accounts", accountController);
 
 
 // Port listen

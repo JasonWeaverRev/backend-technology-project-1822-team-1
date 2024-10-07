@@ -67,7 +67,8 @@ router.get("/username", async (req, res) => {
 });
 */
 
-// POST user registration
+
+// user registration
 router.post("/register", async (req, res) => {
   try {
     const newUser = await AccountService.registerUser(req.body);
@@ -78,6 +79,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// login registration
 router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
 
