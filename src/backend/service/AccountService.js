@@ -206,11 +206,11 @@ const processByUsername = async (user) => {
     });
   }
 
-  // const encounterData = [];
+  const encounterData = [];
 
-  // if (user && user.encounters && user.encounters.length > 0) {
-  //   encounterData = await encounterDao.getBatchEncountersbyId(encounterIds);
-  // }
+  if (user && user.encounters && user.encounters.length > 0) {
+    encounterData = await encounterDao.getBatchEncountersbyId(encounterIds);
+  }
 
   const encounterCampaigns = [];
 
