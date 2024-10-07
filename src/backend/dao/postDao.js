@@ -75,19 +75,19 @@ async function deletePostById(postID, crTime) {
  * 
  * @param replyID Id of post to have its parent removed
  */
-const removeParent = async(replyID) => {
+const removeParent = async(replyPost) => {
     // Get child post to access sort key
-    const child_post = await getPostById(replyID);
+  
 
     const command = new UpdateCommand ( {
         TableName,
         Key: {
-            post_id: replyID,
-            creation_time: child_post.creation_time
+            post_id: replyPost.post_id,
+            creation_time: replyPost.creation_time
         },
         UpdateExpression: "set parent_id = :status",
         ExpressionAttributeValues: {
-            ":status": ""
+            ":status": "deleted"
         }
     });
 
@@ -131,6 +131,37 @@ async function getPostById(postID) {
 }
 
 /**
+ * Retrieves all posts sharing the same given parent id
+ * 
+ * @param {*} parentID parent id to search for 
+ */
+const getPostsByParentId = async (parentID) => {
+
+    // Create a query finding the post with its ID as the key condition
+    const command = new QueryCommand( {
+        TableName,
+        IndexName: "parent_id-post_id-index",
+        KeyConditionExpression: "#id = :id",
+        ExpressionAttributeNames: {
+            "#id": "parent_id"
+        },
+        ExpressionAttributeValues: {
+            ":id": parentID
+        }
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data.Items;
+    } catch(err) {
+        console.error(err);
+        logger.error(err);
+    }
+}
+
+
+/**
  * Retrieves the newest created post
  */
 const getNewestPost = async () => {
@@ -164,6 +195,7 @@ const getNewestPost = async () => {
 module.exports = {
     deletePostById,
     getPostById,
+    getPostsByParentId,
     createPost,
     removeParent
 }

@@ -150,10 +150,10 @@ async function getPostById(postID) {
 async function removeParents(parentPostID) {
     //Get list of children
     const repList = await postDAO.getPostsByParentId(parentPostID);
-    
+
     //Remove parents from children one-by-one
-    repList.forEach( async (replyID, i) => {
-        await postDAO.removeParent(replyID);
+    repList.forEach( async (replyPost, i) => {
+        await postDAO.removeParent(replyPost);
     });
 
     return 1;
