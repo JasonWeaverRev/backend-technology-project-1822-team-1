@@ -50,6 +50,7 @@ const getMonstersByChallengeRating = async (challengeRating) => {
       const newMonster = {
         name: monsterDetails.data.name,
         size: monsterDetails.data.size,
+        challengeRating: monsterDetails.data.challenge_rating,
         armorClass: monsterDetails.data.armor_class[0].value,
         hp: monsterDetails.data.hit_points,
         strength: monsterDetails.data.strength,
@@ -59,13 +60,19 @@ const getMonstersByChallengeRating = async (challengeRating) => {
         wisdom: monsterDetails.data.wisdom,
         charisma: monsterDetails.data.charisma,
         image: monsterDetails.data.image,
-        monsterPage: `${dndBeyondUrlPath}${monsterDetails.data.name.replaceAll(
-          " ",
-          "-"
-        )}`,
+        monsterPage: monsterDetails.data.name.includes(",")
+          ? `${dndBeyondUrlPath}${monsterDetails.data.name
+              .split(",")[0]
+              .trim()}`
+          : `${dndBeyondUrlPath}${monsterDetails.data.name.replaceAll(
+              " ",
+              "-"
+            )}`,
       };
       randomMonsterData.push(newMonster);
     }
+
+    console.log(randomMonsterData);
 
     return randomMonsterData;
   } catch (err) {
