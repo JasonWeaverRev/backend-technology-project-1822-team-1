@@ -147,7 +147,7 @@ const loginUser = async (identifier, password) => {
 };
 
 const processByEmail = async (user) => {
-  const encounterData = [];
+  let encounterData = [];
   if (user && user.encounters && user.encounters.length > 0) {
     encounterData = await encounterDao.getBatchEncountersbyId(user.encounters);
     user.encounters = encounterData;
