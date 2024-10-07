@@ -1,9 +1,9 @@
-const accountService = require("../src/backend/service/AccountService");
-const AccountDao = require("../src/backend/dao/AccountDAO");
+const accountService = require("../src/backend/service/accountService");
+const AccountDao = require("../src/backend/dao/accountDAO");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-jest.mock("../src/backend/dao/AccountDAO");
+jest.mock("../src/backend/dao/accountDAO");
 jest.mock("../src/backend/dao/encounterDao");
 jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
