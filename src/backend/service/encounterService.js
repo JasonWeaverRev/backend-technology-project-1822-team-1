@@ -95,6 +95,15 @@ const getEncounterById = async (id) => {
   }
 };
 
+const getEncountersByUsername = async (username) => {
+  try {
+    const encounters = await encounterDao.getEncountersByUsername(username);
+    return encounters;
+  } catch (err) {
+    throw err.status ? err : { status: 500, messsage: "Internal server error" };
+  }
+};
+
 const createNewEncounter = async (monsters, title, username) => {
   try {
     if (monsters.length <= 0) {
@@ -125,8 +134,21 @@ const createNewEncounter = async (monsters, title, username) => {
   }
 };
 
+const processEncounters = (encounters) => {
+  encounters.map((idx) => ({
+    encounter_title: idx.encounter_title.S,
+    created_by: idx.created_by.S,
+    encounter_id: idx.encounter_id.S,
+    creation_time: idx.creation_time.S,
+    saves: idx.saves.N,
+    campaign_title: idx.campaign_title.S,
+    monsters: idx.monsters.L,
+  }));
+};
+
 module.exports = {
   getMonstersByChallengeRating,
   createNewEncounter,
   getEncounterById,
+  getEncountersByUsername,
 };

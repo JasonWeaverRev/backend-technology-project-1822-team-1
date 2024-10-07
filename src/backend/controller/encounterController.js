@@ -15,6 +15,17 @@ router.get("/monsters", async (req, res) => {
   }
 });
 
+router.get("/user", verifyToken, async (req, res) => {
+  const username = req.user.username;
+
+  try {
+    const encounters = await encounterService.getEncountersByUsername(username);
+    res.status(200).json({ encounters });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
 router.get("/encounter", async (req, res) => {
   const encounter_id = req.query.encounter_id;
 
