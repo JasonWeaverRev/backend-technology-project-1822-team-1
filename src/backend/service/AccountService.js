@@ -76,7 +76,6 @@ async function registerUser(user) {
   encounter_campaigns = [];
   forum_posts = [];
   interacted_posts = [];
-  
 
   const newUser = {
     email,
@@ -86,7 +85,7 @@ async function registerUser(user) {
     encounters,
     encounter_campaigns,
     forum_posts,
-    interacted_posts
+    interacted_posts,
   };
 
   // Defaults role to "user" if not an "admin"
@@ -147,6 +146,8 @@ const loginUser = async (identifier, password) => {
       { expiresIn: "1h" }
     );
 
+    console.log(processedUser);
+
     logger.info(`Successful login by ${processedUser.username}`);
     return token;
   } catch (err) {
@@ -167,9 +168,12 @@ const processByEmail = async (user) => {
 
 const processByUsername = async (user) => {
   const encounterIds = [];
-  user.encounters.L.forEach((idx) => {
-    encounterIds.push(idx.S);
-  });
+  console.log(user.encounters);
+  if (user.encounters) {
+    user.encounters.L.forEach((idx) => {
+      encounterIds.push(idx.S);
+    });
+  }
 
   const encounterData = [];
 
@@ -178,28 +182,36 @@ const processByUsername = async (user) => {
   }
 
   const encounterCampaigns = [];
-  user.encounter_campaigns.L.forEach((idx) => {
-    encounterCampaigns.push(idx.S);
-  });
+
+  if (user.encounter_campaigns) {
+    user.encounter_campaigns.L.forEach((idx) => {
+      encounterCampaigns.push(idx.S);
+    });
+  }
 
   const interactedPosts = [];
-  user.interacted_posts.L.forEach((idx) => {
-    interactedPosts.push(idx.S);
-  });
+
+  if (user.interacted_posts) {
+    user.interacted_posts.L.forEach((idx) => {
+      interactedPosts.push(idx.S);
+    });
+  }
 
   const forumPosts = [];
-  user.forum_posts.L.forEach((idx) => {
-    forumPosts.push(idx.S);
-  });
+  if (user.forum_posts) {
+    user.forum_posts.L.forEach((idx) => {
+      forumPosts.push(idx.S);
+    });
+  }
 
   const processedUser = {
     password: user.password.S,
-    about_me: user.about_me.S,
+    about_me: user.about_me ? user.about_me.S : "",
     role: user.role.S,
     creation_time: user.creation_time.S,
     username: user.username.S,
     email: user.email.S,
-    profile_pic: user.profile_pic.S,
+    profile_pic: user.profile_pic ? user.profile_pic.S : "",
     encounter_campaigns: encounterCampaigns,
     encounters: encounterData,
     interacted_posts: interactedPosts,
