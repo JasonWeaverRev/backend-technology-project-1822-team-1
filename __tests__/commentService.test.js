@@ -1,10 +1,10 @@
-const commentDAO = require('../src/backend/dao/commentDAO');
-const userDAO = require('../src/backend/dao/userDao'); // Add userDAO for role checking
+const commentDAO = require('../src/backend/dao/commentDao');
+const accountDAO = require('../src/backend/dao/accountDao'); // Add accountDao for role checking
 const commentService = require('../src/backend/service/commentService');
 
 // Mock DAO functions
 jest.mock('../src/backend/dao/commentDAO');
-jest.mock('../src/backend/dao/userDao');
+jest.mock('../src/backend/dao/accountDAO');
 
 beforeEach(() => {
     jest.clearAllMocks(); // Clear all mock calls before each test
@@ -27,7 +27,7 @@ const sampleComment = {
 commentDAO.getCommentById = jest.fn();
 commentDAO.updateCommentByUser = jest.fn();
 commentDAO.deleteCommentByUser = jest.fn();
-userDAO.getUserRoleByUsername = jest.fn(); // Mock for user role
+accountDAO.getUserRoleByUsername = jest.fn(); // Mock for user role
 
 // ====== Tests for Updating Comment ======
 
@@ -94,7 +94,7 @@ describe("Comment Service - Delete Comment", () => {
         };
         commentDAO.getCommentById.mockClear();
         commentDAO.deleteCommentByUser.mockClear();
-        userDAO.getUserRoleByUsername.mockClear();
+        accountDAO.getUserRoleByUsername.mockClear();
     });
 
     test("Should delete comment if user is the author", async () => {
@@ -125,7 +125,7 @@ describe("Comment Service - Delete Comment", () => {
     test("Should return 403 if user is not the author and not an admin", async () => {
         // Arrange
         commentDAO.getCommentById.mockResolvedValueOnce({ ...sampleComment, written_by: 'differentUser' });
-        userDAO.getUserRoleByUsername.mockResolvedValueOnce('user'); // Regular user
+        accountDAO.getUserRoleByUsername.mockResolvedValueOnce('user'); // Regular user
 
         // Act
         const result = await commentService.deleteComment(
@@ -140,14 +140,14 @@ describe("Comment Service - Delete Comment", () => {
         expect(result).toBe(-1);  // Unauthorized
         expect(commentDAO.getCommentById).toHaveBeenCalledWith(sampleComment.comment_id, sampleComment.creation_time);
         expect(commentDAO.deleteCommentByUser).not.toHaveBeenCalled();
-        expect(userDAO.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure role check is performed
+        expect(accountDAO.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure role check is performed
     });
 
     test("Should delete comment if user is an admin", async () => {
         // Arrange
         commentDAO.getCommentById.mockResolvedValueOnce(sampleComment);
         commentDAO.deleteCommentByUser.mockResolvedValueOnce(1);
-        userDAO.getUserRoleByUsername.mockResolvedValueOnce('admin'); // Admin user
+        accountDAO.getUserRoleByUsername.mockResolvedValueOnce('admin'); // Admin user
 
         // Act
         const result = await commentService.deleteComment(
@@ -167,7 +167,7 @@ describe("Comment Service - Delete Comment", () => {
             sampleComment.comment_id,
             sampleComment.creation_time
         );
-        expect(userDAO.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure admin check is performed
+        expect(accountDAO.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure admin check is performed
     });
 
     test("Should return 404 if comment not found", async () => {
@@ -187,7 +187,7 @@ describe("Comment Service - Delete Comment", () => {
         expect(result).toBe(0);  // Comment not found
         expect(commentDAO.getCommentById).toHaveBeenCalledWith(sampleComment.comment_id, sampleComment.creation_time);
         expect(commentDAO.deleteCommentByUser).not.toHaveBeenCalled();  // Delete should not be called
-        expect(userDAO.getUserRoleByUsername).not.toHaveBeenCalled();  // User role check should not be performed
+        expect(accountDAO.getUserRoleByUsername).not.toHaveBeenCalled();  // User role check should not be performed
     });
     
 });
