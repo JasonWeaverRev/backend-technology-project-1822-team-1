@@ -1,5 +1,5 @@
 /**
- * Representation of the Post Repository
+ * Representation of the Post Repository and Post Repository services
  */
 const {DynamoDBClient} = require("@aws-sdk/client-dynamodb");
 const {
@@ -29,6 +29,7 @@ const TableName = 'Delver_Forum_Posts';
  * @param Item post to be created
  */
 async function createPost(Item) {
+    
     // Create new put command with the post meta data
     const command = new PutCommand( {
         TableName,
@@ -45,12 +46,12 @@ async function createPost(Item) {
 }
 
 
-
 /**
+ * Adds a reply post_id to the parent
  * 
- * @param replyID 
- * @param parent_id 
- * @param crTime 
+ * @param replyID ID to add to the parent's reply list
+ * @param parent_id ID of parent post
+ * @param crTime creation time of the parent post
  */
 async function addReplyToParentList(replyID, parent_id, crTime) {
     const command = new UpdateCommand( {
@@ -73,7 +74,6 @@ async function addReplyToParentList(replyID, parent_id, crTime) {
         logger.error(err);
     }
 }
-
 
 /**
  * Deletes a specific post using admin privileges  
@@ -122,7 +122,10 @@ async function removeReplyFromParent(replyID, parent_id, crTime) {
             post_id: parent_id,
             creation_time: crTime
         },
-        UpdateExpression: `REMOVE replies[${ind}]`,
+        UpdateExpression: `REMOVE #replies[${ind}]`,
+        ExpressionAttributeNames: {
+            '#replies': 'replies'
+          }
     });
 
     // Send command to the DB
@@ -134,6 +137,35 @@ async function removeReplyFromParent(replyID, parent_id, crTime) {
     }
 }
 
+/**
+ * Removes a parent id from a post
+ * 
+ * @param replyID Id of post to have its parent removed
+ */
+const removeParent = async(replyID) => {
+    // Get child post to access sort key
+    const child_post = await getPostById(replyID);
+
+    const command = new UpdateCommand ( {
+        TableName,
+        Key: {
+            post_id: replyID,
+            creation_time: child_post.creation_time
+        },
+        UpdateExpression: "set parent_id = :status",
+        ExpressionAttributeValues: {
+            ":status": ""
+        }
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data;
+    } catch(err) {
+        logger.error(err);
+    }
+};
 
 /**
  * Retrieves a post using a post id
@@ -169,5 +201,6 @@ module.exports = {
     getPostById,
     createPost,
     addReplyToParentList,
-    removeReplyFromParent
+    removeReplyFromParent,
+    removeParent
 }
