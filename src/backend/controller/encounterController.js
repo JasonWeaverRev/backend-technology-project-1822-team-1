@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const encounterService = require("../service/encounterService");
+const { verifyToken } = require("../middleware/authMiddleware");
 
 router.get("/monsters", async (req, res) => {
   const challengeRating = req.query.challenge;
@@ -15,7 +16,18 @@ router.get("/monsters", async (req, res) => {
 });
 
 router.post("/encounter", async (req, res) => {
-  const { monsters, encounterTitle } = "";
+  const { monsters, encounter_title } = req.body;
+
+  try {
+    const encounter = await encounterService.createNewEncounter(
+      monsters,
+      encounter_title
+    );
+
+    res.status(201).json({ encounter });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
 });
 
 module.exports = router;
