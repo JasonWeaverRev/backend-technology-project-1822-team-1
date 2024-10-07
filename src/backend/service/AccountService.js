@@ -87,12 +87,21 @@ async function registerUser(user) {
 
   const saltRounds = 10;
   hashedPassword = await bcrypt.hash(password, saltRounds);
+  encounters = [];
+  encounter_campaigns = [];
+  forum_posts = [];
+  interacted_posts = [];
+  
 
   const newUser = {
     email,
     username,
     password: hashedPassword,
     role,
+    encounters,
+    encounter_campaigns,
+    forum_posts,
+    interacted_posts
   };
 
   // Defaults role to "user" if not an "admin"
@@ -173,7 +182,7 @@ const loginUser = async (identifier, password) => {
  * @returns 
  */
 const processByEmail = async (user) => {
-  const encounterData = [];
+  let encounterData = [];
   if (user && user.encounters && user.encounters.length > 0) {
     encounterData = await encounterDao.getBatchEncountersbyId(user.encounters);
     user.encounters = encounterData;
