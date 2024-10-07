@@ -156,7 +156,7 @@ const loginUser = async (identifier, password) => {
         // profile_pic: processedUser.profile_pic,
       },
       secret,
-      { expiresIn: "1h" }
+      { expiresIn: "2h" }
     );
 
     logger.info(`Successful login by ${processedUser.username}`);
@@ -230,12 +230,12 @@ const processByUsername = async (user) => {
 
    const processedUser = {
     password: user.password.S,
-    about_me: user.about_me,
-    role: user.role,
-    creation_time: user.creation_time,
+    about_me: user.about_me.S,
+    role: user.role.S,
+    creation_time: user.creation_time.S,
     username: user.username.S,
     email: user.email.S,
-    profile_pic: user.profile_pic,
+    profile_pic: user.profile_pic.S,
     encounter_campaigns: [],
     encounters: [],
     interacted_posts: [],
