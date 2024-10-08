@@ -34,41 +34,6 @@ const TableName = "Dungeon_Delver_Users";
         }
 */
 
-// // GET user by email (partition key)
-// async function getUserByEmail(email) {
-//   const command = new GetCommand({
-//     TableName,
-//     Key: { email },
-//   });
-
-//   try {
-//     const data = await documentClient.send(command);
-//     return data.Item || null;
-//   } catch (err) {
-//     console.error("Error fetching user by email:", err);
-//     return null;
-//   }
-// }
-
-// // GET user by username
-// async function getUserByUsername(username) {
-//   const command = new QueryCommand({
-//     TableName,
-//     IndexName: "username-index",
-//     KeyConditionExpression: "#username = :username",
-//     ExpressionAttributeNames: { "#username": "username" },
-//     ExpressionAttributeValues: { ":username": username },
-//   });
-
-//   try {
-//     const data = await documentClient.send(command);
-//     return data.Items.length === 0 ? null : data.Items[0];
-//   } catch (err) {
-//     console.error("Error fetching user by username:", err);
-//     return null;
-//   }
-// }
-
 // POST user
 async function registerUser(user) {
   const command = new PutCommand({
