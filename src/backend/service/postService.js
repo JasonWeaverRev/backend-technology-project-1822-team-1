@@ -5,7 +5,7 @@ const uuid = require("uuid");
 
 // Local module imports
 const postDAO = require("../dao/postDao.js");
-const accountDAO = require("../dao/accountDao");
+const accountDAO = require("../dao/accountDao.js");
 const { logger } = require("../utils/logger");
 
 /**
