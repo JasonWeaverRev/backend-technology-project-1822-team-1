@@ -19,9 +19,6 @@ const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = 'Delver_Forum_Posts';
 
-/**
- * TABLE METHODS
- */
 
 /**
  * Creates a new post to the forums table
@@ -45,35 +42,6 @@ async function createPost(Item) {
     }
 }
 
-
-/**
- * Adds a reply post_id to the parent
- * 
- * @param replyID ID to add to the parent's reply list
- * @param parent_id ID of parent post
- * @param crTime creation time of the parent post
- */
-async function addReplyToParentList(replyID, parent_id, crTime) {
-    const command = new UpdateCommand( {
-        TableName,
-        Key: {
-            post_id: parent_id,
-            creation_time: crTime
-        },
-        UpdateExpression: 'SET replies = list_append(if_not_exists(replies, :emptyList), :newString)',
-        ExpressionAttributeValues: {
-            ":newString": [replyID],
-            ":emptyList": []
-        }
-    });
-
-    try {
-        const data = await documentClient.send(command);
-        return data;
-    } catch(err) {
-        logger.error(err);
-    }
-}
 
 /**
  * Deletes a specific post using admin privileges  
@@ -103,58 +71,23 @@ async function deletePostById(postID, crTime) {
 
 
 /**
- * Removes a reply post_id from the replies list of a parent post 
- * 
- * @param replyID reply id to be removed
- * @param parent_id post id of the post containing the replies list
- * @param crTime parent post creation time (for sort key specification)
- */
-async function removeReplyFromParent(replyID, parent_id, crTime) {
-   
-    // Get index of reply post inside the parent's replies list
-    const parent_post = await getPostById(parent_id);
-    const ind = parent_post.replies.indexOf(replyID); 
-   
-    // Update command to remove the index in the replies list
-    const command = new UpdateCommand ( {
-        TableName,
-        Key: {
-            post_id: parent_id,
-            creation_time: crTime
-        },
-        UpdateExpression: `REMOVE #replies[${ind}]`,
-        ExpressionAttributeNames: {
-            '#replies': 'replies'
-          }
-    });
-
-    // Send command to the DB
-    try {
-        const data = await documentClient.send(command);
-        return data;
-    } catch(err) {
-        logger.error(err);
-    }
-}
-
-/**
  * Removes a parent id from a post
  * 
  * @param replyID Id of post to have its parent removed
  */
-const removeParent = async(replyID) => {
+const removeParent = async(replyPost) => {
     // Get child post to access sort key
-    const child_post = await getPostById(replyID);
+  
 
     const command = new UpdateCommand ( {
         TableName,
         Key: {
-            post_id: replyID,
-            creation_time: child_post.creation_time
+            post_id: replyPost.post_id,
+            creation_time: replyPost.creation_time
         },
         UpdateExpression: "set parent_id = :status",
         ExpressionAttributeValues: {
-            ":status": ""
+            ":status": "deleted"
         }
     });
 
@@ -166,6 +99,24 @@ const removeParent = async(replyID) => {
         logger.error(err);
     }
 };
+
+
+/**
+ * Retrieves a list of all posts in the forums table
+ */
+const getAllPosts = async() => {
+    const command = new ScanCommand( {
+        TableName
+    })
+
+    try {
+        const data = await documentClient.send(command);
+        return data.Items;
+    } catch(err) {
+        console.error(err);
+        throw { status: 500, message: "Error: Could not retrieve posts at this time" };
+    }
+}
 
 /**
  * Retrieves a post using a post id
@@ -196,11 +147,84 @@ async function getPostById(postID) {
     }
 }
 
+/**
+ * Retrieves all posts sharing the same given parent id
+ * 
+ * @param {*} parentID parent id to search for 
+ */
+const getPostsByParentId = async (parentID) => {
+
+    // Create a query finding the post with its ID as the key condition
+    const command = new QueryCommand( {
+        TableName,
+        IndexName: "parent_id-post_id-index",
+        KeyConditionExpression: "#id = :id",
+        ExpressionAttributeNames: {
+            "#id": "parent_id"
+        },
+        ExpressionAttributeValues: {
+            ":id": parentID
+        }
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        return data.Items;
+    } catch(err) {
+        console.error(err);
+        logger.error(err);
+    }
+}
+
+
+/**
+ * Retrieves the newest created post
+ */
+const getNewestPost = async () => {
+    // Create a query finding the post with its ID as the key condition
+    const command = new ScanCommand( {
+        TableName
+    });
+
+    // Send command to the DB
+    try {
+        const data = await documentClient.send(command);
+        
+        // Sort times to retrieve the newest post
+        if (data.Items.length > 0) {
+            // Recursively check between whether a post is earlier than another post
+            let newestPost = null;
+
+            for (let i = 0; i < data.Items.length; i++) {
+                const tempPost = data.Items[i];
+                const tempDate = new Date(tempPost.creation_time);
+
+                if (!newestPost || tempDate > new Date(newestPost.creation_time)) {
+                    newestPost = tempPost;
+                }
+            }
+
+            return newestPost; 
+        }
+        // No posts exist in the table
+        else {
+            console.error(err);
+            throw { status: 404, message: "Error: No posts were found in the forums" };
+        }
+
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
 module.exports = {
     deletePostById,
+    getAllPosts,
     getPostById,
+    getPostsByParentId,
+    getNewestPost,
     createPost,
-    addReplyToParentList,
-    removeReplyFromParent,
     removeParent
 }
+

@@ -39,14 +39,15 @@ router.get("/encounter", async (req, res) => {
 });
 
 router.post("/encounter", verifyToken, async (req, res) => {
-  const { monsters, encounter_title } = req.body;
+  const { monsters, encounter_title, setting } = req.body;
   const username = req.user.username;
 
   try {
     const encounter = await encounterService.createNewEncounter(
       monsters,
       encounter_title,
-      username
+      username,
+      setting
     );
 
     res.status(201).json({ encounter });
