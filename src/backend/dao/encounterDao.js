@@ -11,6 +11,7 @@ const {
   DeleteCommand,
   BatchGetCommand,
 } = require("@aws-sdk/lib-dynamodb");
+const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
 const client = new DynamoDBClient({ region: "us-east-1" });
 
@@ -33,6 +34,63 @@ const getEncounterById = async (encounter_id) => {
     throw { status: 500, message: "Error retrieving encounter by id" };
   }
 };
+
+const createEncounter = async (encounter) => {
+  try {
+    const command = new PutCommand({
+      TableName,
+      Item: encounter,
+    });
+
+    await documentClient.send(command);
+  } catch (err) {
+    throw { status: 500, message: "Error creating new encounter" };
+  }
+};
+
+const getEncountersByUsername = async (username) => {
+  try {
+    const command = new QueryCommand({
+      TableName,
+      IndexName: "encounters_by_username-index",
+      KeyConditionExpression: "#created_by = :username",
+      ExpressionAttributeNames: {
+        "#created_by": "created_by",
+      },
+      ExpressionAttributeValues: {
+        ":username": { S: username },
+      },
+    });
+
+    const data = await documentClient.send(command);
+
+    const processedItems = data.Items.map((item) => unmarshall(item));
+
+    return processedItems || [];
+  } catch (err) {
+    console.error(err);
+    throw { status: 500, message: "Error retrieving encounters by username" };
+  }
+};
+
+// const getEncountersByUsername = async (username) => {
+//   try {
+//     const command = new QueryCommand({
+//       TableName,
+//       IndexName: "encounters_by_username-index",
+//       KeyConditionExpression: "created_by = :username",
+//       ExpressionAttributeValues: {
+//         ":username": username,
+//       },
+//     });
+
+//     const data = await client.send(command);
+//     console.log(data.Items);
+//     return data.Items;
+//   } catch (err) {
+//     throw { status: 500, message: "Error retrieving encounters by username" };
+//   }
+// };
 
 const getBatchEncountersbyId = async (encounter_ids) => {
   try {
@@ -59,4 +117,9 @@ const getBatchEncountersbyId = async (encounter_ids) => {
   }
 };
 
-module.exports = { getEncounterById, getBatchEncountersbyId };
+module.exports = {
+  getEncounterById,
+  getBatchEncountersbyId,
+  createEncounter,
+  getEncountersByUsername,
+};

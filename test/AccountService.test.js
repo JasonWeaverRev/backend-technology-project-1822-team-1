@@ -1,10 +1,10 @@
 const accountService = require("../src/backend/service/accountService");
-const AccountDao = require("../src/backend/dao/accountDAO");
+const accountDao = require("../src/backend/dao/accountDao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { PutItemCommand } = require("@aws-sdk/client-dynamodb");
 
-jest.mock("../src/backend/dao/accountDAO");
+jest.mock("../src/backend/dao/accountDao");
 jest.mock("../src/backend/dao/encounterDao");
 jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
@@ -23,10 +23,10 @@ describe("accountService Tests", () => {
         password: "password123",
       };
 
-      AccountDao.getUserByEmail.mockReturnValue(mockUser);
+      accountDao.getUserByEmail.mockReturnValue(mockUser);
 
       const result = await accountService.getUserByEmail(testEmail);
-      expect(AccountDao.getUserByEmail).toHaveBeenCalledWith(testEmail);
+      expect(accountDao.getUserByEmail).toHaveBeenCalledWith(testEmail);
       expect(result).toEqual(mockUser);
     });
 
@@ -47,11 +47,11 @@ describe("accountService Tests", () => {
         password: "password123",
       };
 
-      AccountDao.getUserByUsername.mockReturnValue(mockUser);
+      accountDao.getUserByUsername.mockReturnValue(mockUser);
 
       const result = await accountService.getUserByUsername(testUsername);
       expect(result).toEqual(mockUser);
-      expect(AccountDao.getUserByUsername).toHaveBeenCalledWith(testUsername);
+      expect(accountDao.getUserByUsername).toHaveBeenCalledWith(testUsername);
     });
   });
 
@@ -62,7 +62,7 @@ describe("accountService Tests", () => {
         username: "testuser",
         password: "password123",
       };
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -79,7 +79,7 @@ describe("accountService Tests", () => {
         username: "testuser",
         password: "password123",
       };
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -95,8 +95,8 @@ describe("accountService Tests", () => {
         username: "testuser",
         password: "password123",
       };
-      AccountDao.getUserByEmail.mockReturnValue(mockUser);
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.getUserByEmail.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -113,7 +113,7 @@ describe("accountService Tests", () => {
         username: "",
         password: "password123",
       };
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -131,7 +131,7 @@ describe("accountService Tests", () => {
         password: "password123",
       };
 
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -147,8 +147,8 @@ describe("accountService Tests", () => {
         username: "testuser",
         password: "password123",
       };
-      AccountDao.isUsernameTaken.mockReturnValue(mockUser);
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.isUsernameTaken.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -165,7 +165,7 @@ describe("accountService Tests", () => {
         username: "testuser",
         password: "",
       };
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -182,7 +182,7 @@ describe("accountService Tests", () => {
         username: "testuser",
         password: "passwor",
       };
-      AccountDao.registerUser.mockReturnValue(mockUser);
+      accountDao.registerUser.mockReturnValue(mockUser);
 
       try {
         await accountService.registerUser(mockUser);
@@ -201,9 +201,9 @@ describe("accountService Tests", () => {
         username: "testuser",
         password: "password123",
       };
-      AccountDao.isEmailTaken.mockReturnValue(false);
-      AccountDao.isUsernameTaken.mockReturnValue(false);
-      AccountDao.registerUser.mockReturnValue({
+      accountDao.isEmailTaken.mockReturnValue(false);
+      accountDao.isUsernameTaken.mockReturnValue(false);
+      accountDao.registerUser.mockReturnValue({
         ...mockUser,
         role: "user",
         creation_time: "2024-10-04",
@@ -222,9 +222,9 @@ describe("accountService Tests", () => {
         password: "password123",
         role: "AdmiN",
       };
-      AccountDao.isEmailTaken.mockReturnValue(false);
-      AccountDao.isUsernameTaken.mockReturnValue(false);
-      AccountDao.registerUser.mockReturnValue({
+      accountDao.isEmailTaken.mockReturnValue(false);
+      accountDao.isUsernameTaken.mockReturnValue(false);
+      accountDao.registerUser.mockReturnValue({
         ...mockUser,
         role: "admin",
         creation_time: "2024-10-04",
@@ -305,7 +305,7 @@ describe("User Service - loginUser", () => {
     const mockEmail = "testuser@email.com";
     const mockPassword = "pwd";
 
-    AccountDao.getUserByEmail.mockResolvedValue(mockUserEmail);
+    accountDao.getUserByEmail.mockResolvedValue(mockUserEmail);
 
     bcrypt.compare.mockResolvedValue(true);
 
@@ -320,7 +320,7 @@ describe("User Service - loginUser", () => {
     const mockUsername = "user2";
     const mockPassword = "pwd";
 
-    AccountDao.getUserByUsername.mockResolvedValue(mockUserUsername);
+    accountDao.getUserByUsername.mockResolvedValue(mockUserUsername);
 
     bcrypt.compare.mockResolvedValue(true);
 
@@ -335,7 +335,7 @@ describe("User Service - loginUser", () => {
     const mockEmail = "tesuser@email.com";
     const mockPassword = "pwd";
 
-    AccountDao.getUserByEmail.mockResolvedValue(null);
+    accountDao.getUserByEmail.mockResolvedValue(null);
 
     try {
       await accountService.loginUser(mockEmail, mockPassword);
@@ -348,7 +348,7 @@ describe("User Service - loginUser", () => {
     const mockEmail = "testuser@email.com";
     const mockPassword = "pw";
 
-    AccountDao.getUserByEmail.mockResolvedValue(mockUserEmail);
+    accountDao.getUserByEmail.mockResolvedValue(mockUserEmail);
 
     try {
       await accountService.loginUser(mockEmail, mockPassword);
@@ -361,7 +361,7 @@ describe("User Service - loginUser", () => {
     const mockEmail = "testuser@email.com";
     const mockPassword = "pw";
 
-    AccountDao.getUserByEmail.mockResolvedValue(mockUserEmail);
+    accountDao.getUserByEmail.mockResolvedValue(mockUserEmail);
 
     try {
       await accountService.loginUser(null, mockPassword);

@@ -1,3 +1,4 @@
+
 const {
   DynamoDBClient,
   QueryCommand,
@@ -133,76 +134,46 @@ const getUserByUsername = async (username) => {
   }
 };
 
-/**
- * Adds a post id to its respective user's forum posts list
- * 
- * @param {*} postID post id to add to the user's profile
- * @param {*} username username of the user to have the post added to
- */
-const addPostToUserForumPosts = async(postID, username) => {
-  // Retrieve email from the associated username to get DB's original PK
-  const user = await getUserByUsername(username);
-  const email = user.email.S;
+
+const getUserRoleByUsername = async (username) => {
+    console.log("getUserRoleByUsername called with username:", username);
   
-  const command = new UpdateCommand( {
-    TableName,
-    Key: {
-        email
-    },
-    UpdateExpression: 'SET forum_posts = list_append(if_not_exists(forum_posts, :emptyList), :newString)',
-    ExpressionAttributeValues: {
-        ":newString": [postID],
-        ":emptyList": []
+    if (typeof username !== 'string') {
+      console.error("Username is not a string. Converting to string.");
+      username = String(username);
     }
-  });
-
-  try {
-      const data = await documentClient.send(command);
-      return data;
-  } catch(err) {
-      console.error(err);
-      throw { status: 500, message: "Error updating user's forum posts" };
-  }
-};
-
-/**
- * Removes a post id from its respective user's forum posts list
- * 
- * @param {*} postID post id to remove from the user's profile
- * @param {*} username username of the user to have the post removed from
- */
-const deletePostFromUserForums = async(postID, username) => {
-  // Retrieve email from the associated username to get DB's original PK
-  const user = await getUserByUsername(username);
-  const forumPosts = user.forum_posts.L;
-  const ind = forumPosts.findIndex(id => id.S === postID); 
-  const email = user.email.S;
-
-  // If the post could not be found in the user's post list
-  if (ind === -1) {
-    console.log("Warning: post did not appear in any user's post list");
-    return -1;
-  }
-
-  const command = new UpdateCommand( {
-    TableName,
-    Key: {
-        email
-    },
-    UpdateExpression: `REMOVE #forum_posts[${ind}]`,
-    ExpressionAttributeNames: {
-      '#forum_posts': 'forum_posts'
+  
+    try {
+      const command = new QueryCommand({
+        TableName,
+        IndexName: "username-index",
+        KeyConditionExpression: "#username = :username",
+        ExpressionAttributeNames: {
+          "#username": "username",
+          "#r": "role",
+        },
+        ExpressionAttributeValues: {
+          ":username": username,
+        },
+        ProjectionExpression: "#r",
+      });
+  
+      const result = await documentClient.send(command);
+  
+      if (!result.Items || result.Items.length === 0) {
+        console.log("User not found.");
+        return null;
+      }
+  
+      const userRole = result.Items[0]['role'];
+      console.log("User role retrieved:", userRole);
+      return userRole;
+    } catch (err) {
+      console.error("Error fetching user role:", err);
+      return null;
     }
-  });
-
-  try {
-      const data = await documentClient.send(command);
-      return data;
-  } catch(err) {
-      console.error(err);
-      throw { status: 500, message: "Error removing post from user's forum posts" };
-  }
-}
+  };
+  
 
 
 module.exports = {
