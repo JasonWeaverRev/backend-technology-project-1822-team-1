@@ -78,7 +78,7 @@ describe("PostService Tests", () => {
             written_by: "test_user"
         };
         
-        //Test 1. No post id is given
+        //Test 3. No post id is given
         it("Test 3. Should throw an error for no post id given for deletion", async () => {
 
             try {
@@ -88,7 +88,7 @@ describe("PostService Tests", () => {
             }
         });
 
-        //Test 2. Post id is invalid/Post does not exist
+        //Test 4. Post id is invalid/Post does not exist
         it("Test 4. Should throw an error if the given post id does not match an existing post", async () => {
 
             PostDao.getPostById.mockReturnValue(null);
@@ -100,7 +100,7 @@ describe("PostService Tests", () => {
             }
         });
 
-        //Test 3. Post id is valid: successfully deletes a post
+        //Test 5. Post id is valid: successfully deletes a post
         it("Test 5. Should return back '1' if a post was succesfully deleted", async () => {
             
             PostDao.getPostById.mockReturnValue(mockPost);
@@ -113,29 +113,9 @@ describe("PostService Tests", () => {
             expect(result).toEqual(1); 
         });
 
-        //Test 4. Post id is valid: parent post successfully removes a reply
-        it("Test 6. Should remove a reply from a parent post if the reply post is deleted", async () => {
-            const mockParentPost = {
-                post_id: "test_parentid",
-                creation_time: "2023-09-26T20:13:48.999Z",
-                body: "test_parentbody",
-                likes: 4000,
-                replies: [mockPostId],
-                title: "test_parenttitle",
-                written_by: "test_parentuser"
-            };
 
-            PostDao.getPostById.mockReturnValueOnce(mockPost);
-            PostDao.deletePostById.mockReturnValue(true);
-
-            const result = await PostService.deletePostById(mockPostId);
-
-            expect(PostDao.getPostById).toHaveBeenCalledWith(mockPostId);
-            expect(result).toEqual(1); 
-        });
-
-        //Test 5. Post id is valid: unexpected deletion error
-        it("Test 7. Should return an error if the post could not be deleted from unknown circumstances", async () => {
+        //Test 6. Post id is valid: unexpected deletion error
+        it("Test 6. Should return an error if the post could not be deleted from unknown circumstances", async () => {
 
             PostDao.getPostById.mockReturnValue(mockPost);
             PostDao.deletePostById.mockReturnValue(null);
