@@ -47,14 +47,14 @@ Getting Started
 Authentication
 ```
 Method	Endpoint	Description
-POST	/api/users			Register a new user
-POST	/api/users/login		Log in an existing user
+POST	/api/account			Register a new user
+POST	/api/account/login		Log in an existing user
 ```
 User Profile
 ```
 Method	Endpoint	    	 	Description
-GET	/api/users/profile		View a user’s profile
-PUT	/api/users/profile		Update a user’s profile
+GET	/api/account/profile		View a user’s profile
+PUT	/api/account/profile		Update a user’s profile
 ```
 Encounters
 ```
@@ -73,13 +73,13 @@ DELETE	/api/campaigns			Delete a campaign
 ```
 Forum
 ```
-POST	/api/forum	        	Create a post
-GET	/api/forum			View a post
-PUT	/api/forum 		        Update a post
-DELETE	/api/forum			Delete a post
-POST	/api/forum	        	Create a comment
-PUT	/api/forum/comment 		Update an comment
-DELETE	/api/forum/comment		Delete a comment
+POST	/api/forums	        	Create a post
+GET	/api/forums			View a post
+PUT	/api/forums		        Update a post
+DELETE	/api/forums			Delete a post
+POST	/api/forums	        	Create a comment
+PUT	/api/forums/comments		Update an comment
+DELETE	/api/forums/comments		Delete a comment
 
 
 Features
