@@ -316,6 +316,7 @@ async function likePost(post_id, username) {
  * Dislikes a post on behalf of a user
  */
 async function dislikePost(post_id, username) {
+  
   // Validate that post exists
   const post = await getPostById(post_id);
   if (!post) {
@@ -324,6 +325,8 @@ async function dislikePost(post_id, username) {
       message: `Post with id ${post_id} not found.`,
     };
   }
+
+
 
   // Delegate to DAO
   const result = await postDAO.dislikePost(post_id, post.creation_time, username);

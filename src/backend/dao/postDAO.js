@@ -265,12 +265,12 @@ async function likePost(post_id, creation_time, username) {
       };
   
       if (dislikedBy.includes(username)) {
+
         // User had previously disliked the post
-        likesIncrement = 2;
-        updateExpression = 'SET #likes = #likes + :inc, liked_by = list_append(if_not_exists(liked_by, :emptyList), :user), disliked_by = list_remove(disliked_by, :index)';
-        
+        likesIncrement = 2;    
         const index = dislikedBy.indexOf(username);
-        expressionAttributeValues[':index'] = [index];
+
+        updateExpression = 'SET #likes = #likes + :inc, liked_by = list_append(if_not_exists(liked_by, :emptyList), :user) REMOVE disliked_by[' + index + ']';
       }
   
       // Update the post
@@ -341,13 +341,15 @@ async function likePost(post_id, creation_time, username) {
 
     // If the user previously liked the post, switch from like to dislike
     if (likedBy.includes(username)) {
+       
       likesIncrement = -2; // Decrease by 2 (removing a like and adding a dislike)
-      updateExpression = 'SET #likes = #likes + :inc, disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user), liked_by = list_remove(liked_by, :index)';
       
       // Find the index of the username in the liked_by list
       const index = likedBy.indexOf(username);
-      expressionAttributeValues[':index'] = [index];
-      expressionAttributeNames['#liked_by'] = 'liked_by';
+
+      updateExpression = 'SET #likes = #likes + :inc, disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user) REMOVE liked_by[' + index + ']';
+
+
     }
 
     // Update the post with the new dislike
