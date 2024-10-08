@@ -5,17 +5,9 @@ const uuid = require("uuid");
 
 // Local module imports
 const postDAO = require("../dao/postDao.js");
-const accountDAO = require("../dao/accountDAO");
+const accountDAO = require("../dao/accountDAO.js");
 const { logger } = require("../utils/logger");
 
-/**
- * TEST ARROW METHOD
- * ============================================
- *  const getSomething = (target, index) => {
- *      stuff goes here
- *  };
- * ============================================
- */
 
 /**
  * Deletes a post by its ID
@@ -46,9 +38,23 @@ async function deletePostById(postID) {
       );
     }
 
-    // If the post-to-be-deleted has a reply list, remove the parent from each reply
-    if (foundPost.replies.length > 0) {
-      childData = await removeParents(foundPost);
+    // Validate if the post exists
+    foundPost = await getPostById(postID);
+    if(foundPost) {
+
+        // Search for posts that have the to-be-deleted post as their parent, then remove their parent_ids
+        const childData = await removeParents(postID);
+
+        // Delete the post
+        let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
+        
+        // If errors arise during deletion
+        if(!data) {
+            logger.info(`Failed Admin post deletion attempt: Unexpected error occured during deletion`);
+            throw { status: 400, message: `Error: Encountered an unexpected error during deletion`};
+        }
+
+        return 1;
     }
 
     // Delete the post
@@ -95,24 +101,21 @@ async function createPost(postContents, user) {
   if (validatePost(postContents, user)) {
     // Add the new post information
 
-    newPost = {
-      post_id: uuid.v4(),
-      ...postContents,
-      written_by: user.username,
-      creation_time: new Date().toISOString(),
-      likes: 0,
-      liked_by: [],
-      disliked_by: [],
-      replies: [],
-    };
-    let data = await postDAO.createPost(newPost);
-    let userData = await accountDAO.addPostToUserForumPosts(
-      newPost.post_id,
-      newPost.written_by
-    );
+    if (validatePost(postContents, user)) {
+        // Add the new post information
+        newPost = {
+            post_id: uuid.v4(),
+            ...postContents,
+            written_by: user.username,
+            creation_time: new Date().toISOString(),
+            liked_by: [user.username],
+            disliked_by: []
+        }
+        let data = await postDAO.createPost(newPost);
 
-    return data;
-  }
+        return data;
+    }
+    }
 
   // Invalid post
   logger.info(
@@ -132,59 +135,31 @@ async function createPost(postContents, user) {
 async function createReply(replyCont, parent_id, user) {
   // Validate reply contents
   if (validateReply(replyCont, parent_id, user)) {
-    // If the parent post exists, add it to the forum post
 
-    parentPost = await getPostById(parent_id);
+        // If the parent post exists, add it to the forum post
+        const parentPost = await getPostById(parent_id);
+        
+        if(parentPost) {
+            // Create new reply
+            reply = {
+                post_id: uuid.v4(),
+                ...replyCont,
+                written_by: user.username,
+                creation_time: new Date().toISOString(),
+                parent_id,
+                liked_by: [],
+                disliked_by: []
+            };
 
-    if (parentPost) {
-      // Create new reply
-      reply = {
-        post_id: uuid.v4(),
-        ...replyCont,
-        written_by: user.username,
-        creation_time: new Date().toISOString(),
-        parent_id,
-        likes: 0,
-        liked_by: [],
-        disliked_by: [],
-        replies: [],
-      };
+            let data = await postDAO.createPost(reply);
 
-      let data = await postDAO.createPost(reply);
-      let userData = await accountDAO.addPostToUserForumPosts(
-        reply.post_id,
-        reply.written_by
-      );
-
-      // Add the reply to the parent reply list
-
-      let parentData = await postDAO.addReplyToParentList(
-        reply.post_id,
-        parent_id,
-        parentPost.creation_time
-      );
-
-      if (!parentData) {
-        logger.info(
-          `Failed forum reply comment creation failed: Error found in adding the reply to the parent reply list`
-        );
-        throw {
-          status: 400,
-          message: `Error: Could not add your reply to the original poster's reply list`,
-        };
-      }
-
-      return data;
+            return data;
+        }
+        // Parent comment not found
+        logger.info(`Failed forum reply comment creation failed: Parent post not found`);
+        throw { status: 400, message: `Error: Could not find post you are replying to`};
     }
-    // Parent comment not found
-    logger.info(
-      `Failed forum reply comment creation failed: Parent post not found`
-    );
-    throw {
-      status: 400,
-      message: `Error: Could not find post you are replying to`,
-    };
-  }
+
 
   // Parent post not found
   logger.info(
@@ -197,13 +172,84 @@ async function createReply(replyCont, parent_id, user) {
 }
 
 /**
- * Removes the parent post's id from all of its children posts
- *
- * @param parentPost parent post to be removed from all children, containing parent post ID and reply list
+ * Retrieves a list of all posts, sorted by creation time
+ * 
+ * @returns list of all posts, sorted by creation time
  */
-async function removeParents(parentPost) {
-  //Get list of children
-  repList = parentPost.replies;
+const getAllPostsSorted = async () => {
+    const posts = await postDAO.getAllPosts();
+    const postTimeList = [];
+    const sortedPosts = [];
+
+    // Create a list of all posts, attached to a time
+    for (let i = 0; i < posts.length; i++) {
+        postTimeList.push([posts[i], posts[i].creation_time]);
+    }
+
+    // Sort the list by the attached time in descending order (newest first)
+    postTimeList.sort(function(a, b) {
+        return new Date(b[1]) - new Date(a[1]); // compares index 1, or the creation time
+    });
+
+    // Create a list of all posts, using a sorted list WITHOUT the extra time attachment
+    for (let x = 0; x < postTimeList.length; x++) {
+        sortedPosts.push(postTimeList[x][0]); // 
+    }
+
+    return sortedPosts;
+
+}
+
+/**
+ * Retrieves the newest added post to the forums for page/post sorting
+ * 
+ * @returns the newest added post 
+ */
+const getNewestPost = async () => {
+    return await postDAO.getNewestPost();
+}
+
+
+/**
+ * =======================
+ * HELPER FUNCTIONS BELOW
+ * =======================
+ */
+
+/**
+ * Retrieve a post by its post ID
+ * 
+ * @param {*} postID ID of the post to retrieve
+ * @returns the post, or null if the post does not exist 
+ */
+async function getPostById(postID) {
+    return await postDAO.getPostById(postID);
+}
+
+/**
+ * Retrieve all posts
+ * 
+ * @returns An array containing every post 
+ */
+const getAllPosts = async () => {
+    return await postDAO.getAllPosts();
+}
+
+/**
+ * Removes the parent post's id from all of its children posts 
+ * 
+ * @param parentPostID parent_id to be removed from all posts
+ */
+async function removeParents(parentPostID) {
+    //Get list of children
+    const repList = await postDAO.getPostsByParentId(parentPostID);
+
+    //Remove parents from children one-by-one
+    if (repList) {
+        repList.forEach( async (replyPost, i) => {
+            await postDAO.removeParent(replyPost);
+        });
+    }
 
   //Remove parents from children one-by-one
   repList.forEach(async (replyID, i) => {
@@ -251,19 +297,13 @@ function validateReply(replyCont, parent_id, user) {
   );
 }
 
-/**
- * Retrieve a post by its post ID
- *
- * @param {*} postID ID of the post to retrieve
- * @returns the post, or null if the post does not exist
- */
-async function getPostById(postID) {
-  return await postDAO.getPostById(postID);
-}
 
 module.exports = {
-  deletePostById,
-  getPostById,
-  createPost,
-  createReply,
+    deletePostById,
+    getPostById,
+    getAllPosts,
+    createPost,
+    createReply,
+    getAllPostsSorted,
+    getNewestPost
 };
