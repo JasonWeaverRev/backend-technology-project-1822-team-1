@@ -73,20 +73,12 @@ async function registerUser(user) {
 
   const saltRounds = 10;
   hashedPassword = await bcrypt.hash(password, saltRounds);
-  encounters = [];
-  encounter_campaigns = [];
-  forum_posts = [];
-  interacted_posts = [];
 
   const newUser = {
     email,
     username,
     password: hashedPassword,
     role,
-    encounters,
-    encounter_campaigns,
-    forum_posts,
-    interacted_posts,
   };
 
   // Defaults role to "user" if not an "admin"
