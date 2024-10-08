@@ -135,11 +135,7 @@ async function createPost(postContents, user) {
 async function createReply(replyCont, parent_id, user) {
   // Validate reply contents
   if (validateReply(replyCont, parent_id, user)) {
-    // If the parent post exists, add it to the forum post
 
-    // Validate reply contents
-    if (validateReply(replyCont, parent_id, user)) {
-        
         // If the parent post exists, add it to the forum post
         const parentPost = await getPostById(parent_id);
         
@@ -163,15 +159,7 @@ async function createReply(replyCont, parent_id, user) {
         logger.info(`Failed forum reply comment creation failed: Parent post not found`);
         throw { status: 400, message: `Error: Could not find post you are replying to`};
     }
-    // Parent comment not found
-    logger.info(
-      `Failed forum reply comment creation failed: Parent post not found`
-    );
-    throw {
-      status: 400,
-      message: `Error: Could not find post you are replying to`,
-    };
-  }
+
 
   // Parent post not found
   logger.info(
