@@ -38,49 +38,7 @@ postRouter.post('/', verifyToken, async (req, res) => {
         res.status(err.status || 400).json({message: err.message});
     }
 });
-/// POST INTERACTION
 
-/**
- * Like a post
- */
-postRouter.post('/like', verifyToken, async (req, res) => {
-    const { post_id } = req.body;
-    const username = req.user.username;
-  
-    if (!post_id) {
-      return res.status(400).json({ message: 'post_id is required.' });
-    }
-  
-    try {
-      await postService.likePost(post_id, username);
-      res.status(200).json({ message: 'Post liked successfully.' });
-    } catch (err) {
-      res.status(err.status || 500).json({ message: err.message });
-    }
-  });
-  
-  /**
-   * Dislike a post
-   */
-  postRouter.post('/dislike', verifyToken, async (req, res) => {
-    const { post_id } = req.body;
-    const username = req.user.username;
-  
-    if (!post_id) {
-      return res.status(400).json({ message: 'post_id is required.' });
-    }
-  
-    try {
-      await postService.dislikePost(post_id, username);
-      res.status(200).json({ message: 'Post disliked successfully.' });
-    } catch (err) {
-      res.status(err.status || 500).json({ message: err.message });
-    }
-  });
-
-  //end of post interaction
-
-  
 /**
  * Add a new reply comment
  */
@@ -122,7 +80,6 @@ postRouter.get('/', async (req, res) => {
     }
 
 });
-
 
 
 
