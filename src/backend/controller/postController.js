@@ -53,6 +53,33 @@ postRouter.post('/:postId', verifyToken, async (req, res) => {
     }
 });
 
+/**
+ * Get all posts in the forums table, sorted in ascending order of their creation time
+ */
+postRouter.get('/filters', async (req, res) => {
+    
+    try {
+        const data = await postService.getAllPostsSorted();
+        res.status(201).json(data);
+
+    } catch (err) {
+        res.status(err.status || 400).json({message: err.message});
+    }
+});
+
+/**
+ * Gets all posts from the forums
+ */
+postRouter.get('/', async (req, res) => {
+
+    try {
+        const data = await postService.getAllPosts();
+        res.status(201).json(data);
+    } catch (err) {
+        res.status(err.status || 400).json({message: err.message});
+    }
+
+});
 
 
 

@@ -117,6 +117,35 @@ async function createReply(replyCont, parent_id, user) {
 }
 
 /**
+ * Retrieves a list of all posts, sorted by creation time
+ * 
+ * @returns list of all posts, sorted by creation time
+ */
+const getAllPostsSorted = async () => {
+    const posts = await postDAO.getAllPosts();
+    const postTimeList = [];
+    const sortedPosts = [];
+
+    // Create a list of all posts, attached to a time
+    for (let i = 0; i < posts.length; i++) {
+        postTimeList.push([posts[i], posts[i].creation_time]);
+    }
+
+    // Sort the list by the attached time in descending order (newest first)
+    postTimeList.sort(function(a, b) {
+        return new Date(b[1]) - new Date(a[1]); // compares index 1, or the creation time
+    });
+
+    // Create a list of all posts, using a sorted list WITHOUT the extra time attachment
+    for (let x = 0; x < postTimeList.length; x++) {
+        sortedPosts.push(postTimeList[x][0]); // 
+    }
+
+    return sortedPosts;
+
+}
+
+/**
  * Retrieves the newest added post to the forums for page/post sorting
  * 
  * @returns the newest added post 
@@ -140,6 +169,15 @@ const getNewestPost = async () => {
  */
 async function getPostById(postID) {
     return await postDAO.getPostById(postID);
+}
+
+/**
+ * Retrieve all posts
+ * 
+ * @returns An array containing every post 
+ */
+const getAllPosts = async () => {
+    return await postDAO.getAllPosts();
 }
 
 /**
@@ -203,7 +241,9 @@ function validateReply(replyCont, parent_id, user) {
 module.exports = {
     deletePostById,
     getPostById,
+    getAllPosts,
     createPost,
     createReply,
+    getAllPostsSorted,
     getNewestPost
 }

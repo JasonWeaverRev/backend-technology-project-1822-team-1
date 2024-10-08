@@ -102,6 +102,23 @@ const removeParent = async(replyPost) => {
 
 
 /**
+ * Retrieves a list of all posts in the forums table
+ */
+const getAllPosts = async() => {
+    const command = new ScanCommand( {
+        TableName
+    })
+
+    try {
+        const data = await documentClient.send(command);
+        return data.Items;
+    } catch(err) {
+        console.error(err);
+        throw { status: 500, message: "Error: Could not retrieve posts at this time" };
+    }
+}
+
+/**
  * Retrieves a post using a post id
  * 
  * @param postID ID of the post to be retrieved
@@ -176,17 +193,26 @@ const getNewestPost = async () => {
         
         // Sort times to retrieve the newest post
         if (data.Items.length > 0) {
-            const newestPost = data.Items.reduce((newest, post) => {
+            // Recursively check between whether a post is earlier than another post
+            let newestPost = null;
 
-            });
-        } 
+            for (let i = 0; i < data.Items.length; i++) {
+                const tempPost = data.Items[i];
+                const tempDate = new Date(tempPost.creation_time);
+
+                if (!newestPost || tempDate > new Date(newestPost.creation_time)) {
+                    newestPost = tempPost;
+                }
+            }
+
+            return newestPost; 
+        }
         // No posts exist in the table
         else {
             console.error(err);
             throw { status: 404, message: "Error: No posts were found in the forums" };
         }
 
-        return data.Items[0];
     } catch(err) {
         logger.error(err);
     }
@@ -194,8 +220,11 @@ const getNewestPost = async () => {
 
 module.exports = {
     deletePostById,
+    getAllPosts,
     getPostById,
     getPostsByParentId,
+    getNewestPost,
     createPost,
     removeParent
 }
+

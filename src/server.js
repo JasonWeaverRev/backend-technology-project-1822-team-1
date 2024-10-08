@@ -6,7 +6,7 @@ const app = express();
 // Local project import
 const { logger } = require("./backend/utils/logger");
 const postRouter = require('./backend/controller/postController.js');
-const accountController = require("./backend/controller/AccountController");
+const accountController = require("./backend/controller/accountController.js");
 
 
 /**
