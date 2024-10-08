@@ -218,6 +218,158 @@ const getNewestPost = async () => {
     }
 }
 
+/// POST INTERACTION
+
+/**
+ * Likes a post by adding the username to the 'liked_by' set and updating 'likes' counter
+ */
+async function likePost(post_id, creation_time, username) {
+    try {
+      // Read the post first
+      const getCommand = new GetCommand({
+        TableName,
+        Key: {
+          post_id: post_id,
+          creation_time: creation_time,
+        },
+        ProjectionExpression: 'liked_by, disliked_by, #likes',
+        ExpressionAttributeNames: {
+          '#likes': 'likes',
+        },
+      });
+      const postData = await documentClient.send(getCommand);
+  
+      if (!postData.Item) {
+        return 0; // Post not found
+      }
+  
+      const post = postData.Item;
+  
+      // Ensure 'liked_by' and 'disliked_by' are arrays
+      const likedBy = post.liked_by || [];
+      const dislikedBy = post.disliked_by || [];
+  
+      if (likedBy.includes(username)) {
+        return -1; // Already liked
+      }
+  
+      let likesIncrement = 1;
+      let updateExpression = 'SET #likes = #likes + :inc, liked_by = list_append(if_not_exists(liked_by, :emptyList), :user)';
+      let expressionAttributeValues = {
+        ':inc': likesIncrement,
+        ':user': [username],
+        ':emptyList': [],
+      };
+      let expressionAttributeNames = {
+        '#likes': 'likes',
+      };
+  
+      if (dislikedBy.includes(username)) {
+        // User had previously disliked the post
+        likesIncrement = 2;
+        updateExpression = 'SET #likes = #likes + :inc, liked_by = list_append(if_not_exists(liked_by, :emptyList), :user), disliked_by = list_remove(disliked_by, :index)';
+        
+        const index = dislikedBy.indexOf(username);
+        expressionAttributeValues[':index'] = [index];
+      }
+  
+      // Update the post
+      const updateCommand = new UpdateCommand({
+        TableName,
+        Key: {
+          post_id: post_id,
+          creation_time: creation_time,
+        },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
+      });
+  
+      await documentClient.send(updateCommand);
+  
+      return 1; // Success
+    } catch (err) {
+      logger.error("Error liking post:", err);
+      return -2; // Failure
+    }
+  }
+
+  /**
+   * Dislikes a post by adding the username to the 'disliked_by' set and updating 'likes' counter
+   */
+  async function dislikePost(post_id, creation_time, username) {
+  try {
+    // Read the post first
+    const getCommand = new GetCommand({
+      TableName,
+      Key: {
+        post_id: post_id,
+        creation_time: creation_time,
+      },
+      ProjectionExpression: 'liked_by, disliked_by, #likes',
+      ExpressionAttributeNames: {
+        '#likes': 'likes',
+      },
+    });
+    const postData = await documentClient.send(getCommand);
+
+    if (!postData.Item) {
+      return 0; // Post not found
+    }
+
+    const post = postData.Item;
+
+    // Ensure 'liked_by' and 'disliked_by' are arrays
+    const likedBy = post.liked_by || [];
+    const dislikedBy = post.disliked_by || [];
+
+    // Check if the user has already disliked the post
+    if (dislikedBy.includes(username)) {
+      return -1; // Already disliked
+    }
+
+    let likesIncrement = -1; // Default decrement by 1 for dislike
+    let updateExpression = 'SET #likes = #likes + :inc, disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user)';
+    let expressionAttributeValues = {
+      ':inc': likesIncrement,
+      ':user': [username],
+      ':emptyList': [],
+    };
+    let expressionAttributeNames = {
+      '#likes': 'likes',
+    };
+
+    // If the user previously liked the post, switch from like to dislike
+    if (likedBy.includes(username)) {
+      likesIncrement = -2; // Decrease by 2 (removing a like and adding a dislike)
+      updateExpression = 'SET #likes = #likes + :inc, disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user), liked_by = list_remove(liked_by, :index)';
+      
+      // Find the index of the username in the liked_by list
+      const index = likedBy.indexOf(username);
+      expressionAttributeValues[':index'] = [index];
+      expressionAttributeNames['#liked_by'] = 'liked_by';
+    }
+
+    // Update the post with the new dislike
+    const updateCommand = new UpdateCommand({
+      TableName,
+      Key: {
+        post_id: post_id,
+        creation_time: creation_time,
+      },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+    });
+
+    await documentClient.send(updateCommand);
+
+    return 1; // Success
+  } catch (err) {
+    logger.error("Error disliking post:", err);
+    return -2; // Failure
+  }
+}
 module.exports = {
     deletePostById,
     getAllPosts,
@@ -225,6 +377,8 @@ module.exports = {
     getPostsByParentId,
     getNewestPost,
     createPost,
-    removeParent
+    removeParent, 
+    likePost, 
+    dislikePost
 }
 

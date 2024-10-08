@@ -284,6 +284,63 @@ function validateReply(replyCont, parent_id, user) {
 }
 
 
+// POST INTERACTION
+
+/**
+ * Likes a post on behalf of a user
+ */
+async function likePost(post_id, username) {
+  // Validate that post exists
+  const post = await getPostById(post_id);
+  if (!post) {
+    throw {
+      status: 404,
+      message: `Post with id ${post_id} not found.`,
+    };
+  }
+
+  // Delegate to DAO
+  const result = await postDAO.likePost(post_id, post.creation_time, username);
+
+  if (result !== 1) {
+    throw {
+      status: 500,
+      message: 'Failed to like the post.',
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Dislikes a post on behalf of a user
+ */
+async function dislikePost(post_id, username) {
+  // Validate that post exists
+  const post = await getPostById(post_id);
+  if (!post) {
+    throw {
+      status: 404,
+      message: `Post with id ${post_id} not found.`,
+    };
+  }
+
+  // Delegate to DAO
+  const result = await postDAO.dislikePost(post_id, post.creation_time, username);
+
+  if (result !== 1) {
+    throw {
+      status: 500,
+      message: 'Failed to dislike the post.',
+    };
+  }
+
+  return result;
+}
+
+
+
+
 module.exports = {
     deletePostById,
     getPostById,
@@ -291,5 +348,7 @@ module.exports = {
     createPost,
     createReply,
     getAllPostsSorted,
-    getNewestPost
+    getNewestPost, 
+    likePost, 
+    dislikePost
 };

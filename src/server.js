@@ -6,14 +6,9 @@ const app = express();
 // Local project import
 const { logger } = require("./backend/utils/logger");
 const postRouter = require('./backend/controller/postController.js');
-<<<<<<< HEAD
 const commentRouter = require("./backend/controller/commentController");
 const accountController = require("./backend/controller/accountController.js");
 const encounterController = require("./backend/controller/encounterController.js");
-=======
-const accountController = require("./backend/controller/accountController.js");
-const encounterController = require("./backend/controller/encounterController");
->>>>>>> 7ec526e29b15a2067ee895fb2acaec370c1e929e
 
 /**
  * Server Port and general setup
