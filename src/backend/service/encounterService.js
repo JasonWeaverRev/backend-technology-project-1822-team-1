@@ -104,7 +104,7 @@ const getEncountersByUsername = async (username) => {
   }
 };
 
-const createNewEncounter = async (monsters, title, username) => {
+const createNewEncounter = async (monsters, title, username, setting) => {
   try {
     if (monsters.length <= 0) {
       throw { status: 400, message: "Must provide monsters for the encounter" };
@@ -122,6 +122,7 @@ const createNewEncounter = async (monsters, title, username) => {
       creation_time: new Date().toISOString(),
       created_by: username,
       campaign_title: "",
+      setting: setting ? setting : "",
     };
 
     console.log(newEncounter);
