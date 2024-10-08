@@ -63,6 +63,31 @@ async function isEmailTaken(email) {
   return user !== null;
 }
 
+// Update about_me section of user profile
+async function editAboutMe(email, text) {
+  const command = new UpdateCommand({
+    TableName,
+      Key: {email},
+      UpdateExpression: 'SET about_me = :text',
+      ExpressionAttributeValues: {
+          ':text': text
+      },
+      ReturnValues: "ALL_NEW"
+    })
+
+    try {
+      const data = await documentClient.send(command);
+      return data;
+    } catch (err) {
+      console.error("Error updating About Me section: ", err);
+      return null;
+    }
+}
+
+async function updateProfilePic(email, image) {
+  // need to look into Amazon S3
+}
+
 const getUserByEmail = async (email) => {
   try {
     const command = new GetCommand({
@@ -179,6 +204,7 @@ const deletePostFromUserForums = async(postID, username) => {
   }
 }
 
+
 module.exports = {
   getUserByEmail,
   getUserByUsername,
@@ -186,5 +212,6 @@ module.exports = {
   isUsernameTaken,
   isEmailTaken,
   addPostToUserForumPosts,
-  deletePostFromUserForums
+  deletePostFromUserForums,
+  editAboutMe
 };
