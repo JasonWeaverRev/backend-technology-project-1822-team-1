@@ -1,3 +1,4 @@
+
 const {
   DynamoDBClient,
   QueryCommand,
@@ -114,7 +115,15 @@ const getUserByEmail = async (email) => {
   }
 };
 
+
+/**
+ * 
+ * @param {*} username 
+ * @returns 
+ */
 const getUserByUsername = async (username) => {
+  
+
   try {
     const command = new QueryCommand({
       TableName,
@@ -124,7 +133,7 @@ const getUserByUsername = async (username) => {
         "#username": "username",
       },
       ExpressionAttributeValues: {
-        ":username": { S: username },
+        ":username": {S: username}
       },
     });
 
@@ -136,10 +145,51 @@ const getUserByUsername = async (username) => {
   }
 };
 
+
+const getUserRoleByUsername = async (username) => {
+    console.log("getUserRoleByUsername called with username:", username);
+  
+    if (typeof username !== 'string') {
+      console.error("Username is not a string. Converting to string.");
+      username = String(username);
+    }
+  
+    try {
+      const command = new QueryCommand({
+        TableName,
+        IndexName: "username-index",
+        KeyConditionExpression: "#username = :username",
+        ExpressionAttributeNames: {
+          "#username": "username",
+          "#r": "role",
+        },
+        ExpressionAttributeValues: {
+          ":username": username,
+        },
+        ProjectionExpression: "#r",
+      });
+  
+      const result = await documentClient.send(command);
+  
+      if (!result.Items || result.Items.length === 0) {
+        console.log("User not found.");
+        return null;
+      }
+  
+      const userRole = result.Items[0]['role'];
+      console.log("User role retrieved:", userRole);
+      return userRole;
+    } catch (err) {
+      console.error("Error fetching user role:", err);
+      return null;
+    }
+  };
+  
+
 module.exports = {
   getUserByEmail,
   getUserByUsername,
   registerUser,
   isUsernameTaken,
-  isEmailTaken,
+  isEmailTaken
 };

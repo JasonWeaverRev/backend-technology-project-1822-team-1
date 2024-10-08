@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const AccountService = require("../service/AccountService");
+const accountService = require("../service/accountService");
 
 /*
     DDUser Object Model
@@ -68,9 +68,10 @@ router.get("/username", async (req, res) => {
 */
 
 // POST user registration
+// user registration
 router.post("/register", async (req, res) => {
   try {
-    const newUser = await AccountService.registerUser(req.body);
+    const newUser = await accountService.registerUser(req.body);
     return res.status(201).json({ message: "New user registered", newUser });
   } catch (error) {
     console.error(error);
@@ -82,7 +83,7 @@ router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
-    const token = await AccountService.loginUser(identifier, password);
+    const token = await accountService.loginUser(identifier, password);
 
     res.status(200).json({ token });
   } catch (err) {

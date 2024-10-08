@@ -1,4 +1,5 @@
-const AccountDao = require("../dao/AccountDAO");
+
+const AccountDao = require("../dao/accountDao");
 const encounterDao = require("../dao/encounterDao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -72,20 +73,12 @@ async function registerUser(user) {
 
   const saltRounds = 10;
   hashedPassword = await bcrypt.hash(password, saltRounds);
-  encounters = [];
-  encounter_campaigns = [];
-  forum_posts = [];
-  interacted_posts = [];
 
   const newUser = {
     email,
     username,
     password: hashedPassword,
     role,
-    encounters,
-    encounter_campaigns,
-    forum_posts,
-    interacted_posts,
   };
 
   // Defaults role to "user" if not an "admin"
@@ -127,7 +120,7 @@ const loginUser = async (identifier, password) => {
     }
 
     const processedUser = identifier.includes("@")
-      ? await processByEmail(user)
+      ? user
       : await processByUsername(user);
 
     const token = jwt.sign(
@@ -135,12 +128,6 @@ const loginUser = async (identifier, password) => {
         username: processedUser.username,
         email: processedUser.email,
         role: processedUser.role,
-        // about_me: processedUser.about_me,
-        // encounter_campaigns: processedUser.encounter_campaigns,
-        // encouters: processedUser.encounters,
-        // forum_posts: processedUser.forum_posts,
-        // interacted_posts: processedUser.interacted_posts,
-        // profile_pic: processedUser.profile_pic,
       },
       secret,
       { expiresIn: "1h" }
@@ -167,43 +154,6 @@ const processByEmail = async (user) => {
 };
 
 const processByUsername = async (user) => {
-  const encounterIds = [];
-  console.log(user.encounters);
-  if (user.encounters) {
-    user.encounters.L.forEach((idx) => {
-      encounterIds.push(idx.S);
-    });
-  }
-
-  const encounterData = [];
-
-  if (user && user.encounters && user.encounters.length > 0) {
-    encounterData = await encounterDao.getBatchEncountersbyId(encounterIds);
-  }
-
-  const encounterCampaigns = [];
-
-  if (user.encounter_campaigns) {
-    user.encounter_campaigns.L.forEach((idx) => {
-      encounterCampaigns.push(idx.S);
-    });
-  }
-
-  const interactedPosts = [];
-
-  if (user.interacted_posts) {
-    user.interacted_posts.L.forEach((idx) => {
-      interactedPosts.push(idx.S);
-    });
-  }
-
-  const forumPosts = [];
-  if (user.forum_posts) {
-    user.forum_posts.L.forEach((idx) => {
-      forumPosts.push(idx.S);
-    });
-  }
-
   const processedUser = {
     password: user.password.S,
     about_me: user.about_me ? user.about_me.S : "",
@@ -212,10 +162,6 @@ const processByUsername = async (user) => {
     username: user.username.S,
     email: user.email.S,
     profile_pic: user.profile_pic ? user.profile_pic.S : "",
-    encounter_campaigns: encounterCampaigns,
-    encounters: encounterData,
-    interacted_posts: interactedPosts,
-    forum_posts: forumPosts,
   };
 
   return processedUser;
@@ -227,3 +173,4 @@ module.exports = {
   registerUser,
   loginUser,
 };
+
