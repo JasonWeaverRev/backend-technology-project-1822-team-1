@@ -44,20 +44,31 @@ postRouter.post('/', verifyToken, async (req, res) => {
  * Like a post
  */
 postRouter.post('/like', verifyToken, async (req, res) => {
-    const { post_id } = req.body;
-    const username = req.user.username;
-  
-    if (!post_id) {
-      return res.status(400).json({ message: 'post_id is required.' });
+  const { post_id } = req.body;
+  const username = req.user.username;
+
+  if (!post_id) {
+    return res.status(400).json({ message: 'post_id is required.' });
+  }
+
+  try {
+    // Call the service to like/unlike the post and store the result
+    const result = await postService.likePost(post_id, username);
+
+    // Handle the response based on the result value
+    if (result === 1) {
+      return res.status(200).json({ message: 'Post liked successfully.' });
+    } else if (result === 3) {
+      return res.status(200).json({ message: 'Post unliked successfully.' });
+    } else {
+      return res.status(500).json({ message: 'Failed to update like status.' });
     }
-  
-    try {
-      await postService.likePost(post_id, username);
-      res.status(200).json({ message: 'Post liked successfully.' });
-    } catch (err) {
-      res.status(err.status || 500).json({ message: err.message });
-    }
-  });
+  } catch (err) {
+    // Send error status and message if something goes wrong
+    res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
   
   /**
    * Dislike a post
@@ -71,13 +82,15 @@ postRouter.post('/like', verifyToken, async (req, res) => {
     }
   
     try {
-      await postService.dislikePost(post_id, username);
-      res.status(200).json({ message: 'Post disliked successfully.' });
+      const result = await postService.dislikePost(post_id, username);
+      console.log('Dislike service result:', result);
+  
+      return res.status(result.status).json({ message: result.message });
     } catch (err) {
       res.status(err.status || 500).json({ message: err.message });
     }
   });
-
+  
   //end of post interaction
 
   

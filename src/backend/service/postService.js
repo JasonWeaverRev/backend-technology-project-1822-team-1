@@ -289,9 +289,12 @@ function validateReply(replyCont, parent_id, user) {
 /**
  * Likes a post on behalf of a user
  */
+/**
+ * Likes or unlikes a post based on the current state
+ */
 async function likePost(post_id, username) {
-  // Validate that post exists
   const post = await getPostById(post_id);
+
   if (!post) {
     throw {
       status: 404,
@@ -299,25 +302,34 @@ async function likePost(post_id, username) {
     };
   }
 
-  // Delegate to DAO
   const result = await postDAO.likePost(post_id, post.creation_time, username);
 
-  if (result !== 1) {
+  // 3: Unliked successfully
+  if (result === 3) {
+    return 3; // Unliked
+  }
+  // 2: Liked successfully
+  else if (result === 2) {
+    return 2; // Liked
+  }
+  // Anything else should be considered an error
+  else if (result !== 1) {
     throw {
       status: 500,
       message: 'Failed to like the post.',
     };
   }
 
-  return result;
+  return 1; // Success (default case for first-time liking)
 }
 
 /**
  * Dislikes a post on behalf of a user
  */
+/**
+ * Dislikes a post on behalf of a user
+ */
 async function dislikePost(post_id, username) {
-  
-  // Validate that post exists
   const post = await getPostById(post_id);
   if (!post) {
     throw {
@@ -326,21 +338,24 @@ async function dislikePost(post_id, username) {
     };
   }
 
-
-
   // Delegate to DAO
   const result = await postDAO.dislikePost(post_id, post.creation_time, username);
 
-  if (result !== 1) {
+  console.log('Dislike DAO result:', result);
+
+  if (result === 3) {
+    return { status: 200, message: 'Undisliked successfully.' };
+  } else if (result === 2) {
+    return { status: 200, message: 'Disliked successfully.' };
+  } else if (result !== 1) {
     throw {
       status: 500,
       message: 'Failed to dislike the post.',
     };
   }
 
-  return result;
+  return { status: 200, message: 'Disliked successfully.' };
 }
-
 
 
 
