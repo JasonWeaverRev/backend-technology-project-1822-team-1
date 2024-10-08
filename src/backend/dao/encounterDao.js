@@ -73,24 +73,20 @@ const getEncountersByUsername = async (username) => {
   }
 };
 
-// const getEncountersByUsername = async (username) => {
-//   try {
-//     const command = new QueryCommand({
-//       TableName,
-//       IndexName: "encounters_by_username-index",
-//       KeyConditionExpression: "created_by = :username",
-//       ExpressionAttributeValues: {
-//         ":username": username,
-//       },
-//     });
+const editEncounterById = async (encounter) => {
+  try {
+    const command = new PutCommand({
+      TableName,
+      Item: encounter,
+    });
 
-//     const data = await client.send(command);
-//     console.log(data.Items);
-//     return data.Items;
-//   } catch (err) {
-//     throw { status: 500, message: "Error retrieving encounters by username" };
-//   }
-// };
+    const data = await documentClient.send(command);
+
+    return data;
+  } catch (err) {
+    throw { status: 500, message: "Error retrieving encounters by username" };
+  }
+};
 
 const getBatchEncountersbyId = async (encounter_ids) => {
   try {
@@ -122,4 +118,5 @@ module.exports = {
   getBatchEncountersbyId,
   createEncounter,
   getEncountersByUsername,
+  editEncounterById,
 };

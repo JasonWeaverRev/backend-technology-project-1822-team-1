@@ -56,4 +56,23 @@ router.post("/encounter", verifyToken, async (req, res) => {
   }
 });
 
+router.put("/encounter", verifyToken, async (req, res) => {
+  const { encounter_id, monsters, encounter_title, setting } = req.body;
+  const username = req.user.username;
+
+  try {
+    const encounter = await encounterService.editEncounterById(
+      encounter_id,
+      monsters,
+      encounter_title,
+      username,
+      setting
+    );
+
+    res.status(201).json({ encounter });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
 module.exports = router;
