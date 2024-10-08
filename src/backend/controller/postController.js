@@ -54,7 +54,7 @@ postRouter.post('/:postId', verifyToken, async (req, res) => {
 });
 
 /**
- * Get all posts in the forums table, sorted in ascending order of their creation time
+ * Get all posts in the forums table, sorted in ascending order of their creation time []
  */
 postRouter.get('/filters', async (req, res) => {
     
