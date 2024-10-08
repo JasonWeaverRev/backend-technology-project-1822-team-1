@@ -87,20 +87,12 @@ async function registerUser(user) {
 
   const saltRounds = 10;
   hashedPassword = await bcrypt.hash(password, saltRounds);
-  encounters = [];
-  encounter_campaigns = [];
-  forum_posts = [];
-  interacted_posts = [];
 
   const newUser = {
     email,
     username,
     password: hashedPassword,
-    role,
-    encounters,
-    encounter_campaigns,
-    forum_posts,
-    interacted_posts,
+    role
   };
 
   // Defaults role to "user" if not an "admin"
@@ -115,6 +107,16 @@ async function registerUser(user) {
 
   const registeredUser = await AccountDao.registerUser(newUser);
   return registeredUser;
+}
+
+async function updateAboutMe(email, new_about_me) {
+  const emailTaken = await AccountDao.isEmailTaken(email);
+  if (!emailTaken) {
+    throw new Error("Account does not exist");
+  }
+
+  const update = await AccountDao.editAboutMe(email, new_about_me);
+  return update;
 }
 
 /**
@@ -271,4 +273,5 @@ module.exports = {
   getUserByUsername,
   registerUser,
   loginUser,
+  updateAboutMe
 };
