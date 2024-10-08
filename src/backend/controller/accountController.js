@@ -98,7 +98,7 @@ router.put("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
 
     try {
         const email = req.user.email;
-        const result = await AccountService.editAboutMe(email, about_me);
+        const result = await AccountService.updateAboutMe(email, about_me);
 
         res.status(200).json(result);
     } catch (err) {

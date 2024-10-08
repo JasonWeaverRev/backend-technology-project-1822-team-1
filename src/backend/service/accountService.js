@@ -115,7 +115,7 @@ async function updateAboutMe(email, new_about_me) {
     throw new Error("Account does not exist");
   }
 
-  const update = await AccountDao.editAboutMe(email, new_about_me);
+  const update = await AccountDao.updateAboutMe(email, new_about_me);
   return update;
 }
 

@@ -64,7 +64,7 @@ async function isEmailTaken(email) {
 }
 
 // Update about_me section of user profile
-async function editAboutMe(email, text) {
+async function updateAboutMe(email, text) {
   const command = new UpdateCommand({
     TableName,
       Key: {email},
@@ -77,7 +77,7 @@ async function editAboutMe(email, text) {
 
     try {
       const data = await documentClient.send(command);
-      return data;
+      return {email, text};
     } catch (err) {
       console.error("Error updating About Me section: ", err);
       return null;
@@ -213,5 +213,5 @@ module.exports = {
   isEmailTaken,
   addPostToUserForumPosts,
   deletePostFromUserForums,
-  editAboutMe
+  updateAboutMe
 };
