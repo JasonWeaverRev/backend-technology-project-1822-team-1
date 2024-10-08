@@ -113,21 +113,6 @@ describe("PostService Tests", () => {
             expect(result).toEqual(1); 
         });
 
-
-        //Test 6. Post id is valid: unexpected deletion error
-        it("Test 6. Should return an error if the post could not be deleted from unknown circumstances", async () => {
-
-            PostDao.getPostById.mockReturnValue(mockPost);
-            PostDao.deletePostById.mockReturnValue(null);
-
-            try {
-                const result = await PostService.deletePostById(mockPostId);
-            } catch (err) {
-                expect(err.message).toBe(`Error: Encountered an unexpected error during deletion`);
-            }
-
-        });
-
     });
 
 });

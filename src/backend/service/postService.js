@@ -28,15 +28,6 @@ async function deletePostById(postID) {
   // Validate if the post exists
   foundPost = await getPostById(postID);
   if (foundPost) {
-    // If the post-to-be-deleted has a parent, remove the reply from the parent's reply list
-    if (foundPost.parent_id) {
-      parentPost = await getPostById(foundPost.parent_id);
-      const parentData = await postDAO.removeReplyFromParent(
-        postID,
-        parentPost.post_id,
-        parentPost.creation_time
-      );
-    }
 
     // Validate if the post exists
     foundPost = await getPostById(postID);
@@ -250,11 +241,6 @@ async function removeParents(parentPostID) {
             await postDAO.removeParent(replyPost);
         });
     }
-
-  //Remove parents from children one-by-one
-  repList.forEach(async (replyID, i) => {
-    await postDAO.removeParent(replyID);
-  });
 
   return 1;
 }
