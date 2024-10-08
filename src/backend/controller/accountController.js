@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const AccountService = require("../service/accountService");
+const AuthMiddleware = require("../middleware/authMiddleware");
 
 /*
     DDUser Object Model
@@ -92,10 +93,11 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.put("/about-me", async (req, res) => {
-    const { email, about_me } = req.body;
+router.put("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
+    const { about_me } = req.body;
 
     try {
+        const email = req.user.email;
         const result = await AccountService.editAboutMe(email, about_me);
 
         res.status(200).json(result);
