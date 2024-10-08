@@ -46,40 +46,35 @@ Getting Started
 
 Authentication
 ```
-Method	Endpoint	Description
-POST	/api/account			Register a new user
-POST	/api/account/login		Log in an existing user
+Method	Endpoint							Description
+POST	/api/accounts/register						Register a new user
+POST	/api/accounts/login						Log in an existing user
 ```
 User Profile
 ```
-Method	Endpoint	    	 	Description
-GET	/api/account/profile		View a user’s profile
-PUT	/api/account/profile		Update a user’s profile
+Method	Endpoint	    	 					Description
+GET	/api/accounts/profile						View a user’s profile
+PUT	/api/accounts/profile						Update a user’s profile
 ```
 Encounters
 ```
-Method	Endpoint			Description
-POST	/api/encounters	                Create a new encounter
-GET	/api/encounters			Get all encounters by a user
-PUT	/api/encounters			Update an existing encounter
-DELETE	/api/encounters			Delete an encounter
-```
-Campaigns 
-```
-POST	/api/campaigns	        	Create a campaign folder
-GET	/api/campaigns		 	View campaigns for a user
-PUT	/api/campaigns			Update a campaign
-DELETE	/api/campaigns			Delete a campaign
+Method	Endpoint							Description
+POST	/api/encounters/encounter					Create a new encounter
+GET	/api/encounters/encounter					Get single encounter by id
+GET	/api/encounters/user						Get all encounters by a user
+GET	/api/encounters/monsters?challenge_rating=[challenge rating] 	Get random monsters by challenge rating
+PUT	/api/encounters/encounter					Update an existing encounter
+DELETE	/api/encounters/encounter					Delete an encounter
 ```
 Forum
 ```
-POST	/api/forums	        	Create a post
-GET	/api/forums			View a post
-PUT	/api/forums		        Update a post
-DELETE	/api/forums			Delete a post
-POST	/api/forums	        	Create a comment
-PUT	/api/forums/comments		Update an comment
-DELETE	/api/forums/comments		Delete a comment
+POST	/api/forums	        					Create a post
+GET	/api/forums							View a post
+PUT	/api/forums		       					Update a post
+DELETE	/api/forums							Delete a post
+POST	/api/forums/:[postID]	        				Create a comment
+PUT	/api/forums/comments						Update an comment
+DELETE	/api/forums/comments						Delete a comment
 
 
 Features
@@ -90,7 +85,8 @@ Features
 	•	Campaign Organization: Encounters can be organized into campaigns with subfolders.
 	•	Forum Interaction: Users can post about their encounters, comment on posts, and like/dislike posts.
 	•	Moderator Tools: Admins can delete problematic comments and posts.
-   
+
+
 Database Schema
 
 The backend uses DynamoDB to store data. Below are some key collections and their fields:
