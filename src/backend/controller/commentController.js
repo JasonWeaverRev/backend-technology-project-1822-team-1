@@ -9,16 +9,16 @@ const validateComment = require('../middleware/validateComment');
  * Delete a specific comment
  */
 commentRouter.delete('/', verifyToken, async (req, res) => {
-  const { comment_id, comment_creation_time } = req.body;
+  const { post_id, creation_time } = req.body;
   const username = req.user.username;
 
   // Validate required parameters
-  if (!comment_id || !comment_creation_time) {
-    return res.status(400).json({ message: 'comment_id and comment_creation_time are required.' });
+  if (!post_id || !creation_time) {
+    return res.status(400).json({ message: 'post_id and creation_time are required.' });
   }
 
   try {
-    const result = await commentService.deleteComment(comment_id, comment_creation_time, username);
+    const result = await commentService.deleteComment(post_id, creation_time, username);
 
     if (result === 1) {
       return res.status(200).json({ message: 'Comment deleted successfully' });
@@ -34,6 +34,8 @@ commentRouter.delete('/', verifyToken, async (req, res) => {
     res.status(err.status || 500).json({ message: 'Internal Server Error' });
   }
 });
+
+
 
 /**
  * Update an existing comment

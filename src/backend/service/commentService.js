@@ -32,31 +32,36 @@ async function updateComment(comment_id, comment_creation_time, body, username) 
  */
 // commentService.js
 
-const deleteComment = async (post_id, post_creation_time, comment_id, comment_creation_time, username) => {
-  console.log(`Deleting comment with ID: ${comment_id}, creation_time: ${comment_creation_time}, username: ${username}`);
+const deleteComment = async (post_id, creation_time, username) => {
+  console.log(`Deleting comment with ID: ${post_id}, creation_time: ${creation_time}, username: ${username}`);
 
   // Fetch the comment
-  const comment = await commentDao.getCommentById(comment_id, comment_creation_time);
+  const comment = await commentDao.getCommentById(post_id, creation_time);
   if (!comment) {
-      console.log('Comment not found');
-      return 0; // Comment not found
+    console.log('Comment not found');
+    return 0; // Comment not found
   }
 
   // Authorization check
   if (comment.written_by !== username) {
-      // Check if user is admin
-      const userRole = await accountDao.getUserRoleByUsername(username);
-      console.log(`User role: ${userRole}`);
-      if (userRole !== 'admin') {
-          console.log('Not authorized');
-          return -1; // Not authorized
-      }
+    // Check if user is admin
+    const userRole = await accountDao.getUserRoleByUsername(username);
+    console.log(`User role: ${userRole}`);
+    if (userRole !== 'admin') {
+      console.log('Not authorized');
+      return -1; // Not authorized
+    }
   }
 
   // Proceed to delete
-  const deleteResult = await commentDao.deleteCommentByUser(comment_id, comment_creation_time);
+  const deleteResult = await commentDao.deleteCommentByUser(post_id, creation_time);
   return deleteResult;
 };
+
+module.exports = {
+  deleteComment,
+};
+
 
 
 module.exports = {
