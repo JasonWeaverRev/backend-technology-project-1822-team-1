@@ -5,7 +5,7 @@ const uuid = require("uuid");
 
 // Local module imports
 const postDAO = require("../dao/postDao.js");
-const accountDAO = require("../dao/accountDao.js");
+const accountDAO = require("../dao/accountDAO.js");
 const { logger } = require("../utils/logger");
 
 
@@ -190,9 +190,11 @@ async function removeParents(parentPostID) {
     const repList = await postDAO.getPostsByParentId(parentPostID);
 
     //Remove parents from children one-by-one
-    repList.forEach( async (replyPost, i) => {
-        await postDAO.removeParent(replyPost);
-    });
+    if (repList) {
+        repList.forEach( async (replyPost, i) => {
+            await postDAO.removeParent(replyPost);
+        });
+    }
 
     return 1;
 }

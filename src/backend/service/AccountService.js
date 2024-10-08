@@ -1,4 +1,4 @@
-const AccountDao = require("../dao/accountDao");
+const AccountDao = require("../dao/accountDAO");
 const encounterDao = require("../dao/encounterDao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
