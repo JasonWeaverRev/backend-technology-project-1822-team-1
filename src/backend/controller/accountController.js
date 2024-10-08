@@ -92,4 +92,16 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.put("/about-me", async (req, res) => {
+    const { email, about_me } = req.body;
+
+    try {
+        const result = await AccountService.editAboutMe(email, about_me);
+
+        res.status(200).json(result);
+    } catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+})
+
 module.exports = router;
