@@ -8,7 +8,7 @@ const { logger } = require("./backend/utils/logger");
 const postRouter = require('./backend/controller/postController.js');
 const commentRouter = require("./backend/controller/commentController");
 const accountController = require("./backend/controller/accountController.js");
-const encounterController = require("./backend/controller/enocunterController.js");
+const encounterController = require("./backend/controller/encounterController.js");
 
 /**
  * Server Port and general setup

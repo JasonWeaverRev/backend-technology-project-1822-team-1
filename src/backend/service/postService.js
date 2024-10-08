@@ -5,11 +5,7 @@ const uuid = require("uuid");
 
 // Local module imports
 const postDAO = require("../dao/postDao.js");
-<<<<<<< HEAD
-const accountDAO = require("../dao/accountDao.js");
-=======
 const accountDAO = require("../dao/accountDAO");
->>>>>>> merge-US2-US3-US4
 const { logger } = require("../utils/logger");
 
 /**
@@ -140,25 +136,6 @@ async function createReply(replyCont, parent_id, user) {
 
     parentPost = await getPostById(parent_id);
 
-<<<<<<< HEAD
-        parentPost = await getPostById(parent_id);
-
-        console.log(parentPost);
-        
-        if(parentPost) {
-            // Create new reply
-            reply = {
-                post_id: uuid.v4(),
-                ...replyCont,
-                written_by: user.username,
-                creation_time: new Date().toISOString(),
-                parent_id,
-                likes: 0,
-                liked_by: [],
-                disliked_by: [],
-                replies: []
-            };
-=======
     if (parentPost) {
       // Create new reply
       reply = {
@@ -172,7 +149,6 @@ async function createReply(replyCont, parent_id, user) {
         disliked_by: [],
         replies: [],
       };
->>>>>>> merge-US2-US3-US4
 
       let data = await postDAO.createPost(reply);
       let userData = await accountDAO.addPostToUserForumPosts(

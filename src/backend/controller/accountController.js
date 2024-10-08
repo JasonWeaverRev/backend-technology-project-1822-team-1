@@ -67,11 +67,8 @@ router.get("/username", async (req, res) => {
 });
 */
 
-<<<<<<< HEAD
 // POST user registration
-=======
 // user registration
->>>>>>> merge-US2-US3-US4
 router.post("/register", async (req, res) => {
   try {
     const newUser = await accountService.registerUser(req.body);
