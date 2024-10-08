@@ -23,32 +23,17 @@ const secret = process.env.JWT_SECRET;
 */
 
 // Get user by email (partition key)
-/**
- * 
- * @param {*} email 
- * @returns 
- */
 async function getUserByEmail(email) {
   const user = await AccountDao.getUserByEmail(email);
   return user;
 }
 
 // Get user by username
-/**
- * 
- * @param {*} username 
- * @returns 
- */
 async function getUserByUsername(username) {
   const user = await AccountDao.getUserByUsername(username);
   return user;
 }
 
-/**
- * 
- * @param {*} user 
- * @returns 
- */
 async function registerUser(user) {
   const { email, username, password, role } = user;
 
@@ -117,12 +102,6 @@ async function registerUser(user) {
   return registeredUser;
 }
 
-/**
- * 
- * @param {*} identifier 
- * @param {*} password 
- * @returns 
- */
 const loginUser = async (identifier, password) => {
   if (!identifier || !password) {
     logger.info(`Failed login attempt: Invalid credentials`);
@@ -148,7 +127,7 @@ const loginUser = async (identifier, password) => {
     }
 
     const processedUser = identifier.includes("@")
-      ? await processByEmail(user)
+      ? user
       : await processByUsername(user);
 
     const token = jwt.sign(
@@ -156,15 +135,9 @@ const loginUser = async (identifier, password) => {
         username: processedUser.username,
         email: processedUser.email,
         role: processedUser.role,
-        // about_me: processedUser.about_me,
-        // encounter_campaigns: processedUser.encounter_campaigns,
-        // encouters: processedUser.encounters,
-        // forum_posts: processedUser.forum_posts,
-        // interacted_posts: processedUser.interacted_posts,
-        // profile_pic: processedUser.profile_pic,
       },
       secret,
-      { expiresIn: "2h" }
+      { expiresIn: "1h" }
     );
 
     console.log(processedUser);
@@ -177,11 +150,6 @@ const loginUser = async (identifier, password) => {
   }
 };
 
-/**
- * 
- * @param {*} user 
- * @returns 
- */
 const processByEmail = async (user) => {
   let encounterData = [];
   if (user && user.encounters && user.encounters.length > 0) {
@@ -192,64 +160,8 @@ const processByEmail = async (user) => {
   return user;
 };
 
-/**
- * 
- * @param {*} user 
- * @returns 
- */
 const processByUsername = async (user) => {
-  const encounterIds = [];
-  console.log(user.encounters);
-  if (user.encounters) {
-    user.encounters.L.forEach((idx) => {
-      encounterIds.push(idx.S);
-    });
-  }
-
-  const encounterData = [];
-
-  if (user && user.encounters && user.encounters.length > 0) {
-    encounterData = await encounterDao.getBatchEncountersbyId(encounterIds);
-  }
-
-  const encounterCampaigns = [];
-
-  if (user.encounter_campaigns) {
-    user.encounter_campaigns.L.forEach((idx) => {
-      encounterCampaigns.push(idx.S);
-    });
-  }
-
-  const interactedPosts = [];
-
-  if (user.interacted_posts) {
-    user.interacted_posts.L.forEach((idx) => {
-      interactedPosts.push(idx.S);
-    });
-  }
-
-  const forumPosts = [];
-  if (user.forum_posts) {
-    user.forum_posts.L.forEach((idx) => {
-      forumPosts.push(idx.S);
-    });
-  }
-
-  // const processedUser = {
-  //   password: user.password.S,
-  //   about_me: user.about_me.S,
-  //   role: user.role.S,
-  //   creation_time: user.creation_time.S,
-  //   username: user.username.S,
-  //   email: user.email.S,
-  //   profile_pic: user.profile_pic.S,
-  //   encounter_campaigns: encounterCampaigns,
-  //   encounters: encounterData,
-  //   interacted_posts: interactedPosts,
-  //   forum_posts: forumPosts,
-  // };
-
-   const processedUser = {
+  const processedUser = {
     password: user.password.S,
     about_me: user.about_me ? user.about_me.S : "",
     role: user.role.S,
@@ -257,10 +169,6 @@ const processByUsername = async (user) => {
     username: user.username.S,
     email: user.email.S,
     profile_pic: user.profile_pic ? user.profile_pic.S : "",
-    encounter_campaigns: encounterCampaigns,
-    encounters: encounterData,
-    interacted_posts: interactedPosts,
-    forum_posts: forumPosts,
   };
 
   return processedUser;

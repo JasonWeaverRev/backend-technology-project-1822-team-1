@@ -7,7 +7,7 @@ const app = express();
 const { logger } = require("./backend/utils/logger");
 const postRouter = require('./backend/controller/postController.js');
 const accountController = require("./backend/controller/accountController.js");
-
+const encounterController = require("./backend/controller/encounterController");
 
 /**
  * Server Port and general setup
@@ -18,9 +18,9 @@ app.use(express.json());
 /**
  * Routing setup
  */
-app.use('/api/forums', postRouter);
+app.use("/api/forums", postRouter);
 app.use("/api/accounts", accountController);
-
+app.use("/api/encounters", encounterController);
 
 // Port listen
 app.listen(PORT, () => {

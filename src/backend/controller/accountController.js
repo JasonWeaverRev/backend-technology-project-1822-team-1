@@ -67,7 +67,6 @@ router.get("/username", async (req, res) => {
 });
 */
 
-
 // user registration
 router.post("/register", async (req, res) => {
   try {
