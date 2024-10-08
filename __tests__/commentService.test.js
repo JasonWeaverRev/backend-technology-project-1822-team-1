@@ -97,107 +97,113 @@ describe('Comment Service - Update Comment', () => {
 
 // ====== Tests for Deleting Comment ======
 
-// describe("Comment Service - Delete Comment", () => {
-//     let username;
+describe("Comment Service - Delete Comment", () => {
+    let username;
 
-//     beforeEach(() => {
-//         username = '1';
-//         commentDao.getCommentById.mockClear();
-//         commentDao.deleteCommentByUser.mockClear();
-//         accountDao.getUserRoleByUsername.mockClear();
-//     });
+    beforeEach(() => {
+        username = '1';
+        jest.clearAllMocks(); // Clears all mocks
+    });
 
-    // test("Should delete comment if user is the author", async () => {
-    //     // Arrange
-    //     commentDao.getCommentById.mockResolvedValueOnce(sampleComment);
-    //     commentDao.deleteCommentByUser.mockResolvedValueOnce(1);
+    const sampleComment = {
+        post_id: 'sample-comment-id',
+        creation_time: '2024-10-04T17:35:39.984Z',
+        written_by: '1', // Assuming the author is '1'
+        body: 'This is a comment',
+        parentID: 'sample-post-id' // Reference to the parent post
+    };
 
-    //     // Act
-    //     const result = await commentService.deleteComment(
-    //         samplePost.post_id,            // Keep post_id for context
-    //         samplePost.creation_time,      // Keep post creation_time for context
-    //         sampleComment.comment_id,      // Use comment_id for deletion
-    //         sampleComment.creation_time,   // Use comment creation_time for deletion
-    //         username                       // username of the user
-    //     );
+    test("Should delete comment if user is the author", async () => {
+        // Arrange
+        commentDao.getCommentById.mockResolvedValueOnce(sampleComment);
+        commentDao.deleteCommentByUser.mockResolvedValueOnce(1);
 
-    //     // Assert
-    //     expect(result).toBe(1);  // Successfully deleted
-    //     expect(commentDao.getCommentById).toHaveBeenCalledWith(sampleComment.comment_id, sampleComment.creation_time);  // Comment-specific values
-    //     expect(commentDao.deleteCommentByUser).toHaveBeenCalledWith(
-    //         sampleComment.comment_id,      // Correctly delete by comment_id
-    //         sampleComment.creation_time    // and creation_time
-    //     );
-    // });
+        // Act
+        const result = await commentService.deleteComment(
+            sampleComment.post_id,         // post_id of the comment to delete
+            sampleComment.creation_time,   // creation_time of the comment to delete
+            username                       // username of the user
+        );
 
-    // test("Should return 403 if user is not the author and not an admin", async () => {
-    //     // Arrange
-    //     commentDao.getCommentById.mockResolvedValueOnce({ ...sampleComment, written_by: 'differentUser' });
-    //     accountDao.getUserRoleByUsername.mockResolvedValueOnce('user'); // Regular user
+        // Assert
+        expect(result).toBe(1);  // Successfully deleted
+        expect(commentDao.getCommentById).toHaveBeenCalledWith(
+            sampleComment.post_id,
+            sampleComment.creation_time
+        );
+        expect(commentDao.deleteCommentByUser).toHaveBeenCalledWith(
+            sampleComment.post_id,
+            sampleComment.creation_time
+        );
+    });
 
-    //     // Act
-    //     const result = await commentService.deleteComment(
-    //         samplePost.post_id,
-    //         samplePost.creation_time,
-    //         sampleComment.comment_id,      // Use comment_id
-    //         sampleComment.creation_time,   // Use comment_creation_time
-    //         username
-    //     );
+    test("Should return 403 if user is not the author and not an admin", async () => {
+        // Arrange
+        commentDao.getCommentById.mockResolvedValueOnce({ ...sampleComment, written_by: 'differentUser' });
+        accountDao.getUserRoleByUsername.mockResolvedValueOnce('user'); // Regular user
 
-    //     // Assert
-    //     expect(result).toBe(-1);  // Unauthorized
-    //     expect(commentDao.getCommentById).toHaveBeenCalledWith(sampleComment.comment_id, sampleComment.creation_time);  // Comment-specific values
-    //     expect(commentDao.deleteCommentByUser).not.toHaveBeenCalled();  // Ensure no deletion happened
-    //     expect(accountDao.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure role check is performed
-    // });
+        // Act
+        const result = await commentService.deleteComment(
+            sampleComment.post_id,
+            sampleComment.creation_time,
+            username
+        );
 
-    // test("Should delete comment if user is an admin", async () => {
-    //     // Arrange
-    //     // Simulate that the comment was written by someone else
-    //     commentDao.getCommentById.mockResolvedValueOnce({ ...sampleComment, written_by: 'differentUser' });
-    //     commentDao.deleteCommentByUser.mockResolvedValueOnce(1);
-    //     accountDao.getUserRoleByUsername.mockResolvedValueOnce('admin'); // Admin user
-    
-    //     // Act
-    //     const result = await commentService.deleteComment(
-    //         samplePost.post_id,
-    //         samplePost.creation_time,
-    //         sampleComment.comment_id,
-    //         sampleComment.creation_time,
-    //         username // 'username' is '1', different from 'differentUser'
-    //     );
-    
-    //     // Assert
-    //     expect(result).toBe(1);  // Successfully deleted
-    //     expect(commentDao.getCommentById).toHaveBeenCalledWith(
-    //         sampleComment.comment_id,
-    //         sampleComment.creation_time
-    //     );
-    //     expect(commentDao.deleteCommentByUser).toHaveBeenCalledWith(
-    //         sampleComment.comment_id,
-    //         sampleComment.creation_time
-    //     );
-    //     expect(accountDao.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure admin check is performed
-    // });
-    
+        // Assert
+        expect(result).toBe(-1);  // Unauthorized
+        expect(commentDao.getCommentById).toHaveBeenCalledWith(
+            sampleComment.post_id,
+            sampleComment.creation_time
+        );
+        expect(commentDao.deleteCommentByUser).not.toHaveBeenCalled();  // Ensure no deletion happened
+        expect(accountDao.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure role check is performed
+    });
 
-    // test("Should return 404 if comment not found", async () => {
-    //     // Arrange: Comment not found
-    //     commentDao.getCommentById.mockResolvedValueOnce(null);
-    
-    //     // Act
-    //     const result = await commentService.deleteComment(
-    //         samplePost.post_id,
-    //         samplePost.creation_time,
-    //         sampleComment.comment_id,      // Use comment_id
-    //         sampleComment.creation_time,   // Use comment_creation_time
-    //         username
-    //     );
-    
-    //     // Assert
-    //     expect(result).toBe(0);  // Comment not found
-    //     expect(commentDao.getCommentById).toHaveBeenCalledWith(sampleComment.comment_id, sampleComment.creation_time);  // Comment-specific values
-    //     expect(commentDao.deleteCommentByUser).not.toHaveBeenCalled();  // Ensure no deletion happened
-    //     expect(accountDao.getUserRoleByUsername).not.toHaveBeenCalled();  // No role check if comment not found
-    // });
-// });
+    test("Should delete comment if user is an admin", async () => {
+        // Arrange
+        // Simulate that the comment was written by someone else
+        commentDao.getCommentById.mockResolvedValueOnce({ ...sampleComment, written_by: 'differentUser' });
+        commentDao.deleteCommentByUser.mockResolvedValueOnce(1);
+        accountDao.getUserRoleByUsername.mockResolvedValueOnce('admin'); // Admin user
+
+        // Act
+        const result = await commentService.deleteComment(
+            sampleComment.post_id,
+            sampleComment.creation_time,
+            username // 'username' is '1', different from 'differentUser'
+        );
+
+        // Assert
+        expect(result).toBe(1);  // Successfully deleted
+        expect(commentDao.getCommentById).toHaveBeenCalledWith(
+            sampleComment.post_id,
+            sampleComment.creation_time
+        );
+        expect(commentDao.deleteCommentByUser).toHaveBeenCalledWith(
+            sampleComment.post_id,
+            sampleComment.creation_time
+        );
+        expect(accountDao.getUserRoleByUsername).toHaveBeenCalledWith(username);  // Ensure admin check is performed
+    });
+
+    test("Should return 404 if comment not found", async () => {
+        // Arrange: Comment not found
+        commentDao.getCommentById.mockResolvedValueOnce(null);
+
+        // Act
+        const result = await commentService.deleteComment(
+            sampleComment.post_id,
+            sampleComment.creation_time,
+            username
+        );
+
+        // Assert
+        expect(result).toBe(0);  // Comment not found
+        expect(commentDao.getCommentById).toHaveBeenCalledWith(
+            sampleComment.post_id,
+            sampleComment.creation_time
+        );
+        expect(commentDao.deleteCommentByUser).not.toHaveBeenCalled();  // Ensure no deletion happened
+        expect(accountDao.getUserRoleByUsername).not.toHaveBeenCalled();  // No role check if comment not found
+    });
+});
