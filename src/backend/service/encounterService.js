@@ -158,8 +158,6 @@ const editEncounterById = async (
     }
 
     if (encounter.created_by !== username) {
-      console.log(encounter.username);
-      console.log(username);
       throw { status: 403, message: "Cannot edit encounters of other users" };
     }
 
@@ -179,10 +177,31 @@ const editEncounterById = async (
   }
 };
 
+const deleteEncounterById = async (encounter_id, username) => {
+  try {
+    const encounter = await encounterDao.getEncounterById(encounter_id);
+
+    if (!encounter) {
+      throw { status: 404, message: "Encounter with this id does not exist" };
+    }
+
+    if (encounter.created_by !== username) {
+      throw { status: 403, message: "Cannot delete encounters of other users" };
+    }
+
+    const deleted = await encounterDao.deleteEncounterById(encounter_id);
+
+    return deleted;
+  } catch (err) {
+    throw err.status ? err : { status: 500, messsage: "Internal server error" };
+  }
+};
+
 module.exports = {
   getMonstersByChallengeRating,
   createNewEncounter,
   getEncounterById,
   getEncountersByUsername,
   editEncounterById,
+  deleteEncounterById,
 };

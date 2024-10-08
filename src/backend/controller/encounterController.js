@@ -69,7 +69,23 @@ router.put("/encounter", verifyToken, async (req, res) => {
       setting
     );
 
-    res.status(201).json({ encounter });
+    res.status(200).json({ encounter });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+router.delete("/encounter", verifyToken, async (req, res) => {
+  const encounter_id = req.query.encounter_id;
+  const username = req.user.username;
+
+  try {
+    const encounter = await encounterService.deleteEncounterById(
+      encounter_id,
+      username
+    );
+
+    res.status(200).json({ encounter });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }

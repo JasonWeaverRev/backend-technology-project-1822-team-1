@@ -88,6 +88,22 @@ const editEncounterById = async (encounter) => {
   }
 };
 
+const deleteEncounterById = async (encounter_id) => {
+  try {
+    const command = new DeleteCommand({
+      TableName,
+      Key: {
+        encounter_id: encounter_id,
+      },
+    });
+
+    const data = await documentClient.send(command);
+    return data;
+  } catch (err) {
+    throw { status: 500, message: "Error retrieving encounters by username" };
+  }
+};
+
 const getBatchEncountersbyId = async (encounter_ids) => {
   try {
     const batchGetCommand = new BatchGetCommand({
@@ -119,4 +135,5 @@ module.exports = {
   createEncounter,
   getEncountersByUsername,
   editEncounterById,
+  deleteEncounterById,
 };
