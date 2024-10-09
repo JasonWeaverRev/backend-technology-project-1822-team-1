@@ -399,11 +399,7 @@ module.exports = {
     createPost,
     createReply,
     getAllPostsSorted,
-<<<<<<< HEAD
-    getPostsSorted,
-    getNewestPost
-=======
     getNewestPost,
+    likePost,
     dislikePost
->>>>>>> f81abd343bbe4f71fc28e08b5301adc437921102
 };
