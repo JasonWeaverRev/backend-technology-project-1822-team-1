@@ -78,7 +78,7 @@ async function registerUser(user) {
     email,
     username,
     password: hashedPassword,
-    role,
+    role
   };
 
   // Defaults role to "user" if not an "admin"
@@ -95,6 +95,22 @@ async function registerUser(user) {
   return registeredUser;
 }
 
+async function updateAboutMe(email, new_about_me) {
+  const emailTaken = await AccountDao.isEmailTaken(email);
+  if (!emailTaken) {
+    throw new Error("Account does not exist");
+  }
+
+  const update = await AccountDao.updateAboutMe(email, new_about_me);
+  return update;
+}
+
+/**
+ * 
+ * @param {*} identifier 
+ * @param {*} password 
+ * @returns 
+ */
 const loginUser = async (identifier, password) => {
   if (!identifier || !password) {
     logger.info(`Failed login attempt: Invalid credentials`);
@@ -172,5 +188,6 @@ module.exports = {
   getUserByUsername,
   registerUser,
   loginUser,
+  updateAboutMe
 };
 

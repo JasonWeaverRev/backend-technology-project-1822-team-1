@@ -97,7 +97,6 @@ async function createReply(replyCont, parent_id, user) {
 
         // If the parent post exists, add it to the forum post
         const parentPost = await getPostById(parent_id);
-        
         if(parentPost) {
             // Create new reply
             reply = {
@@ -318,6 +317,81 @@ function validateReply(replyCont, parent_id, user) {
 }
 
 
+// POST INTERACTION
+
+/**
+ * Likes a post on behalf of a user
+ */
+/**
+ * Likes or unlikes a post based on the current state
+ */
+async function likePost(post_id, username) {
+  const post = await getPostById(post_id);
+
+  if (!post) {
+    throw {
+      status: 404,
+      message: `Post with id ${post_id} not found.`,
+    };
+  }
+
+  const result = await postDAO.likePost(post_id, post.creation_time, username);
+
+  // 3: Unliked successfully
+  if (result === 3) {
+    return 3; // Unliked
+  }
+  // 2: Liked successfully
+  else if (result === 2) {
+    return 2; // Liked
+  }
+  // Anything else should be considered an error
+  else if (result !== 1) {
+    throw {
+      status: 500,
+      message: 'Failed to like the post.',
+    };
+  }
+
+  return 1; // Success (default case for first-time liking)
+}
+
+/**
+ * Dislikes a post on behalf of a user
+ */
+/**
+ * Dislikes a post on behalf of a user
+ */
+async function dislikePost(post_id, username) {
+  const post = await getPostById(post_id);
+  if (!post) {
+    throw {
+      status: 404,
+      message: `Post with id ${post_id} not found.`,
+    };
+  }
+
+  // Delegate to DAO
+  const result = await postDAO.dislikePost(post_id, post.creation_time, username);
+
+  console.log('Dislike DAO result:', result);
+
+  if (result === 3) {
+    return { status: 200, message: 'Undisliked successfully.' };
+  } else if (result === 2) {
+    return { status: 200, message: 'Disliked successfully.' };
+  } else if (result !== 1) {
+    throw {
+      status: 500,
+      message: 'Failed to dislike the post.',
+    };
+  }
+
+  return { status: 200, message: 'Disliked successfully.' };
+}
+
+
+
 module.exports = {
     deletePostById,
     getPostById,
@@ -325,6 +399,11 @@ module.exports = {
     createPost,
     createReply,
     getAllPostsSorted,
+<<<<<<< HEAD
     getPostsSorted,
     getNewestPost
+=======
+    getNewestPost,
+    dislikePost
+>>>>>>> f81abd343bbe4f71fc28e08b5301adc437921102
 };
