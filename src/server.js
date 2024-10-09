@@ -27,11 +27,8 @@ app.use(loggerMiddleware);
  * Routing setup
  */
 app.use("/api/accounts", accountController);
-app.use("/api/forums", postRouter);
-app.use("/api/forums/comments", commentRouter);
-
-app.use("/api/forums", postRouter);
-app.use("/api/accounts", accountController);
+app.use('/api/forums', postRouter);
+app.use('/api/forums/comments', commentRouter);
 app.use("/api/encounters", encounterController);
 
 // Port listen

@@ -1,5 +1,5 @@
 const commentDao = require('../src/backend/dao/commentDao');
-const accountDao = require('../src/backend/dao/accountDao'); // Add accountDao for role checking
+const accountDao = require('../src/backend/dao/accountDAO'); // Add accountDao for role checking
 const commentService = require('../src/backend/service/commentService');
 
 // Mock DAO functions
