@@ -164,7 +164,7 @@ Database Schema
 
 The backend uses DynamoDB to store data. Below are some key collections and their fields:
 
-User
+Dungeon_Delver_Users
 ```
 
 {
@@ -173,17 +173,13 @@ User
 "password": "hashedString",
 "profile_pic": "https://example.com/images/profile.jpg",
 "about_me": "I love DnD!",
-"encounters": ["EncounterID1", "EncounterID2"],
-"encounter_campaigns": ["CampaignID1", "CampaignID2"],
-"forum_posts": ["PostID1", "PostID2"],
-"interacted_posts": ["PostID1", "PostID3"],
 "creation_time": "2024-10-01T10:00:00Z",
 "role": "string"
 }
 
 ```
 
-Encounter
+Encounters
 ```
 
 {
@@ -206,18 +202,9 @@ Encounter
 "creation_time": "2024-10-01T10:00:00Z"
 }
 
-```
-Campaign
-```
-
-{
-"campaign_id": "UUID",
-"campaign_title": "title",
-"encounters": ["EncounterID1", "EncounterID2", "EncounterID3"]
-}
 
 ```
-Forum Post
+Delver_Forum_Posts
 ```
 
 {
@@ -228,9 +215,9 @@ Forum Post
 "title": "My Epic Encounter",
 "body": "Here's a great encounter with a dragon and goblins. [Encounter Details]",
 "likes": 20,
-"parent_id": 2,
-"replies": "["ReplyID1", "ReplyID2", "ReplyID3"]" // This would be null or omitted if it's an independent post
-
+"parent_id": 2
+"liked_by": ["user1", "user2"],
+"disliked_by": ["user1", "user2"]
 }
 
 ```
