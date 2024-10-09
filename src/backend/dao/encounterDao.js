@@ -129,11 +129,56 @@ const getBatchEncountersbyId = async (encounter_ids) => {
   }
 };
 
+// assigns a campaign_title to an Encounter -- used if we only want 1 campaign per encounter
+const createCampaign = async (encounter_id, campaign_title) => {
+  try {
+    const command = new UpdateCommand({
+      TableName,
+      Key: {encounter_id},
+      UpdateExpression: 'SET campaign_title = :campaign_title',
+      ExpressionAttributeValues: {
+        ':campaign_title': campaign_title
+      },
+
+      ReturnValues: "ALL_NEW"
+    })
+
+    const data = await documentClient.send(command);
+    return data?.Attributes;
+
+  } catch (err) {
+    console.error('Error in createCampaign DAO:', err);
+    throw { status: 500, message: "Internal server error" };
+  }
+}
+
+// removes campaign_title assignment to an encounter -- used if we only want 1 campaign per encounter
+const removeCampaign = async (encounter_id) => {
+  try {
+    const command = new UpdateCommand({
+      TableName,
+      Key: {encounter_id},
+      UpdateExpression: 'REMOVE campaign_title',
+      ReturnValues: "ALL_NEW"
+    })
+
+    const data = await documentClient.send(command);
+    return data.Attributes;
+    
+  } catch (err) {
+    console.error('Error in removeCampaign DAO:', err);
+    throw { status: 500, message: "Internal server error" };
+  }
+}
+
+
 module.exports = {
   getEncounterById,
   getBatchEncountersbyId,
   createEncounter,
   getEncountersByUsername,
+  createCampaign,
+  removeCampaign,
   editEncounterById,
   deleteEncounterById,
 };

@@ -24,6 +24,11 @@ const monsterAmount = 5;
 //   },
 // ];
 
+/**
+ * 
+ * @param {*} challengeRating 
+ * @returns 
+ */
 const getMonstersByChallengeRating = async (challengeRating) => {
   try {
     const response = await axios(
@@ -79,6 +84,11 @@ const getMonstersByChallengeRating = async (challengeRating) => {
   }
 };
 
+/**
+ * 
+ * @param {*} id 
+ * @returns 
+ */
 const getEncounterById = async (id) => {
   if (!id || id.trim() === "") {
     throw { status: 400, message: "Must provide id for the encounter" };
@@ -197,11 +207,63 @@ const deleteEncounterById = async (encounter_id, username) => {
   }
 };
 
+// add a campaign_title to an encounter
+const createCampaign = async (username, encounter_id, campaign_title) => {
+  if (!campaign_title) {
+    throw { status: 400, message: "Campaign Title must be provided" };
+  }
+
+  const encounter = await encounterDao.getEncounterById(encounter_id);
+  if (!encounter) {
+    throw { status: 404, message: "Invalid Encounter ID" };
+  }
+
+  if (encounter.created_by !== username) {
+    throw { status: 404, message: "Users can only add their own Encounters to Campaigns" };
+  }
+
+  const data = await encounterDao.createCampaign(encounter_id, campaign_title);
+  if(!data) {
+    throw { status: 500, message: "Internal server error" };
+  }
+  
+  return data;
+}
+
+// remove campaign from an encounter
+const removeCampaign = async (username, encounter_id) => {
+  if (!encounter_id) {
+    throw { status: 404, message: "Encounter ID must be provided" };
+  }
+
+  if (!username) {
+    throw { status: 404, message: "Username must be provided" };
+  }
+
+  const encounter = await encounterDao.getEncounterById(encounter_id);
+  if (!encounter) {
+    throw { status: 404, message: "Invalid Encounter ID" };
+  }
+
+  if (encounter.created_by !== username) {
+    throw { status: 400, message: "Users cannot delete other user's campaigns"};
+  }
+
+  const data = await encounterDao.removeCampaign(encounter_id);
+  if(!data) {
+    throw { status: 500, message: "Internal server error" };
+  }
+  
+  return data;
+}
+
 module.exports = {
   getMonstersByChallengeRating,
   createNewEncounter,
   getEncounterById,
   getEncountersByUsername,
+  createCampaign,
+  removeCampaign,
   editEncounterById,
   deleteEncounterById,
 };

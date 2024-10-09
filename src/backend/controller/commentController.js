@@ -68,4 +68,30 @@ commentRouter.put('/', verifyToken, validateComment, async (req, res) => {
   }
 });
 
+
+
+/**
+ * Get a list of comments, sorted in ascending order, 8 at a time
+ * 
+ * :id = parent_id of comments 
+ * 
+ * :load = 0: 8
+ * :load = 1: 16 posts
+ * :load = 2: 24 posts
+ */
+commentRouter.get('/post', async (req, res) => {
+  const{id, page} = req.query;
+  
+  try {
+      const comments = await commentService.getCommentsByLoadSorted(id, page);
+      res.status(201).json(comments);
+
+  } catch (err) {
+      res.status(err.status || 400).json({message: err.message});
+  }
+
+});
+
+
+
 module.exports = commentRouter;
