@@ -56,4 +56,39 @@ router.post("/encounter", verifyToken, async (req, res) => {
   }
 });
 
+router.put("/encounter", verifyToken, async (req, res) => {
+  const { encounter_id, monsters, encounter_title, setting } = req.body;
+  const username = req.user.username;
+
+  try {
+    const encounter = await encounterService.editEncounterById(
+      encounter_id,
+      monsters,
+      encounter_title,
+      username,
+      setting
+    );
+
+    res.status(200).json({ encounter });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+router.delete("/encounter", verifyToken, async (req, res) => {
+  const encounter_id = req.query.encounter_id;
+  const username = req.user.username;
+
+  try {
+    const encounter = await encounterService.deleteEncounterById(
+      encounter_id,
+      username
+    );
+
+    res.status(200).json({ encounter });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
 module.exports = router;
