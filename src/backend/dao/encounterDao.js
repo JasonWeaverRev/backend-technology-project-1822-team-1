@@ -127,13 +127,7 @@ const createCampaign = async (encounter_id, campaign_title) => {
       ExpressionAttributeValues: {
         ':campaign_title': campaign_title
       },
-      /* IF WE WANT TO ALLOW 1 ENCOUNTER TO BE ADDED TO MULTIPLE CAMPAIGNS (campaign_title would be a list)
-        UpdateExpression: 'SET campaign_title = list_append(if_not_exists(campaign_title, :empty_list), :campaign_title)',
-        ExpressionAttributeValues: {
-        ':campaign_title': [campaign_title],
-        ':empty_list': []
-      },
-      */
+
       ReturnValues: "ALL_NEW"
     })
 
@@ -167,23 +161,6 @@ const removeCampaign = async (encounter_id) => {
   }
 }
 
-/* IF WE WANT TO ALLOW 1 ENCOUNTER TO BE ADDED TO MULTIPLE CAMPAIGNS (campaign_title would be a list)
-async function removeCampaign(encounter_id, index) {
-    const command = new UpdateCommand({
-        TableName,
-        Key: { encounter_id },
-        UpdateExpression: `REMOVE campaign_title[${index}]`,
-        ReturnValues: "ALL_NEW"
-    });
-
-    try {
-        const data = await documentClient.send(command);
-        return data;
-    } catch (err) {
-        throw { status: 500, message: "Error removing campaign_title" };
-    }
-}
-*/
 
 module.exports = {
   getEncounterById,

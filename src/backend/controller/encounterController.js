@@ -90,22 +90,5 @@ router.delete('/campaigns', verifyToken, async (req, res) => {
   }
 });
 
-/*
-// DELETE route to remove a campaign title from an encounter
-// Example URL: http://localhost:3000/campaigns?encounter_id=123
-router.delete('/campaigns', verifyToken, async (req, res) => {
-  const { encounter_id } = req.query;
-  const { campaign_title } = req.body;
-  const username = req.user.username;
-
-  try {
-    const result = await campaignService.removeCampaign(username, encounter_id, campaign_title);
-    return res.status(200).json({ message: "Campaign successfully removed from Encounter", data: result });
-
-  } catch (err) {
-    return res.status(err.status || 500).json({ message: err.message || "Internal server error" });
-  }
-});
-*/
 
 module.exports = router;

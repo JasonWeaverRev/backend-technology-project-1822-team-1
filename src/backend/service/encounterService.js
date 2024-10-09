@@ -197,45 +197,6 @@ const removeCampaign = async (username, encounter_id) => {
   return data;
 }
 
-/* THIS IMPLEMENTATION IS FOR IF 1 ENCOUNTER CAN HAVE MULTIPLE CAMPAIGNS
-const removeCampaign = async (username, encounter_id, campaign_title) => {
-  if (!encounter_id) {
-    throw { status: 404, message: "Encounter ID must be provided" };
-  }
-
-  if (!username) {
-    throw { status: 404, message: "Username must be provided" };
-  }
-  
-  if (!campaign_title) {
-    throw { status: 404, message: "Campaign Title must be provided" };
-  }
-
-  const encounter = await encounterDao.getEncounterById(encounter_id);
-  if (!encounter) {
-    throw { status: 404, message: "Invalid Encounter ID" };
-  }
-
-  if (encounter.created_by !== username) {
-    throw { status: 400, message: "Users cannot delete other user's campaigns" };
-  }
-
-  const index = encounter.campaign_title.indexOf(campaign_title);
-  
-  // Validate the campaign_title exists in the array
-  if (index === -1) {
-    throw { status: 400, message: `Encounter \"${encounter.encounter_title}\" is not assigned to campaign \"${campaign_title}\"` };
-  }
-
-  const data = await encounterDao.removeCampaign(encounter_id, index);
-  if (!data) {
-    throw { status: 500, message: "Internal server error" };
-  }
-  
-  return data;
-};
-*/
-
 module.exports = {
   getMonstersByChallengeRating,
   createNewEncounter,
