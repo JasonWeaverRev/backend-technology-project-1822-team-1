@@ -399,6 +399,7 @@ module.exports = {
     createPost,
     createReply,
     getAllPostsSorted,
+    getPostsSorted,
     getNewestPost,
     likePost,
     dislikePost

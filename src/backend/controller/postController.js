@@ -9,23 +9,6 @@ const postService = require('../service/postService');
 const {verifyToken, verifyAdminToken} = require('../middleware/authMiddleware');
 
 /**
- * Delete a specific post through Admin
- */
-postRouter.delete('/', verifyAdminToken, async (req, res) => {
-    
-    const {post_id} = req.body;
-
-    try {
-        await postService.deletePostById(post_id);
-
-        res.status(200).json({message: `Successfully deleted the post!`});
-    } catch(err) {
-        res.status(err.status || 400).json({ message: err.message });
-    }
-
-});
-
-/**
  * Add a new post
  */
 postRouter.post('/', verifyToken, async (req, res) => {
@@ -107,40 +90,29 @@ postRouter.post('/:postId', verifyToken, async (req, res) => {
     }
 });
 
-/**
- * Get all posts in the forums table, sorted in ascending order of their creation time []
- */
-postRouter.get('/', async (req, res) => {
-    
-    try {
-        const data = await postService.getAllPostsSorted();
-        res.status(201).json(data);
-
-    } catch (err) {
-        res.status(err.status || 400).json({message: err.message});
-    }
-});
 
 /**
- * Get all posts in the forums table, sorted in descending order of their creation time []
+ * Delete a specific post through Admin
  */
-postRouter.get('/', async (req, res) => {
-    
-    try {
-        const data = await postService.getAllPostsSorted();
-        res.status(201).json(data);
+postRouter.delete('/:postId', verifyAdminToken, async (req, res) => {
 
-    } catch (err) {
-        res.status(err.status || 400).json({message: err.message});
+    try {
+        await postService.deletePostById(req.params.postId);
+
+        res.status(200).json({message: `Successfully deleted the post!`});
+    } catch(err) {
+        res.status(err.status || 400).json({ message: err.message });
     }
+
 });
+
 
 /**
  * Get a list of posts, sorted in descending order, 6 at a time
  * 
- * :load = 0: 6 posts
- * :load = 1: 12 posts
- * :load = 2: 18 posts
+ * :page = 1: 6 posts
+ * :page = 2: 12 posts
+ * :page = 3: 18 posts
  */
 postRouter.get('/landing', async (req, res) => {
     const{page} = req.query;
