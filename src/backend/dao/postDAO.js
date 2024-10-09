@@ -420,8 +420,6 @@ module.exports = {
     getPostsByParentId,
     getNewestPost,
     createPost,
-    removeParent, 
-    likePost, 
-    dislikePost
+    removeParent
 }
 

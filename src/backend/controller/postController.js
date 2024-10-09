@@ -38,7 +38,6 @@ postRouter.post('/', verifyToken, async (req, res) => {
         res.status(err.status || 400).json({message: err.message});
     }
 });
-/// POST INTERACTION
 
 /**
  * Like a post
@@ -135,7 +134,6 @@ postRouter.get('/', async (req, res) => {
     }
 
 });
-
 
 
 

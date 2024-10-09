@@ -89,24 +89,21 @@ async function deletePostById(postID) {
  * @returns meta data of the post creation if successful, or null otherwise
  */
 async function createPost(postContents, user) {
+
   if (validatePost(postContents, user)) {
-    // Add the new post information
+      // Add the new post information
+      newPost = {
+          post_id: uuid.v4(),
+          ...postContents,
+          written_by: user.username,
+          creation_time: new Date().toISOString(),
+          liked_by: [user.username],
+          disliked_by: []
+      }
+      let data = await postDAO.createPost(newPost);
 
-    if (validatePost(postContents, user)) {
-        // Add the new post information
-        newPost = {
-            post_id: uuid.v4(),
-            ...postContents,
-            written_by: user.username,
-            creation_time: new Date().toISOString(),
-            liked_by: [user.username],
-            disliked_by: []
-        }
-        let data = await postDAO.createPost(newPost);
-
-        return data;
-    }
-    }
+      return data;
+  }
 
   // Invalid post
   logger.info(
@@ -138,7 +135,7 @@ async function createReply(replyCont, parent_id, user) {
                 written_by: user.username,
                 creation_time: new Date().toISOString(),
                 parent_id,
-                liked_by: [],
+                liked_by: [user.username],
                 disliked_by: []
             };
 
@@ -366,7 +363,5 @@ module.exports = {
     createPost,
     createReply,
     getAllPostsSorted,
-    getNewestPost, 
-    likePost, 
-    dislikePost
+    getNewestPost
 };
