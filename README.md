@@ -36,6 +36,8 @@ Getting Started
 ```npm install ```
   
   	4.	Set up environment variables
+
+```export  VAR1=value1 VAR2=value2 VAR3=value3```
    
 	5.	Start the server:
  
@@ -49,33 +51,98 @@ Authentication
 ```
 Method	Endpoint													Description
 POST	/api/accounts/register										Register a new user
+					Body: {
+						"Email": "gmail@gmail.com",
+						"Username": "User1",
+						"Password": "8LettersLong"
+						}
+
 POST	/api/accounts/login											Log in an existing user
+					Body: {
+						"identifier": "gmail@gmail.com",
+						"Password": "8LettersLong"
+					}
 ```
 User Profile
 ```
 Method	Endpoint	    	 										Description
 GET		/api/accounts/profile										View a user’s profile
+					Body: {
+						"Username": "User1"
+					}
+				
 PUT		/api/accounts/profile										Update a user’s profile
 ```
 Encounters
 ```
 Method	Endpoint													Description
 POST	/api/encounters/encounter									Create a new encounter
+					Body: {
+						"Insert": "insert"
+					}
+				
 GET		/api/encounters/encounter									Get single encounter by id
+					Body: {
+						"insert": "insert"
+					}
+
 GET		/api/encounters/user										Get all encounters by a user
+					Body: {
+						"insert": "insert"
+					}
+				
 GET		/api/encounters/monsters?challenge_rating=[chal_rating]		Get random monsters by challenge rating
+					Body: {
+						"insert": "insert"
+					}
+
 PUT		/api/encounters/encounter									Update an existing encounter
+					Body: {
+						"insert": "insert"
+					}
+				
 DELETE	/api/encounters/encounter									Delete an encounter
+					Body: {
+						"insert": "insert"
+					}
+				
 ```
 Forum
 ```
 POST	/api/forums	        										Create a post
+					Body: {
+						"Title": "NewPost",
+						"Body": "Message Goes Here"
+					}
+				
 GET		/api/forums													View a post
+
 PUT		/api/forums		       										Update a post
+					Body: {
+						"post_id": "Postid-goes-here",
+						"Body": "New Message Goes Here"
+					}
+				
 DELETE	/api/forums													Delete a post
+					Body: {
+						"post_id": "Postid-goes-here"
+					}
+				
 POST	/api/forums/:[postID]	        							Create a comment
+					Body: {
+						"Body": "Message Goes Here"
+					}
 PUT		/api/forums/comments										Update an comment
+					Body: {
+						"Title": "NewPost",
+						"Body": "Message Goes Here"
+					}
 DELETE	/api/forums/comments										Delete a comment
+
+
+Postman Testing Setup
+
+
 
 
 Features
