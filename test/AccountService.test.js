@@ -31,7 +31,7 @@ describe("accountService Tests", () => {
     });
 
     it("Should return null when email does not exist", async () => {
-      AccountDao.getUserByEmail.mockReturnValue(null);
+      accountDao.getUserByEmail.mockReturnValue(null);
       const result = await accountService.getUserByEmail("test@example.com");
 
       expect(result).toBeNull();
@@ -241,8 +241,8 @@ describe("accountService Tests", () => {
     it("Should return User email w/ new about_me text", async () => {
       const mockUserEmail = "test@email.com";
       const mockText = "Example about me text";
-      AccountDao.isEmailTaken.mockReturnValue(true);
-      AccountDao.updateAboutMe.mockReturnValue({
+      accountDao.isEmailTaken.mockReturnValue(true);
+      accountDao.updateAboutMe.mockReturnValue({
         email: mockUserEmail, 
         about_me: mockText});
 
@@ -254,8 +254,8 @@ describe("accountService Tests", () => {
     it("Should throw Error when email isn't registered", async () => {
       const mockUserEmail = "test@email.com";
       const mockText = "Example about me text";
-      AccountDao.isEmailTaken.mockReturnValue(false);
-      AccountDao.updateAboutMe.mockReturnValue({mockUserEmail, mockText});
+      accountDao.isEmailTaken.mockReturnValue(false);
+      accountDao.updateAboutMe.mockReturnValue({mockUserEmail, mockText});
 
       try {
         const result = await accountService.updateAboutMe(mockUserEmail, mockText);

@@ -189,7 +189,7 @@ const removeCampaign = async (username, encounter_id) => {
     throw { status: 400, message: "Users cannot delete other user's campaigns"};
   }
 
-  const data = await encounterDao.removeCampaign(campaign_id);
+  const data = await encounterDao.removeCampaign(encounter_id);
   if(!data) {
     throw { status: 500, message: "Internal server error" };
   }

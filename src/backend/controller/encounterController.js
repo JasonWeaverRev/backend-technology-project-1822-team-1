@@ -57,7 +57,7 @@ router.post("/encounter", verifyToken, async (req, res) => {
 });
 
 // Router to assign campaign_title to an Encounter
-// Ex. URL) http://localhost:3000/campaigns?encounter_id=123
+// Ex. URL) http://localhost:3000/api/encounters/campaigns?encounter_id=123
 router.put('/campaigns', verifyToken, async (req, res) => {
   try {
     const { encounter_id } = req.query;
@@ -71,18 +71,19 @@ router.put('/campaigns', verifyToken, async (req, res) => {
     const data = await encounterService.createCampaign(username, encounter_id, campaign_title);
     return res.status(201).json(data);
   } catch (err) {
+    console.error(err);
     return res.status(err.status || 500).json({ message: err.message });
   }
 });
 
 // Router to delete campaign_title from an Encounter
-// Ex. URL) http://localhost:3000/campaigns?encounter_id=123
+// Ex. URL) http://localhost:3000/api/encounters/campaigns?encounter_id=123
 router.delete('/campaigns', verifyToken, async (req, res) => {
   const { encounter_id } = req.query;
   const username = req.user.username;
 
   try {
-    const result = await campaignService.removeCampaign(username, encounter_id);
+    const result = await encounterService.removeCampaign(username, encounter_id);
     return res.status(200).json({ message: "Campaign successfully removed from Encounter", data: result });
 
   } catch (err) {

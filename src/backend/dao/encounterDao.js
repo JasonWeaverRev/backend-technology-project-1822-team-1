@@ -132,31 +132,29 @@ const createCampaign = async (encounter_id, campaign_title) => {
     })
 
     const data = await documentClient.send(command);
-    return data;
+    return data?.Attributes;
 
   } catch (err) {
-    throw { status: 500, message: "Error assigning campaign_title to encounter" };
+    console.error('Error in createCampaign DAO:', err);
+    throw { status: 500, message: "Internal server error" };
   }
 }
 
 // removes campaign_title assignment to an encounter -- used if we only want 1 campaign per encounter
 const removeCampaign = async (encounter_id) => {
   try {
-    let empty = "";
     const command = new UpdateCommand({
       TableName,
       Key: {encounter_id},
-      UpdateExpression: 'SET campaign_title = :empty',
-      ExpressionAttributeValues: {
-        ':empty': empty
-      },
+      UpdateExpression: 'REMOVE campaign_title',
       ReturnValues: "ALL_NEW"
     })
 
     const data = await documentClient.send(command);
-    return data;
+    return data.Attributes;
     
   } catch (err) {
+    console.error('Error in removeCampaign DAO:', err);
     throw { status: 500, message: "Internal server error" };
   }
 }

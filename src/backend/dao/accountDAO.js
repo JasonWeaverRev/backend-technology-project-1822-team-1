@@ -182,7 +182,7 @@ module.exports = {
   registerUser,
   isUsernameTaken,
   isEmailTaken,
-  addPostToUserForumPosts,
-  deletePostFromUserForums,
+  //addPostToUserForumPosts,
+  //deletePostFromUserForums,
   updateAboutMe
 };

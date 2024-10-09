@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const AccountService = require("../service/accountService");
+const accountService = require("../service/accountService");
 const AuthMiddleware = require("../middleware/authMiddleware");
 
 /*
@@ -97,7 +97,7 @@ router.put("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
 
     try {
         const email = req.user.email;
-        const result = await AccountService.updateAboutMe(email, about_me);
+        const result = await accountService.updateAboutMe(email, about_me);
 
         res.status(200).json(result);
     } catch (err) {
