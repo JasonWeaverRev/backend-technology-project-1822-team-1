@@ -5,7 +5,6 @@ const uuid = require("uuid");
 
 // Local module imports
 const postDAO = require("../dao/postDao.js");
-const accountDAO = require("../dao/accountDAO.js");
 const { logger } = require("../utils/logger");
 
 
@@ -27,49 +26,21 @@ async function deletePostById(postID) {
 
   // Validate if the post exists
   foundPost = await getPostById(postID);
-  if (foundPost) {
+  if(foundPost) {
 
-    // Validate if the post exists
-    foundPost = await getPostById(postID);
-    if(foundPost) {
+      // Search for posts that have the to-be-deleted post as their parent, then remove their parent_ids
+      const childData = await removeParents(postID);
 
-        // Search for posts that have the to-be-deleted post as their parent, then remove their parent_ids
-        const childData = await removeParents(postID);
+      // Delete the post
+      let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
+      
+      // If errors arise during deletion
+      if(!data) {
+          logger.info(`Failed Admin post deletion attempt: Unexpected error occured during deletion`);
+          throw { status: 400, message: `Error: Encountered an unexpected error during deletion`};
+      }
 
-        // Delete the post
-        let data = await postDAO.deletePostById(foundPost.post_id, foundPost.creation_time);
-        
-        // If errors arise during deletion
-        if(!data) {
-            logger.info(`Failed Admin post deletion attempt: Unexpected error occured during deletion`);
-            throw { status: 400, message: `Error: Encountered an unexpected error during deletion`};
-        }
-
-        return 1;
-    }
-
-    // Delete the post
-    let userData = await accountDAO.deletePostFromUserForums(
-      postID,
-      foundPost.written_by
-    );
-    let data = await postDAO.deletePostById(
-      foundPost.post_id,
-      foundPost.creation_time
-    );
-
-    // If errors arise during deletion
-    if (!data) {
-      logger.info(
-        `Failed Admin post deletion attempt: Unexpected error occured during deletion`
-      );
-      throw {
-        status: 400,
-        message: `Error: Encountered an unexpected error during deletion`,
-      };
-    }
-
-    return 1;
+      return 1;
   }
 
   // Post was not found
@@ -107,11 +78,11 @@ async function createPost(postContents, user) {
 
   // Invalid post
   logger.info(
-    `Failed forum post creation attempt: Invalid title, body, or written_by fields`
+    `Failed forum post creation attempt: Invalid title or body`
   );
   throw {
     status: 400,
-    message: `Error: Please enter a valid title, body, and user information`,
+    message: `Error: Please enter a valid title and body`,
   };
 }
 
@@ -148,10 +119,9 @@ async function createReply(replyCont, parent_id, user) {
         throw { status: 400, message: `Error: Could not find post you are replying to`};
     }
 
-
   // Parent post not found
   logger.info(
-    `Failed forum reply comment creation failed: Invalid reply contents`
+    `Failed forum reply comment creation: Invalid reply contents`
   );
   throw {
     status: 400,
@@ -160,7 +130,7 @@ async function createReply(replyCont, parent_id, user) {
 }
 
 /**
- * Retrieves a list of all posts, sorted by creation time
+ * Retrieves a list of all posts, sorted by creation time, excluding comments
  * 
  * @returns list of all posts, sorted by creation time
  */
@@ -170,9 +140,11 @@ const getAllPostsSorted = async () => {
     const sortedPosts = [];
 
     // Create a list of all posts, attached to a time
-    for (let i = 0; i < posts.length; i++) {
-        postTimeList.push([posts[i], posts[i].creation_time]);
-    }
+    posts.forEach((post) => {
+      if (!post.parent_id) {
+        postTimeList.push([post, post.creation_time]);
+      }
+    });
 
     // Sort the list by the attached time in descending order (newest first)
     postTimeList.sort(function(a, b) {
@@ -180,11 +152,76 @@ const getAllPostsSorted = async () => {
     });
 
     // Create a list of all posts, using a sorted list WITHOUT the extra time attachment
-    for (let x = 0; x < postTimeList.length; x++) {
-        sortedPosts.push(postTimeList[x][0]); // 
-    }
+    postTimeList.forEach((sortedPost) => {
+      sortedPosts.push(sortedPost[0]);  
+    });
 
     return sortedPosts;
+}
+
+/**
+ * Retrieves a list of posts, sorted by creation time from newest to oldest
+ * 
+ * Initially retrieves 6 posts, with each consecutive load-more 
+ */
+const getPostsSorted = async (loads) => {
+  
+  // Validate if the loads parameter cannot be translated to a number
+  if (isNaN(loads)) {
+    logger.info(
+      `Failed get posts sorted for landing page: Non-numeric amount of pages`
+    );
+    throw {
+      status: 400,
+      message: `Error: Non-numeric amount of pages`,
+    }; 
+  }
+
+  const postsSorted = await getAllPostsSorted();
+  const loadNum = parseInt(loads);
+
+  // Validate the load number is a positive integer
+  if (loadNum <= 0) {
+    logger.info(
+      `Failed get posts sorted for landing page: Negative or zero amount of pages`
+    );
+    throw {
+      status: 400,
+      message: `Error: Negative or zero amount of pages inputted`,
+    }; 
+  }
+
+  // No posts exist
+  if (postsSorted.length === 0) {
+    logger.info(
+      `Failed get posts sorted for landing page: Empty forum table`
+    );
+    throw {
+      status: 404,
+      message: `Error: No posts available for retrieval`,
+    }; 
+  }
+
+  // When the amount of pages exceeds the posts content capacity
+  else if (postsSorted.length <= (6 + ((loadNum-2) * 6))) {
+    logger.info(
+      `Failed get posts sorted for landing page: Page number exceeds amount of posts that can be displayed`
+    );
+    throw {
+      status: 404,
+      message: `Error: Page number exceeds amount of posts that can be displayed`,
+    }; 
+  }
+
+  // When the number of posts don't meet load capacity
+  else if (postsSorted.length <= (6 + ((loadNum-1) * 6))) {
+    return postsSorted;
+  } 
+  // more than 4 posts
+  else {
+    const postsSortedByDenom = postsSorted.slice(0, (6 + ((loadNum-1) * 6)));
+    return postsSortedByDenom;
+  }
 
 }
 
@@ -288,5 +325,6 @@ module.exports = {
     createPost,
     createReply,
     getAllPostsSorted,
+    getPostsSorted,
     getNewestPost
 };
