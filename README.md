@@ -91,7 +91,6 @@ GET		/api/encounters/encounter?encounter_id=[encounter_id]		Get single encounter
 
 
 GET		/api/encounters/user										Get all encounters by a user
-<<<<<<< HEAD
 					Body: {
 						"insert": "insert"
 					}
@@ -100,12 +99,6 @@ GET		/api/encounters/monsters?challenge_rating={chal_rating}		Get random monster
 					Body: {
 						"insert": "insert"
 					}
-=======
-
-
-GET		/api/encounters/monsters?challenge_rating=[chal_rating]		Get random monsters by challenge rating
-
->>>>>>> 266103aa77bb317697fb302c326eb15c16aa34a3
 
 PUT		/api/encounters/encounter									Update an existing encounter
 					Body: {
@@ -147,15 +140,13 @@ POST	/api/forums/:[postID]	        							Create a comment
 					}
 PUT		/api/forums/comments										Update an comment
 					Body: {
-						"Title": "NewPost",
-						"Body": "Message Goes Here"
+						"comment_id": "d0-29-49-8c7-d693d",
+						"comment_creation_time": "24-10-084:10.36Z",
+						"body": "Updated comment text"
 					}
 
+
 DELETE	/api/forums/comments/{post_id}/{creation_time}		Delete a comment
-
-
-Postman Testing Setup
-
 
 
 
@@ -253,10 +244,10 @@ Technologies Used
 	•	BCrypt: Password hashing and encryption.
 	•	Postman: Testing for API routes.
 	•	Axios: API fetch requests
-	•	Winston: Logging library for managing error, info, and debug logs 			in the application.
- 	•	Jest: Testing framework used for the unit and integration tests to 			ensure the application works as expected.
+	•	Winston: Logging library for managing error, info, and debug logs in the application.
+ 	•	Jest: Testing framework used for the unit and integration tests to ensure the application works as expected.
   	•	UUID: Library for generating universally unique identifiers.
-   	•	AWS Document Client: AWS SDK’s DynamoDB DocumentClient for interacting 			with DynamoDB in a simpler, object-oriented way.
+   	•	AWS Document Client: AWS SDK’s DynamoDB DocumentClient for interacting with DynamoDB in a simpler, object-oriented way.
 
 
 
