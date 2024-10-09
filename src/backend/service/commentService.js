@@ -113,7 +113,7 @@ const getCommentsByLoadSorted = async (parentID, loads) => {
     }; 
   }
 
-  // When the amount of pages exceeds the comments content capacity
+  // When the amount of pages exceeds the comments content capacity 
   else if (commentsSorted.length <= (8 + ((loadNum-2) * 8))) {
     logger.info(
       `Failed get posts sorted for landing page: Page number exceeds amount of comments that can be displayed`
