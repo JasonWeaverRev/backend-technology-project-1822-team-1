@@ -363,5 +363,6 @@ module.exports = {
     createPost,
     createReply,
     getAllPostsSorted,
-    getNewestPost
+    getNewestPost, 
+    dislikePost
 };
