@@ -92,7 +92,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.put("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
+router.patch("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
     const { about_me } = req.body;
 
     try {
