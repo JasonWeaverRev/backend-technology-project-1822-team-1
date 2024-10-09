@@ -24,6 +24,11 @@ const monsterAmount = 5;
 //   },
 // ];
 
+/**
+ * 
+ * @param {*} challengeRating 
+ * @returns 
+ */
 const getMonstersByChallengeRating = async (challengeRating) => {
   try {
     const response = await axios(
@@ -79,6 +84,11 @@ const getMonstersByChallengeRating = async (challengeRating) => {
   }
 };
 
+/**
+ * 
+ * @param {*} id 
+ * @returns 
+ */
 const getEncounterById = async (id) => {
   if (!id || id.trim() === "") {
     throw { status: 400, message: "Must provide id for the encounter" };

@@ -110,7 +110,7 @@ postRouter.post('/:postId', verifyToken, async (req, res) => {
 /**
  * Get all posts in the forums table, sorted in ascending order of their creation time []
  */
-postRouter.get('/filters', async (req, res) => {
+postRouter.get('/', async (req, res) => {
     
     try {
         const data = await postService.getAllPostsSorted();
@@ -122,21 +122,38 @@ postRouter.get('/filters', async (req, res) => {
 });
 
 /**
- * Gets all posts from the forums
+ * Get all posts in the forums table, sorted in descending order of their creation time []
  */
 postRouter.get('/', async (req, res) => {
-
+    
     try {
-        const data = await postService.getAllPosts();
+        const data = await postService.getAllPostsSorted();
         res.status(201).json(data);
+
+    } catch (err) {
+        res.status(err.status || 400).json({message: err.message});
+    }
+});
+
+/**
+ * Get a list of posts, sorted in descending order, 6 at a time
+ * 
+ * :load = 0: 6 posts
+ * :load = 1: 12 posts
+ * :load = 2: 18 posts
+ */
+postRouter.get('/landing', async (req, res) => {
+    const{page} = req.query;
+    
+    try {
+        const posts = await postService.getPostsSorted(page);
+        res.status(201).json(posts);
+
     } catch (err) {
         res.status(err.status || 400).json({message: err.message});
     }
 
 });
-
-
-
 
 
 module.exports = postRouter;

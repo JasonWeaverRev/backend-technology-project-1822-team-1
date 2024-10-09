@@ -76,9 +76,6 @@ async function deletePostById(postID, crTime) {
  * @param replyID Id of post to have its parent removed
  */
 const removeParent = async(replyPost) => {
-    // Get child post to access sort key
-  
-
     const command = new UpdateCommand ( {
         TableName,
         Key: {
