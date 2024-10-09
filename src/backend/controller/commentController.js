@@ -8,8 +8,8 @@ const validateComment = require('../middleware/validateComment');
 /**
  * Delete a specific comment
  */
-commentRouter.delete('/', verifyToken, async (req, res) => {
-  const { post_id, creation_time } = req.body;
+commentRouter.delete('/:post_id/:creation_time', verifyToken, async (req, res) => {
+  const { post_id, creation_time } = req.params;  // Extract from URL
   const username = req.user.username;
 
   // Validate required parameters
@@ -34,9 +34,6 @@ commentRouter.delete('/', verifyToken, async (req, res) => {
     res.status(err.status || 500).json({ message: 'Internal Server Error' });
   }
 });
-
-
-
 /**
  * Update an existing comment
  */
@@ -70,5 +67,31 @@ commentRouter.put('/', verifyToken, validateComment, async (req, res) => {
     res.status(err.status || 500).json({ message: 'Internal Server Error' });
   }
 });
+
+
+
+/**
+ * Get a list of comments, sorted in ascending order, 8 at a time
+ * 
+ * :id = parent_id of comments 
+ * 
+ * :load = 0: 8
+ * :load = 1: 16 posts
+ * :load = 2: 24 posts
+ */
+commentRouter.get('/post', async (req, res) => {
+  const{id, page} = req.query;
+  
+  try {
+      const comments = await commentService.getCommentsByLoadSorted(id, page);
+      res.status(201).json(comments);
+
+  } catch (err) {
+      res.status(err.status || 400).json({message: err.message});
+  }
+
+});
+
+
 
 module.exports = commentRouter;

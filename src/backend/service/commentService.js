@@ -1,5 +1,6 @@
 const commentDao = require('../dao/commentDao');
 const accountDao = require('../dao/accountDAO'); // Import the user DAO to fetch user details
+const { logger } = require("../utils/logger");
 
 /**
  * Updates a comment if it belongs to the user making the request
@@ -58,13 +59,45 @@ const deleteComment = async (post_id, creation_time, username) => {
   return deleteResult;
 };
 
-module.exports = {
-  deleteComment,
-};
 
+/**
+ * =================
+ * HELPER FUNCTIONS
+ * =================
+ */
+/**
+ * Retrieves a list of comments, sorted by creation time, excluding comments, in ascending order,
+ * all with the same parent post
+ * 
+ * @returns list of comments, sorted by creation time
+ */
+const getCommentsSortedByParent = async (parentID) => {
+  const comments = await commentDao.getCommentsByParent(parentID);
+  const commentsTimeList = [];
+  const sortedComments = [];
 
+  // Create a list of all comments, attached to a time
+  comments.forEach((comment) => {
+    if (comment.parent_id) {
+      commentsTimeList.push([comment, comment.creation_time]);
+    }
+  });
+
+  // Sort the list by the attached time in ascending order (oldest first)
+  commentsTimeList.sort(function(a, b) {
+      return new Date(a[1]) - new Date(b[1]); // compares index 1, or the creation time
+  });
+
+  // Create a list of all comments, using a sorted list WITHOUT the extra time attachment
+  commentsTimeList.forEach((sortedComment) => {
+    sortedComments.push(sortedComment[0]);  
+  });
+
+  return sortedComments;
+}
 
 module.exports = {
   updateComment,
   deleteComment,
+  getCommentsByLoadSorted
 };

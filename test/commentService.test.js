@@ -101,7 +101,7 @@ describe("Comment Service - Delete Comment", () => {
     let username;
 
     beforeEach(() => {
-        username = '1';
+        username = '1'; // Simulating a logged-in user with ID '1'
         jest.clearAllMocks(); // Clears all mocks
     });
 
@@ -114,18 +114,18 @@ describe("Comment Service - Delete Comment", () => {
     };
 
     test("Should delete comment if user is the author", async () => {
-        // Arrange
+        // Arrange: Simulate that the comment belongs to the user
         commentDao.getCommentById.mockResolvedValueOnce(sampleComment);
         commentDao.deleteCommentByUser.mockResolvedValueOnce(1);
 
-        // Act
+        // Act: Call the deleteComment function
         const result = await commentService.deleteComment(
             sampleComment.post_id,         // post_id of the comment to delete
             sampleComment.creation_time,   // creation_time of the comment to delete
             username                       // username of the user
         );
 
-        // Assert
+        // Assert: Ensure successful deletion
         expect(result).toBe(1);  // Successfully deleted
         expect(commentDao.getCommentById).toHaveBeenCalledWith(
             sampleComment.post_id,
@@ -138,18 +138,18 @@ describe("Comment Service - Delete Comment", () => {
     });
 
     test("Should return 403 if user is not the author and not an admin", async () => {
-        // Arrange
+        // Arrange: Mock the comment being written by a different user and user not being admin
         commentDao.getCommentById.mockResolvedValueOnce({ ...sampleComment, written_by: 'differentUser' });
         accountDao.getUserRoleByUsername.mockResolvedValueOnce('user'); // Regular user
 
-        // Act
+        // Act: Call the deleteComment function
         const result = await commentService.deleteComment(
             sampleComment.post_id,
             sampleComment.creation_time,
             username
         );
 
-        // Assert
+        // Assert: Ensure unauthorized (403) response
         expect(result).toBe(-1);  // Unauthorized
         expect(commentDao.getCommentById).toHaveBeenCalledWith(
             sampleComment.post_id,
@@ -160,20 +160,19 @@ describe("Comment Service - Delete Comment", () => {
     });
 
     test("Should delete comment if user is an admin", async () => {
-        // Arrange
-        // Simulate that the comment was written by someone else
+        // Arrange: Simulate comment written by someone else, and current user is admin
         commentDao.getCommentById.mockResolvedValueOnce({ ...sampleComment, written_by: 'differentUser' });
         commentDao.deleteCommentByUser.mockResolvedValueOnce(1);
         accountDao.getUserRoleByUsername.mockResolvedValueOnce('admin'); // Admin user
 
-        // Act
+        // Act: Call the deleteComment function
         const result = await commentService.deleteComment(
             sampleComment.post_id,
             sampleComment.creation_time,
             username // 'username' is '1', different from 'differentUser'
         );
 
-        // Assert
+        // Assert: Ensure successful deletion
         expect(result).toBe(1);  // Successfully deleted
         expect(commentDao.getCommentById).toHaveBeenCalledWith(
             sampleComment.post_id,
@@ -187,17 +186,17 @@ describe("Comment Service - Delete Comment", () => {
     });
 
     test("Should return 404 if comment not found", async () => {
-        // Arrange: Comment not found
+        // Arrange: Simulate comment not found
         commentDao.getCommentById.mockResolvedValueOnce(null);
 
-        // Act
+        // Act: Call the deleteComment function
         const result = await commentService.deleteComment(
             sampleComment.post_id,
             sampleComment.creation_time,
             username
         );
 
-        // Assert
+        // Assert: Ensure not found (404) response
         expect(result).toBe(0);  // Comment not found
         expect(commentDao.getCommentById).toHaveBeenCalledWith(
             sampleComment.post_id,

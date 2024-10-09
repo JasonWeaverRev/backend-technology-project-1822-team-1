@@ -2,6 +2,7 @@ const accountService = require("../src/backend/service/accountService");
 const accountDao = require("../src/backend/dao/accountDao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { PutItemCommand } = require("@aws-sdk/client-dynamodb");
 
 jest.mock("../src/backend/dao/accountDao");
 jest.mock("../src/backend/dao/encounterDao");
@@ -14,7 +15,7 @@ describe("accountService Tests", () => {
   });
 
   describe("getUserByEmail", () => {
-    test("Should return a user when given a registered email", async () => {
+    it("Should return a user when given a registered email", async () => {
       const testEmail = "test@example.com";
       const mockUser = {
         email: "test@example.com",
@@ -29,7 +30,7 @@ describe("accountService Tests", () => {
       expect(result).toEqual(mockUser);
     });
 
-    test("Should return null when email does not exist", async () => {
+    it("Should return null when email does not exist", async () => {
       accountDao.getUserByEmail.mockReturnValue(null);
       const result = await accountService.getUserByEmail("test@example.com");
 
@@ -38,7 +39,7 @@ describe("accountService Tests", () => {
   });
 
   describe("getUserByUsername", () => {
-    test("Should return a user when given a registered username", async () => {
+    it("Should return a user when given a registered username", async () => {
       const testUsername = "testuser";
       const mockUser = {
         email: "test@example.com",
@@ -55,7 +56,7 @@ describe("accountService Tests", () => {
   });
 
   describe("registerUser: email input validation", () => {
-    test("Should throw Error when missing email", async () => {
+    it("Should throw Error when missing email", async () => {
       const mockUser = {
         email: "",
         username: "testuser",
@@ -72,7 +73,7 @@ describe("accountService Tests", () => {
       }
     });
 
-    test("Should throw Error for incorrect email format", async () => {
+    it("Should throw Error for incorrect email format", async () => {
       const mockUser = {
         email: "wrongformat",
         username: "testuser",
@@ -87,7 +88,7 @@ describe("accountService Tests", () => {
       }
     });
 
-    test("Should throw Error is email is already registered", async () => {
+    it("Should throw Error is email is already registered", async () => {
       const testUsername = "testuser";
       const mockUser = {
         email: "test@example.com",
@@ -106,7 +107,7 @@ describe("accountService Tests", () => {
   });
 
   describe("registerUser: username input validation", () => {
-    test("Should throw Error when missing username", async () => {
+    it("Should throw Error when missing username", async () => {
       const mockUser = {
         email: "test@example.com",
         username: "",
@@ -123,7 +124,7 @@ describe("accountService Tests", () => {
       }
     });
 
-    test("Should throw Error if username contains '@' ", async () => {
+    it("Should throw Error if username contains '@' ", async () => {
       const mockUser = {
         email: "test@example.com",
         username: "user@name",
@@ -139,7 +140,7 @@ describe("accountService Tests", () => {
       }
     });
 
-    test("Should throw Error if username is taken", async () => {
+    it("Should throw Error if username is taken", async () => {
       const testUsername = "testuser";
       const mockUser = {
         email: "test@example.com",
@@ -158,7 +159,7 @@ describe("accountService Tests", () => {
   });
 
   describe("registerUser: password input validation", () => {
-    test("Should throw Error when missing password", async () => {
+    it("Should throw Error when missing password", async () => {
       const mockUser = {
         email: "test@example.com",
         username: "testuser",
@@ -175,7 +176,7 @@ describe("accountService Tests", () => {
       }
     });
 
-    test("Should throw Error when password length is less than 8", async () => {
+    it("Should throw Error when password length is less than 8", async () => {
       const mockUser = {
         email: "test@example.com",
         username: "testuser",
@@ -194,7 +195,7 @@ describe("accountService Tests", () => {
   });
 
   describe("registerUser: successful creation w/ roles", () => {
-    test("Should return User with role 'user' if role is not specified", async () => {
+    it("Should return User with role 'user' if role is not specified", async () => {
       const mockUser = {
         email: "test@example.com",
         username: "testuser",
@@ -214,7 +215,7 @@ describe("accountService Tests", () => {
       expect(result.username).toBe(mockUser.username);
     });
 
-    test("Should return User with role 'admin' if role is specified", async () => {
+    it("Should return User with role 'admin' if role is specified", async () => {
       const mockUser = {
         email: "test@example.com",
         username: "testuser",
@@ -233,6 +234,37 @@ describe("accountService Tests", () => {
       expect(result.role).toBe("admin");
       expect(result.email).toBe(mockUser.email);
       expect(result.username).toBe(mockUser.username);
+    });
+  });
+
+  describe("updateAboutMe", () => {
+    it("Should return User email w/ new about_me text", async () => {
+      const mockUserEmail = "test@email.com";
+      const mockText = "Example about me text";
+      accountDao.isEmailTaken.mockReturnValue(true);
+      accountDao.updateAboutMe.mockReturnValue({
+        email: mockUserEmail, 
+        about_me: mockText});
+
+      const result = await accountService.updateAboutMe(mockUserEmail, mockText);
+      expect(result.email).toBe("test@email.com");
+      expect(result.about_me).toBe("Example about me text");
+    });
+
+    it("Should throw Error when email isn't registered", async () => {
+      const mockUserEmail = "test@email.com";
+      const mockText = "Example about me text";
+      accountDao.isEmailTaken.mockReturnValue(false);
+      accountDao.updateAboutMe.mockReturnValue({mockUserEmail, mockText});
+
+      try {
+        const result = await accountService.updateAboutMe(mockUserEmail, mockText);
+      } catch (error) {
+        expect(error.message).toBe(
+          "Account does not exist"
+        );
+      }
+      
     });
   });
 });
