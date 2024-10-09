@@ -78,7 +78,7 @@ router.put('/campaigns', verifyToken, async (req, res) => {
 
 // Router to delete campaign_title from an Encounter
 // Ex. URL) http://localhost:3000/api/encounters/campaigns?encounter_id=123
-router.delete('/campaigns', verifyToken, async (req, res) => {
+router.put('/campaigns', verifyToken, async (req, res) => {
   const { encounter_id } = req.query;
   const username = req.user.username;
 
