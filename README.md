@@ -91,7 +91,7 @@ GET		/api/encounters/user										Get all encounters by a user
 						"insert": "insert"
 					}
 				
-GET		/api/encounters/monsters?challenge_rating=[chal_rating]		Get random monsters by challenge rating
+GET		/api/encounters/monsters?challenge_rating={chal_rating}		Get random monsters by challenge rating
 					Body: {
 						"insert": "insert"
 					}
@@ -137,7 +137,8 @@ PUT		/api/forums/comments										Update an comment
 						"Title": "NewPost",
 						"Body": "Message Goes Here"
 					}
-DELETE	/api/forums/comments										Delete a comment
+
+DELETE	/api/forums/comments/{post_id}/{creation_time}		Delete a comment
 
 
 Postman Testing Setup

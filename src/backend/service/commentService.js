@@ -58,11 +58,6 @@ const deleteComment = async (post_id, creation_time, username) => {
   return deleteResult;
 };
 
-module.exports = {
-  deleteComment,
-};
-
-
 
 module.exports = {
   updateComment,
