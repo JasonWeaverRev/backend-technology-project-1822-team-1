@@ -361,7 +361,7 @@ async function likePost(post_id, username) {
  * Dislikes a post on behalf of a user
  */
 /**
- * Dislikes a post on behalf of a user
+ * Un-Dislikes a post on behalf of a user
  */
 async function dislikePost(post_id, username) {
   const post = await getPostById(post_id);
