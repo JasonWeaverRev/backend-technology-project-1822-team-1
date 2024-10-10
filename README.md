@@ -91,10 +91,14 @@ GET		/api/encounters/encounter?encounter_id=[encounter_id]		Get single encounter
 
 
 GET		/api/encounters/user										Get all encounters by a user
-
-
-GET		/api/encounters/monsters?challenge_rating=[chal_rating]		Get random monsters by challenge rating
-
+					Body: {
+						"insert": "insert"
+					}
+				
+GET		/api/encounters/monsters?challenge_rating={chal_rating}		Get random monsters by challenge rating
+					Body: {
+						"insert": "insert"
+					}
 
 PUT		/api/encounters/encounter									Update an existing encounter
 					Body: {
@@ -136,14 +140,13 @@ POST	/api/forums/:[postID]	        							Create a comment
 					}
 PUT		/api/forums/comments										Update an comment
 					Body: {
-						"Title": "NewPost",
-						"Body": "Message Goes Here"
+						"comment_id": "d0-29-49-8c7-d693d",
+						"comment_creation_time": "24-10-084:10.36Z",
+						"body": "Updated comment text"
 					}
-DELETE	/api/forums/comments										Delete a comment
 
 
-Postman Testing Setup
-
+DELETE	/api/forums/comments/{post_id}/{creation_time}		Delete a comment
 
 
 
@@ -161,7 +164,7 @@ Database Schema
 
 The backend uses DynamoDB to store data. Below are some key collections and their fields:
 
-User
+Dungeon_Delver_Users
 ```
 
 {
@@ -170,17 +173,13 @@ User
 "password": "hashedString",
 "profile_pic": "https://example.com/images/profile.jpg",
 "about_me": "I love DnD!",
-"encounters": ["EncounterID1", "EncounterID2"],
-"encounter_campaigns": ["CampaignID1", "CampaignID2"],
-"forum_posts": ["PostID1", "PostID2"],
-"interacted_posts": ["PostID1", "PostID3"],
 "creation_time": "2024-10-01T10:00:00Z",
 "role": "string"
 }
 
 ```
 
-Encounter
+Encounters
 ```
 
 {
@@ -203,18 +202,9 @@ Encounter
 "creation_time": "2024-10-01T10:00:00Z"
 }
 
-```
-Campaign
-```
-
-{
-"campaign_id": "UUID",
-"campaign_title": "title",
-"encounters": ["EncounterID1", "EncounterID2", "EncounterID3"]
-}
 
 ```
-Forum Post
+Delver_Forum_Posts
 ```
 
 {
@@ -225,9 +215,9 @@ Forum Post
 "title": "My Epic Encounter",
 "body": "Here's a great encounter with a dragon and goblins. [Encounter Details]",
 "likes": 20,
-"parent_id": 2,
-"replies": "["ReplyID1", "ReplyID2", "ReplyID3"]" // This would be null or omitted if it's an independent post
-
+"parent_id": 2
+"liked_by": ["user1", "user2"],
+"disliked_by": ["user1", "user2"]
 }
 
 ```
@@ -241,10 +231,10 @@ Technologies Used
 	•	BCrypt: Password hashing and encryption.
 	•	Postman: Testing for API routes.
 	•	Axios: API fetch requests
-	•	Winston: Logging library for managing error, info, and debug logs 			in the application.
- 	•	Jest: Testing framework used for the unit and integration tests to 			ensure the application works as expected.
+	•	Winston: Logging library for managing error, info, and debug logs in the application.
+ 	•	Jest: Testing framework used for the unit and integration tests to ensure the application works as expected.
   	•	UUID: Library for generating universally unique identifiers.
-   	•	AWS Document Client: AWS SDK’s DynamoDB DocumentClient for interacting 			with DynamoDB in a simpler, object-oriented way.
+   	•	AWS Document Client: AWS SDK’s DynamoDB DocumentClient for interacting with DynamoDB in a simpler, object-oriented way.
 
 
 

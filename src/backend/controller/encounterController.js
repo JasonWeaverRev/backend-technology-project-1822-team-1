@@ -56,35 +56,27 @@ router.post("/encounter", verifyToken, async (req, res) => {
   }
 });
 
-// Router to assign campaign_title to an Encounter
+// Router to set/delete campaign_title from an Encounter
 // Ex. URL) http://localhost:3000/api/encounters/campaigns?encounter_id=123
-router.put('/campaigns', verifyToken, async (req, res) => {
-  try {
-    const { encounter_id } = req.query;
-    const { campaign_title } = req.body;
-    const username = req.user.username;
-
-    if (!encounter_id) {
-      return res.status(400).json({ message: "Encounter ID must be provided" });
-    }
-
-    const data = await encounterService.createCampaign(username, encounter_id, campaign_title);
-    return res.status(201).json(data);
-  } catch (err) {
-    console.error(err);
-    return res.status(err.status || 500).json({ message: err.message });
-  }
-});
-
-// Router to delete campaign_title from an Encounter
-// Ex. URL) http://localhost:3000/api/encounters/campaigns?encounter_id=123
-router.put('/campaigns', verifyToken, async (req, res) => {
+router.patch('/campaigns', verifyToken, async (req, res) => {
   const { encounter_id } = req.query;
+  const { action, campaign_title } = req.body;
   const username = req.user.username;
 
   try {
-    const result = await encounterService.removeCampaign(username, encounter_id);
-    return res.status(200).json({ message: "Campaign successfully removed from Encounter", data: result });
+    if (action.toLowerCase() !== 'set' && action.toLowerCase() !== 'remove') {
+      return res.status(400).json({message: "Invalid campaign action"});
+    }
+
+    if (action.toLowerCase() === 'set') {
+      const data = await encounterService.createCampaign(username, encounter_id, campaign_title);
+      return res.status(201).json(data);
+
+    } else {
+      const data = await encounterService.removeCampaign(username, encounter_id);
+      return res.status(200).json(data);
+    }
+    
 
   } catch (err) {
     return res.status(err.status || 500).json({ message: err.message || "Internal server error" });
