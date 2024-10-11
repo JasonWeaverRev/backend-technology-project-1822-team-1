@@ -9,7 +9,10 @@ router.get("/monsters", async (req, res) => {
     const monsters = await encounterService.getMonstersByChallengeRating(
       challengeRating
     );
-    res.status(200).json({ monsters });
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ monsters });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -20,7 +23,10 @@ router.get("/user", verifyToken, async (req, res) => {
 
   try {
     const encounters = await encounterService.getEncountersByUsername(username);
-    res.status(200).json({ encounters });
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ encounters });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -32,7 +38,10 @@ router.get("/encounter", async (req, res) => {
   try {
     const encounter = await encounterService.getEncounterById(encounter_id);
 
-    res.status(200).json({ encounter });
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ encounter });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -50,7 +59,10 @@ router.post("/encounter", verifyToken, async (req, res) => {
       setting
     );
 
-    res.status(201).json({ encounter });
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ encounter });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -74,13 +86,19 @@ router.patch("/campaigns", verifyToken, async (req, res) => {
         encounter_id,
         campaign_title
       );
-      return res.status(201).json(data);
+      return res
+        .status(201)
+        .setHeader("Access-Control-Allow-Origin", "*")
+        .json(data);
     } else {
       const data = await encounterService.removeCampaign(
         username,
         encounter_id
       );
-      return res.status(200).json(data);
+      return res
+        .status(200)
+        .setHeader("Access-Control-Allow-Origin", "*")
+        .json(data);
     }
   } catch (err) {
     return res
@@ -102,7 +120,10 @@ router.patch("/encounter", verifyToken, async (req, res) => {
       setting
     );
 
-    res.status(200).json({ encounter });
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ encounter });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -118,7 +139,10 @@ router.delete("/encounter", verifyToken, async (req, res) => {
       username
     );
 
-    res.status(200).json({ encounter });
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ encounter });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }

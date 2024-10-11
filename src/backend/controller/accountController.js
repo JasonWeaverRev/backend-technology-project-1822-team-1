@@ -73,7 +73,10 @@ router.get("/username", async (req, res) => {
 router.post("/register", async (req, res) => {
   try {
     const newUser = await accountService.registerUser(req.body);
-    return res.status(201).json({ message: "New user registered", newUser });
+    return res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ message: "New user registered", newUser });
   } catch (error) {
     console.error(error);
     return res.status(400).json({ message: error.message });
@@ -86,23 +89,26 @@ router.post("/login", async (req, res) => {
   try {
     const token = await accountService.loginUser(identifier, password);
 
-    res.status(200).json({ token });
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ token });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
 });
 
 router.patch("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
-    const { about_me } = req.body;
+  const { about_me } = req.body;
 
-    try {
-        const email = req.user.email;
-        const result = await accountService.updateAboutMe(email, about_me);
+  try {
+    const email = req.user.email;
+    const result = await accountService.updateAboutMe(email, about_me);
 
-        res.status(200).json(result);
-    } catch (err) {
-        return res.status(400).json({ message: err.message });
-    }
-})
+    res.status(200).setHeader("Access-Control-Allow-Origin", "*").json(result);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
 
 module.exports = router;
