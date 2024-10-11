@@ -79,6 +79,83 @@ const deleteComment = async (post_id, creation_time, username) => {
 };
 
 /**
+ * Retrieves a list of comments, sorted by creation time from oldest to newest
+ *
+ * Initially retrieves 8 posts, then 8 more with each consecutive load-more
+ */
+const getCommentsByLoadSorted = async (parentID, loads) => {
+  if (!parentID || !loads) {
+    logger.info(
+      `Failed getting comments sorted for a post: Invalid parent post id or page number`
+    );
+    throw {
+      status: 400,
+      message: `Error: Invalid parent post id or page number`,
+    };
+  }
+
+  // Validate if the loads parameter cannot be translated to a number
+  if (isNaN(loads)) {
+    logger.info(
+      `Failed getting comments sorted for a post: Non-numeric amount of loads`
+    );
+    throw {
+      status: 400,
+      message: `Error: Non-numeric amount of loads`,
+    };
+  }
+
+  const commentsSorted = await getCommentsSortedByParent(parentID);
+  const loadNum = parseInt(loads);
+
+  // Validate the load number is 0 or positive
+  if (loadNum <= 0) {
+    logger.info(
+      `Failed getting comments sorted for a post: Negative or zero amount of pages`
+    );
+    throw {
+      status: 400,
+      message: `Error: Negative or zero amount of pages inputted`,
+    };
+  }
+
+  // No comments exist
+  if (commentsSorted.length === 0) {
+    logger.info(
+      `Failed getting comments sorted for a post: No replies available`
+    );
+    throw {
+      status: 404,
+      message: `Error: No comments available for retrieval for this post`,
+    };
+  }
+
+  // When the amount of pages exceeds the comments content capacity
+  else if (commentsSorted.length <= 8 + (loadNum - 2) * 8) {
+    logger.info(
+      `Failed get posts sorted for landing page: Page number exceeds amount of comments that can be displayed`
+    );
+    throw {
+      status: 400,
+      message: `Error: Page number exceeds amount of comments that can be displayed`,
+    };
+  }
+
+  // When the number of comments don't meet load capacity
+  else if (commentsSorted.length <= 8 + (loadNum - 1) * 8) {
+    return commentsSorted;
+  }
+  // more than 8 comments
+  else {
+    const commentsSortedByDenom = commentsSorted.slice(
+      0,
+      8 + (loadNum - 1) * 8
+    );
+    return commentsSortedByDenom;
+  }
+};
+
+/**
  * =================
  * HELPER FUNCTIONS
  * =================

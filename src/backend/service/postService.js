@@ -128,35 +128,6 @@ async function createReply(replyCont, parent_id, user) {
   };
 }
 
-/**
- * Retrieves a list of all posts, sorted by creation time, excluding comments
- * 
- * @returns list of all posts, sorted by creation time
- */
-const getAllPostsSorted = async () => {
-    const posts = await postDAO.getAllPosts();
-    const postTimeList = [];
-    const sortedPosts = [];
-
-    // Create a list of all posts, attached to a time
-    posts.forEach((post) => {
-      if (!post.parent_id) {
-        postTimeList.push([post, post.creation_time]);
-      }
-    });
-
-    // Sort the list by the attached time in descending order (newest first)
-    postTimeList.sort(function(a, b) {
-        return new Date(b[1]) - new Date(a[1]); // compares index 1, or the creation time
-    });
-
-    // Create a list of all posts, using a sorted list WITHOUT the extra time attachment
-    postTimeList.forEach((sortedPost) => {
-      sortedPosts.push(sortedPost[0]);  
-    });
-
-    return sortedPosts;
-}
 
 /**
  * Retrieves a list of posts, sorted by creation time from newest to oldest
@@ -260,6 +231,36 @@ const getAllPosts = async () => {
 }
 
 /**
+ * Retrieves a list of all posts, sorted by creation time, excluding comments
+ * 
+ * @returns list of all posts, sorted by creation time
+ */
+const getAllPostsSorted = async () => {
+  const posts = await postDAO.getAllPosts();
+  const postTimeList = [];
+  const sortedPosts = [];
+
+  // Create a list of all posts, attached to a time
+  posts.forEach((post) => {
+    if (!post.parent_id) {
+      postTimeList.push([post, post.creation_time]);
+    }
+  });
+
+  // Sort the list by the attached time in descending order (newest first)
+  postTimeList.sort(function(a, b) {
+      return new Date(b[1]) - new Date(a[1]); // compares index 1, or the creation time
+  });
+
+  // Create a list of all posts, using a sorted list WITHOUT the extra time attachment
+  postTimeList.forEach((sortedPost) => {
+    sortedPosts.push(sortedPost[0]);  
+  });
+
+  return sortedPosts;
+}
+
+/**
  * Removes the parent post's id from all of its children posts 
  * 
  * @param parentPostID parent_id to be removed from all posts
@@ -360,7 +361,7 @@ async function likePost(post_id, username) {
  * Dislikes a post on behalf of a user
  */
 /**
- * Dislikes a post on behalf of a user
+ * Un-Dislikes a post on behalf of a user
  */
 async function dislikePost(post_id, username) {
   const post = await getPostById(post_id);
