@@ -171,23 +171,22 @@ const editEncounterById = async (
       throw { status: 403, message: "Cannot edit encounters of other users" };
     }
 
-    if (encounter.encounter_title)
-      // encounter.encounter_title =
-      //   !encounter_title || encounter_title.trim() !== ""
-      //     ? encounter_title
-      //     : encounter.encounter_title;
+    encounter.encounter_title =
+      !encounter_title || encounter_title.trim() === ""
+        ? encounter.encounter_title
+        : encounter_title;
 
-      // encounter.monsters = monsters.length > 0 ? monsters : encounter.monsters;
+    encounter.monsters =
+      !monsters || monsters.length > 0 ? monsters : encounter.monsters;
 
-      // encounter.setting =
-      //   !setting || setting.trim() !== "" ? setting : encounter.setting;
-
-      console.log(encounter);
+    encounter.setting =
+      !setting || setting.trim() === "" ? encounter.setting : setting;
 
     await encounterDao.editEncounterById(encounter);
 
     return encounter;
   } catch (err) {
+    console.log(err);
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
   }
 };
