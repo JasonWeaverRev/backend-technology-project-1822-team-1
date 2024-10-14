@@ -17,13 +17,10 @@ const {
 postRouter.post("/", verifyToken, async (req, res) => {
   try {
     const data = await postService.createPost(req.body, req.user);
-    res
-      .status(201)
-      .setHeader("Access-Control-Allow-Origin", "*")
-      .json({
-        message: `Successfully created new post!`,
-        PostInformation: req.body,
-      });
+    res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
+      message: `Successfully created new post!`,
+      PostInformation: req.body,
+    });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -100,13 +97,10 @@ postRouter.post("/:postId", verifyToken, async (req, res) => {
       req.params.postId,
       req.user
     );
-    res
-      .status(201)
-      .setHeader("Access-Control-Allow-Origin", "*")
-      .json({
-        message: `Successfully created new post!`,
-        PostInformation: req.body,
-      });
+    res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
+      message: `Successfully created new post!`,
+      PostInformation: req.body,
+    });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -130,32 +124,21 @@ postRouter.delete("/:postId", verifyAdminToken, async (req, res) => {
 
 /**
  * Get a list of posts, sorted in descending order, 6 at a time
-<<<<<<< HEAD
- * 
+ *
  * :page = 1: 4 posts
  * :page = 2: 8 posts
  * :page = 3: 12 posts
  */
-postRouter.get('/landing', async (req, res) => {
-    const{page} = req.query;
-    
-    try {
-        const postReturn = await postService.getPostsSorted(page);
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.status(201).json(postReturn);
-
-    } catch (err) {
-        res.status(err.status || 400).json({message: err.message});
-    }
-=======
- *
- * :page = 1: 6 posts
- * :page = 2: 12 posts
- * :page = 3: 18 posts
- */
 postRouter.get("/landing", async (req, res) => {
   const { page } = req.query;
->>>>>>> f0127901ae16ded5d12b23c65600db2e0964cb1a
+
+  try {
+    const postReturn = await postService.getPostsSorted(page);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(201).json(postReturn);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
 
   try {
     const posts = await postService.getPostsSorted(page);
