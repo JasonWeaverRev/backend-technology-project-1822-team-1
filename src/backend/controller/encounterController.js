@@ -4,7 +4,7 @@ const encounterService = require("../service/encounterService");
 const { verifyToken } = require("../middleware/authMiddleware");
 
 router.get("/monsters", async (req, res) => {
-  const challengeRating = req.query.challenge;
+  const challengeRating = req.query.challenge_rating;
   try {
     const monsters = await encounterService.getMonstersByChallengeRating(
       challengeRating

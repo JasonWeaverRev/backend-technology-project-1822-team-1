@@ -63,7 +63,7 @@ const getMonstersByChallengeRating = async (challengeRating) => {
         intelligence: monsterDetails.data.intelligence,
         wisdom: monsterDetails.data.wisdom,
         charisma: monsterDetails.data.charisma,
-        image: monsterDetails.data.image,
+        image: `${dndApiUrlPath}${monsterDetails.data.image}`,
         monsterPage: monsterDetails.data.name.includes(",")
           ? `${dndBeyondUrlPath}${monsterDetails.data.name
               .split(",")[0]
