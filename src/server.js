@@ -2,6 +2,7 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
 // Local project import
 const { logger } = require("./backend/utils/logger");
@@ -24,13 +25,14 @@ function loggerMiddleware(req, res, next) {
 }
 
 app.use(loggerMiddleware);
+app.use(cors());
 
 /**
  * Routing setup
  */
 app.use("/api/accounts", accountController);
-app.use('/api/forums', postRouter);
-app.use('/api/forums/comments', commentRouter);
+app.use("/api/forums", postRouter);
+app.use("/api/forums/comments", commentRouter);
 app.use("/api/encounters", encounterController);
 
 // Port listen

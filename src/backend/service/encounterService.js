@@ -25,9 +25,9 @@ const monsterAmount = 5;
 // ];
 
 /**
- * 
- * @param {*} challengeRating 
- * @returns 
+ *
+ * @param {*} challengeRating
+ * @returns
  */
 const getMonstersByChallengeRating = async (challengeRating) => {
   try {
@@ -85,9 +85,9 @@ const getMonstersByChallengeRating = async (challengeRating) => {
 };
 
 /**
- * 
- * @param {*} id 
- * @returns 
+ *
+ * @param {*} id
+ * @returns
  */
 const getEncounterById = async (id) => {
   if (!id || id.trim() === "") {
@@ -171,18 +171,22 @@ const editEncounterById = async (
       throw { status: 403, message: "Cannot edit encounters of other users" };
     }
 
-    encounter.encounter_title = encounter_title
-      ? encounter_title
-      : encounter.encounter_title;
+    encounter.encounter_title =
+      !encounter_title || encounter_title.trim() === ""
+        ? encounter.encounter_title
+        : encounter_title;
 
-    encounter.monsters = monsters ? monsters : encounter.monsters;
+    encounter.monsters =
+      !monsters || monsters.length > 0 ? monsters : encounter.monsters;
 
-    encounter.setting = setting ? setting : encounter.setting;
+    encounter.setting =
+      !setting || setting.trim() === "" ? encounter.setting : setting;
 
     await encounterDao.editEncounterById(encounter);
 
     return encounter;
   } catch (err) {
+    console.log(err);
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
   }
 };
@@ -207,7 +211,6 @@ const deleteEncounterById = async (encounter_id, username) => {
   }
 };
 
-// add a campaign_title to an encounter
 const createCampaign = async (username, encounter_id, campaign_title) => {
   if (!campaign_title) {
     throw { status: 400, message: "Campaign Title must be provided" };
@@ -219,16 +222,19 @@ const createCampaign = async (username, encounter_id, campaign_title) => {
   }
 
   if (encounter.created_by !== username) {
-    throw { status: 404, message: "Users can only add their own Encounters to Campaigns" };
+    throw {
+      status: 404,
+      message: "Users can only add their own Encounters to Campaigns",
+    };
   }
 
   const data = await encounterDao.createCampaign(encounter_id, campaign_title);
-  if(!data) {
+  if (!data) {
     throw { status: 500, message: "Internal server error" };
   }
-  
+
   return data;
-}
+};
 
 // remove campaign from an encounter
 const removeCampaign = async (username, encounter_id) => {
@@ -246,16 +252,19 @@ const removeCampaign = async (username, encounter_id) => {
   }
 
   if (encounter.created_by !== username) {
-    throw { status: 400, message: "Users cannot delete other user's campaigns"};
+    throw {
+      status: 400,
+      message: "Users cannot delete other user's campaigns",
+    };
   }
 
   const data = await encounterDao.removeCampaign(encounter_id);
-  if(!data) {
+  if (!data) {
     throw { status: 500, message: "Internal server error" };
   }
-  
+
   return data;
-}
+};
 
 module.exports = {
   getMonstersByChallengeRating,
