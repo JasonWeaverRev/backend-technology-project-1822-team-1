@@ -110,16 +110,17 @@ postRouter.delete('/:postId', verifyAdminToken, async (req, res) => {
 /**
  * Get a list of posts, sorted in descending order, 6 at a time
  * 
- * :page = 1: 6 posts
- * :page = 2: 12 posts
- * :page = 3: 18 posts
+ * :page = 1: 4 posts
+ * :page = 2: 8 posts
+ * :page = 3: 12 posts
  */
 postRouter.get('/landing', async (req, res) => {
     const{page} = req.query;
     
     try {
-        const posts = await postService.getPostsSorted(page);
-        res.status(201).json(posts);
+        const postReturn = await postService.getPostsSorted(page);
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.status(201).json(postReturn);
 
     } catch (err) {
         res.status(err.status || 400).json({message: err.message});
