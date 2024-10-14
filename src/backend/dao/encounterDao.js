@@ -151,6 +151,30 @@ const getBatchEncountersbyId = async (encounter_ids) => {
   }
 };
 
+const getCampaignByTitle = async (campaign_title) => {
+  try {
+    const command = new QueryCommand({
+      TableName,
+      IndexName: 'campaign_title-encounter_id-index',
+      KeyConditionExpression: '#campaign_title = :campaign_title',
+      ExpressionAttributeNames: {
+        "#campaign_title": "campaign_title",
+      },
+      ExpressionAttributeValues: {
+        ':campaign_title': { S: campaign_title }
+      }
+    });
+
+    const data = await documentClient.send(command);
+    const encounterIds = data.Items.map(item => item.encounter_id.S);
+    return encounterIds;
+
+  } catch (err) {
+    console.error('Error in getCampaign DAO:', err);
+    throw { status: 500, message: "Internal server error" };
+  }
+};
+
 // assigns a campaign_title to an Encounter -- used if we only want 1 campaign per encounter
 const createCampaign = async (encounter_id, campaign_title) => {
   try {
@@ -200,4 +224,5 @@ module.exports = {
   removeCampaign,
   editEncounterById,
   deleteEncounterById,
+  getCampaignByTitle
 };
