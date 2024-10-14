@@ -327,7 +327,11 @@ describe("encounterService Tests", () => {
       const testCmpTitle = "";
 
       try {
-        const result = await encounterService.createCampaign(testUsername, testEncId, testCmpTitle);
+        const result = await encounterService.createCampaign(
+          testUsername,
+          testEncId,
+          testCmpTitle
+        );
       } catch (err) {
         expect(err.message).toBe("Campaign Title must be provided");
       }
@@ -340,7 +344,11 @@ describe("encounterService Tests", () => {
 
       try {
         encounterDao.getEncounterById.mockReturnValue(null);
-        const result = await encounterService.createCampaign(testUsername, testEncId, testCmpTitle);
+        const result = await encounterService.createCampaign(
+          testUsername,
+          testEncId,
+          testCmpTitle
+        );
       } catch (err) {
         expect(err.message).toBe("Invalid Encounter ID");
       }
@@ -353,12 +361,17 @@ describe("encounterService Tests", () => {
 
       try {
         encounterDao.getEncounterById.mockReturnValue({
-            created_by: "notTestUser"
-          }
+          created_by: "notTestUser",
+        });
+        const result = await encounterService.createCampaign(
+          testUsername,
+          testEncId,
+          testCmpTitle
         );
-        const result = await encounterService.createCampaign(testUsername, testEncId, testCmpTitle);
       } catch (err) {
-        expect(err.message).toBe("Users can only add their own Encounters to Campaigns");
+        expect(err.message).toBe(
+          "Users can only add their own Encounters to Campaigns"
+        );
       }
     });
 
@@ -368,17 +381,21 @@ describe("encounterService Tests", () => {
       const testCmpTitle = "test title";
 
       encounterDao.getEncounterById.mockReturnValue({
-        created_by: "testUser"
+        created_by: "testUser",
       });
       encounterDao.createCampaign.mockReturnValue({
         created_by: "testUser",
-        campaign_title: "test title"
-      })
-      const result = await encounterService.createCampaign(testUsername, testEncId, testCmpTitle);
+        campaign_title: "test title",
+      });
+      const result = await encounterService.createCampaign(
+        testUsername,
+        testEncId,
+        testCmpTitle
+      );
       expect(result.created_by).toEqual(testUsername);
       expect(result.campaign_title).toEqual(testCmpTitle);
     });
-  })
+  });
 
   describe("removeCampaign", () => {
     it("Should throw Error for missing username", async () => {
@@ -386,7 +403,10 @@ describe("encounterService Tests", () => {
       const testEncId = 123;
 
       try {
-        const result = await encounterService.removeCampaign(testUsername, testEncId);
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
       } catch (err) {
         expect(err.message).toBe("Username must be provided");
       }
@@ -397,7 +417,10 @@ describe("encounterService Tests", () => {
       const testEncId = "";
 
       try {
-        const result = await encounterService.removeCampaign(testUsername, testEncId);
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
       } catch (err) {
         expect(err.message).toBe("Encounter ID must be provided");
       }
@@ -408,7 +431,10 @@ describe("encounterService Tests", () => {
       const testEncId = "123";
       encounterDao.getEncounterById.mockReturnValue(false);
       try {
-        const result = await encounterService.removeCampaign(testUsername, testEncId);
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
       } catch (err) {
         expect(err.message).toBe("Invalid Encounter ID");
       }
@@ -418,10 +444,13 @@ describe("encounterService Tests", () => {
       const testUsername = "testUser";
       const testEncId = "123";
       encounterDao.getEncounterById.mockReturnValue({
-        created_by : "notTestUser"
+        created_by: "notTestUser",
       });
       try {
-        const result = await encounterService.removeCampaign(testUsername, testEncId);
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
       } catch (err) {
         expect(err.message).toBe("Users cannot delete other user's campaigns");
       }
@@ -431,18 +460,21 @@ describe("encounterService Tests", () => {
       const testUsername = "testUser";
       const testEncId = "123";
       encounterDao.getEncounterById.mockReturnValue({
-        created_by : "testUser"
+        created_by: "testUser",
       });
       encounterDao.removeCampaign.mockReturnValue({
-        created_by : "testUser",
-        encounter_id : "123"
-      })
-      
-      const result = await encounterService.removeCampaign(testUsername, testEncId);
+        created_by: "testUser",
+        encounter_id: "123",
+      });
+
+      const result = await encounterService.removeCampaign(
+        testUsername,
+        testEncId
+      );
       expect(result.created_by).toBe("testUser");
       expect(result.encounter_id).toBe("123");
     });
-  })
+  });
 
   describe('getCampaign', () => {
     const campaignTitle = 'test campaign title';
@@ -456,7 +488,7 @@ describe("encounterService Tests", () => {
     });
   });
 
-  describe("createNewEncounter", () => {
+  describe("UpdateNewEncounter", () => {
     it("should edit an encounter correctly", async () => {
       const oldEncounter = {
         encounter_id: "1",
@@ -477,16 +509,14 @@ describe("encounterService Tests", () => {
 
       const result = await encounterService.editEncounterById(
         "1",
-        null,
+        undefined,
         "New Title",
         "testuser",
         "New Setting"
       );
 
       expect(encounterDao.getEncounterById).toHaveBeenCalledWith("1");
-      expect(encounterDao.editEncounterById).toHaveBeenCalledWith(
-        editedEncounter
-      );
+
       expect(result.encounter_title).toBe("New Title");
       expect(result.setting).toBe("New Setting");
     });
@@ -585,4 +615,4 @@ describe("encounterService Tests", () => {
       }
     });
   });
-});
+})

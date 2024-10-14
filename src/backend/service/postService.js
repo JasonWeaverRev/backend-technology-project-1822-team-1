@@ -128,40 +128,11 @@ async function createReply(replyCont, parent_id, user) {
   };
 }
 
-/**
- * Retrieves a list of all posts, sorted by creation time, excluding comments
- * 
- * @returns list of all posts, sorted by creation time
- */
-const getAllPostsSorted = async () => {
-    const posts = await postDAO.getAllPosts();
-    const postTimeList = [];
-    const sortedPosts = [];
-
-    // Create a list of all posts, attached to a time
-    posts.forEach((post) => {
-      if (!post.parent_id) {
-        postTimeList.push([post, post.creation_time]);
-      }
-    });
-
-    // Sort the list by the attached time in descending order (newest first)
-    postTimeList.sort(function(a, b) {
-        return new Date(b[1]) - new Date(a[1]); // compares index 1, or the creation time
-    });
-
-    // Create a list of all posts, using a sorted list WITHOUT the extra time attachment
-    postTimeList.forEach((sortedPost) => {
-      sortedPosts.push(sortedPost[0]);  
-    });
-
-    return sortedPosts;
-}
 
 /**
  * Retrieves a list of posts, sorted by creation time from newest to oldest
  * 
- * Initially retrieves 6 posts, with each consecutive load-more 
+ * Initially retrieves 4 posts, with each consecutive load-more 
  */
 const getPostsSorted = async (loads) => {
   
@@ -202,7 +173,7 @@ const getPostsSorted = async (loads) => {
   }
 
   // When the amount of pages exceeds the posts content capacity
-  else if (postsSorted.length <= (6 + ((loadNum-2) * 6))) {
+  else if (postsSorted.length <= (4 + ((loadNum-2) * 4))) {
     logger.info(
       `Failed get posts sorted for landing page: Page number exceeds amount of posts that can be displayed`
     );
@@ -213,13 +184,13 @@ const getPostsSorted = async (loads) => {
   }
 
   // When the number of posts don't meet load capacity
-  else if (postsSorted.length <= (6 + ((loadNum-1) * 6))) {
-    return postsSorted;
+  else if (postsSorted.length <= (4 + ((loadNum-1) * 4))) {
+    return [postsSorted, postsSorted.length];
   } 
   // more than 4 posts
   else {
-    const postsSortedByDenom = postsSorted.slice(0, (6 + ((loadNum-1) * 6)));
-    return postsSortedByDenom;
+    const postsSortedByDenom = postsSorted.slice(0, (4 + ((loadNum-1) * 4)));
+    return [postsSortedByDenom, postsSorted.length];
   }
 
 }
@@ -257,6 +228,36 @@ async function getPostById(postID) {
  */
 const getAllPosts = async () => {
     return await postDAO.getAllPosts();
+}
+
+/**
+ * Retrieves a list of all posts, sorted by creation time, excluding comments
+ * 
+ * @returns list of all posts, sorted by creation time
+ */
+const getAllPostsSorted = async () => {
+  const posts = await postDAO.getAllPosts();
+  const postTimeList = [];
+  const sortedPosts = [];
+
+  // Create a list of all posts, attached to a time
+  posts.forEach((post) => {
+    if (!post.parent_id) {
+      postTimeList.push([post, post.creation_time]);
+    }
+  });
+
+  // Sort the list by the attached time in descending order (newest first)
+  postTimeList.sort(function(a, b) {
+      return new Date(b[1]) - new Date(a[1]); // compares index 1, or the creation time
+  });
+
+  // Create a list of all posts, using a sorted list WITHOUT the extra time attachment
+  postTimeList.forEach((sortedPost) => {
+    sortedPosts.push(sortedPost[0]);  
+  });
+
+  return sortedPosts;
 }
 
 /**
@@ -360,7 +361,7 @@ async function likePost(post_id, username) {
  * Dislikes a post on behalf of a user
  */
 /**
- * Dislikes a post on behalf of a user
+ * Un-Dislikes a post on behalf of a user
  */
 async function dislikePost(post_id, username) {
   const post = await getPostById(post_id);
