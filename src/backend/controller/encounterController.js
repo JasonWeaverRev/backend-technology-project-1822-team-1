@@ -56,9 +56,30 @@ router.post("/encounter", verifyToken, async (req, res) => {
   }
 });
 
+router.get('/campaign', verifyToken, async (req, res) => {
+  const { campaign_title } = req.query; 
+
+  if (!campaign_title) {
+    return res.status(400).json({ message: "Campaign title must be provided" });
+  }
+
+  try {
+    const campaigns = await encounterService.getCampaignByTitle(campaign_title);
+
+    if (!campaigns || campaigns.length === 0) {
+      throw { status: 404, message: "Campaign not found" };
+    }
+
+    return res.status(200).json(campaigns);
+
+  } catch (err) {
+    return res.status(err.status || 500).json({ message: err.message || "Internal server error" });
+  }
+});
+
 // Router to set/delete campaign_title from an Encounter
 // Ex. URL) http://localhost:3000/api/encounters/campaigns?encounter_id=123
-router.patch('/campaigns', verifyToken, async (req, res) => {
+router.patch('/campaign', verifyToken, async (req, res) => {
   const { encounter_id } = req.query;
   const { action, campaign_title } = req.body;
   const username = req.user.username;

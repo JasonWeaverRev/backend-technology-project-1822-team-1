@@ -444,6 +444,18 @@ describe("encounterService Tests", () => {
     });
   })
 
+  describe('getCampaign', () => {
+    const campaignTitle = 'test campaign title';
+
+    it('should return a list of encounter_ids for a valid campaign title', async () => {
+      // Mocking the DAO return value
+      encounterDao.getCampaignByTitle.mockReturnValue(['1', '2', '3']);
+
+      const result = await encounterService.getCampaignByTitle(campaignTitle);
+      expect(result).toEqual(['1', '2', '3']);
+    });
+  });
+
   describe("createNewEncounter", () => {
     it("should edit an encounter correctly", async () => {
       const oldEncounter = {
