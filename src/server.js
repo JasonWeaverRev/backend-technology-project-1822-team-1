@@ -14,7 +14,7 @@ const encounterController = require("./backend/controller/encounterController.js
 /**
  * Server Port and general setup
  */
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 app.use(express.json());
 
 function loggerMiddleware(req, res, next) {
@@ -24,6 +24,15 @@ function loggerMiddleware(req, res, next) {
 
 app.use(loggerMiddleware);
 app.use(cors());
+app.options("*", cors()); // Allow preflight requests from any origin
+
+app.use((req, res, next) => {
+  console.log("Request received:");
+  console.log("Method:", req.method);
+  console.log("Path:", req.path);
+  console.log("Headers:", req.headers);
+  next();
+});
 
 /**
  * Routing setup
