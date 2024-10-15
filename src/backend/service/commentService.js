@@ -1,5 +1,5 @@
 const commentDao = require("../dao/commentDao");
-const accountDao = require("../dao/accountDAO"); // Import the user DAO to fetch user details
+const accountDao = require("../dao/accountDao"); // Import the user DAO to fetch user details
 const { logger } = require("../utils/logger");
 
 /**

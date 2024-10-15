@@ -1,4 +1,3 @@
-
 const AccountDao = require("../dao/accountDao");
 const encounterDao = require("../dao/encounterDao");
 const bcrypt = require("bcrypt");
@@ -78,7 +77,7 @@ async function registerUser(user) {
     email,
     username,
     password: hashedPassword,
-    role
+    role,
   };
 
   // Defaults role to "user" if not an "admin"
@@ -106,10 +105,10 @@ async function updateAboutMe(email, new_about_me) {
 }
 
 /**
- * 
- * @param {*} identifier 
- * @param {*} password 
- * @returns 
+ *
+ * @param {*} identifier
+ * @param {*} password
+ * @returns
  */
 const loginUser = async (identifier, password) => {
   if (!identifier || !password) {
@@ -188,6 +187,5 @@ module.exports = {
   getUserByUsername,
   registerUser,
   loginUser,
-  updateAboutMe
+  updateAboutMe,
 };
-
