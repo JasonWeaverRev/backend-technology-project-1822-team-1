@@ -35,41 +35,6 @@ const TableName = "Dungeon_Delver_Users";
         }
 */
 
-// // GET user by email (partition key)
-// async function getUserByEmail(email) {
-//   const command = new GetCommand({
-//     TableName,
-//     Key: { email },
-//   });
-
-//   try {
-//     const data = await documentClient.send(command);
-//     return data.Item || null;
-//   } catch (err) {
-//     console.error("Error fetching user by email:", err);
-//     return null;
-//   }
-// }
-
-// // GET user by username
-// async function getUserByUsername(username) {
-//   const command = new QueryCommand({
-//     TableName,
-//     IndexName: "username-index",
-//     KeyConditionExpression: "#username = :username",
-//     ExpressionAttributeNames: { "#username": "username" },
-//     ExpressionAttributeValues: { ":username": username },
-//   });
-
-//   try {
-//     const data = await documentClient.send(command);
-//     return data.Items.length === 0 ? null : data.Items[0];
-//   } catch (err) {
-//     console.error("Error fetching user by username:", err);
-//     return null;
-//   }
-// }
-
 // POST user
 async function registerUser(user) {
   const command = new PutCommand({
@@ -99,6 +64,31 @@ async function isEmailTaken(email) {
   return user !== null;
 }
 
+// Update about_me section of user profile
+async function updateAboutMe(email, text) {
+  const command = new UpdateCommand({
+    TableName,
+      Key: {email},
+      UpdateExpression: 'SET about_me = :text',
+      ExpressionAttributeValues: {
+          ':text': text
+      },
+      ReturnValues: "ALL_NEW"
+    })
+
+    try {
+      const data = await documentClient.send(command);
+      return {email, text};
+    } catch (err) {
+      console.error("Error updating About Me section: ", err);
+      return null;
+    }
+}
+
+async function updateProfilePic(email, image) {
+  // need to look into Amazon S3
+}
+
 const getUserByEmail = async (email) => {
   try {
     const command = new GetCommand({
@@ -114,7 +104,6 @@ const getUserByEmail = async (email) => {
     throw { status: 500, message: "Error retrieving  user by email" };
   }
 };
-
 
 /**
  * 
@@ -186,10 +175,14 @@ const getUserRoleByUsername = async (username) => {
   };
   
 
+
 module.exports = {
   getUserByEmail,
   getUserByUsername,
   registerUser,
   isUsernameTaken,
-  isEmailTaken
+  isEmailTaken,
+  //addPostToUserForumPosts,
+  //deletePostFromUserForums,
+  updateAboutMe
 };

@@ -4,7 +4,9 @@ const {
   GetCommand,
   UpdateCommand,
   DeleteCommand,
+  QueryCommand
 } = require("@aws-sdk/lib-dynamodb");
+const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
 const client = new DynamoDBClient({ region: "us-east-1" });
 const documentClient = DynamoDBDocumentClient.from(client);
@@ -145,9 +147,40 @@ const removeCommentFromParent = async (parentID, parentCreationTime, commentID, 
   }
 };
 
+/**
+ * Retrieves a list of all comments attached to a specific post
+ * 
+ * @param {*} parentID ID of the parent to get comment replies from
+ * @returns List of comments with same parent id
+ */
+const getCommentsByParent = async (parentID) => {
+  try {
+    const command = new QueryCommand({
+      TableName,
+      IndexName: "parent_id-post_id-index",
+      KeyConditionExpression: "#parent_id = :parent_id",
+      ExpressionAttributeNames: {
+        "#parent_id": "parent_id",
+      },
+      ExpressionAttributeValues: {
+        ":parent_id": parentID,
+      },
+    });
+
+    const data = await documentClient.send(command);
+    return data.Items;
+
+  } catch (err) {
+    console.error(err);
+    throw { status: 500, message: "Error retrieving comments by their parent posts "};
+  }
+};
+
+
 module.exports = {
   updateCommentByUser,
   deleteCommentByUser,
   getCommentById,
   removeCommentFromParent,
+  getCommentsByParent
 };

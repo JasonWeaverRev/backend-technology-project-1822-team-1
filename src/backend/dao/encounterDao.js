@@ -73,24 +73,58 @@ const getEncountersByUsername = async (username) => {
   }
 };
 
-// const getEncountersByUsername = async (username) => {
-//   try {
-//     const command = new QueryCommand({
-//       TableName,
-//       IndexName: "encounters_by_username-index",
-//       KeyConditionExpression: "created_by = :username",
-//       ExpressionAttributeValues: {
-//         ":username": username,
-//       },
-//     });
+const editEncounterById = async (encounter) => {
+  const encounter_id = encounter.encounter_id;
+  const encounter_title = encounter.encounter_title;
+  const monsters = encounter.monsters;
+  const setting = encounter.setting;
 
-//     const data = await client.send(command);
-//     console.log(data.Items);
-//     return data.Items;
-//   } catch (err) {
-//     throw { status: 500, message: "Error retrieving encounters by username" };
-//   }
-// };
+  console.log(encounter_id);
+  console.log(encounter_title);
+  console.log(monsters);
+  console.log(setting);
+  try {
+    // const command = new PutCommand({
+    //   TableName,
+    //   Item: encounter,
+    // });
+
+    const command = new UpdateCommand({
+      TableName,
+      Key: { encounter_id },
+      UpdateExpression:
+        "SET encounter_title = :encounter_title, monsters = :monsters, setting = :setting",
+      ExpressionAttributeValues: {
+        ":encounter_title": encounter_title,
+        ":monsters": monsters,
+        ":setting": setting,
+      },
+      ReturnValues: "ALL_NEW",
+    });
+
+    const data = await documentClient.send(command);
+
+    return data;
+  } catch (err) {
+    throw { status: 500, message: "Error retrieving encounters by username" };
+  }
+};
+
+const deleteEncounterById = async (encounter_id) => {
+  try {
+    const command = new DeleteCommand({
+      TableName,
+      Key: {
+        encounter_id: encounter_id,
+      },
+    });
+
+    const data = await documentClient.send(command);
+    return data;
+  } catch (err) {
+    throw { status: 500, message: "Error retrieving encounters by username" };
+  }
+};
 
 const getBatchEncountersbyId = async (encounter_ids) => {
   try {
@@ -117,9 +151,78 @@ const getBatchEncountersbyId = async (encounter_ids) => {
   }
 };
 
+const getCampaignByTitle = async (campaign_title) => {
+  try {
+    const command = new QueryCommand({
+      TableName,
+      IndexName: 'campaign_title-encounter_id-index',
+      KeyConditionExpression: '#campaign_title = :campaign_title',
+      ExpressionAttributeNames: {
+        "#campaign_title": "campaign_title",
+      },
+      ExpressionAttributeValues: {
+        ':campaign_title': { S: campaign_title }
+      }
+    });
+
+    const data = await documentClient.send(command);
+    const encounterIds = data.Items.map(item => item.encounter_id.S);
+    return encounterIds;
+
+  } catch (err) {
+    console.error('Error in getCampaign DAO:', err);
+    throw { status: 500, message: "Internal server error" };
+  }
+};
+
+// assigns a campaign_title to an Encounter -- used if we only want 1 campaign per encounter
+const createCampaign = async (encounter_id, campaign_title) => {
+  try {
+    const command = new UpdateCommand({
+      TableName,
+      Key: { encounter_id },
+      UpdateExpression: "SET campaign_title = :campaign_title",
+      ExpressionAttributeValues: {
+        ":campaign_title": campaign_title,
+      },
+
+      ReturnValues: "ALL_NEW",
+    });
+
+    const data = await documentClient.send(command);
+    return data?.Attributes;
+  } catch (err) {
+    console.error("Error in createCampaign DAO:", err);
+    throw { status: 500, message: "Internal server error" };
+  }
+};
+
+// removes campaign_title assignment to an encounter -- used if we only want 1 campaign per encounter
+const removeCampaign = async (encounter_id) => {
+  try {
+    const command = new UpdateCommand({
+      TableName,
+      Key: { encounter_id },
+      UpdateExpression: "REMOVE campaign_title",
+      ReturnValues: "ALL_NEW",
+    });
+
+    const data = await documentClient.send(command);
+    return data.Attributes;
+  } catch (err) {
+    console.error("Error in removeCampaign DAO:", err);
+    throw { status: 500, message: "Internal server error" };
+  }
+};
+
 module.exports = {
   getEncounterById,
   getBatchEncountersbyId,
   createEncounter,
   getEncountersByUsername,
+  createCampaign,
+  removeCampaign,
+  editEncounterById,
+  deleteEncounterById,
+  getCampaignByTitle
 };
