@@ -48,7 +48,6 @@ router.get("/email", async (req, res) => {
 // get user data based on their Auth token
 router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
     const username = req.user.username;
-    console.log("router layer ", username);
 
     try {
         const user = await accountService.getUserByUsername(username);
@@ -68,9 +67,35 @@ router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
     }
 });
 
+// get user data based on their username
+router.get("/profile/:username", async (req, res) => {
+  const username = req.params.username;
+
+  try {
+      const user = await accountService.getUserByUsername(username);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const userProfile = {
+        email: user.email.S,
+        username: user.username.S,
+        about_me: user.about_me.S,
+        role: user.role.S,
+        creation_time: user.creation_time.S
+    };
+
+    return res.status(200).json({ userProfile });
+
+  } catch (error) {
+      console.error("Error fetching user by username:", error);
+      return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 // POST user registration
-// user registration
 router.post("/register", async (req, res) => {
   try {
     const newUser = await accountService.registerUser(req.body);

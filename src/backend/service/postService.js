@@ -393,6 +393,18 @@ async function dislikePost(post_id, username) {
   return { status: 200, message: "Disliked successfully." };
 }
 
+async function getPostsByWrittenBy(username) {
+  if (!username) {
+    throw {
+      status: 404,
+      message: `A username must be provided`,
+    };
+  }
+
+  const result = await postDAO.getPostsByWrittenBy(username);
+  return result;
+}
+
 module.exports = {
   deletePostById,
   getPostById,
@@ -404,4 +416,5 @@ module.exports = {
   getNewestPost,
   likePost,
   dislikePost,
+  getPostsByWrittenBy
 };

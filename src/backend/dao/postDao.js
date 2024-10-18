@@ -174,6 +174,29 @@ const getPostsByParentId = async (parentID) => {
     }
 }
 
+const getPostsByWrittenBy = async (username) => {
+
+  const command = new QueryCommand({
+    TableName,
+    IndexName: "user_by_creation_time-index",
+    KeyConditionExpression: "#id = :id",
+    ExpressionAttributeNames: {
+      "#id": "written_by"
+    },
+    ExpressionAttributeValues: {
+      ":id": username
+    }
+  });
+
+  try {
+    const data = await documentClient.send(command);
+    return data;
+  } catch (err) {
+    console.error(err);
+    logger.error(err);
+  }
+}
+
 
 /**
  * Retrieves the newest created post
@@ -417,6 +440,7 @@ module.exports = {
     getPostsByParentId,
     getNewestPost,
     createPost,
-    removeParent
+    removeParent,
+    getPostsByWrittenBy
 }
 
