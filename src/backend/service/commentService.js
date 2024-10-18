@@ -1,5 +1,5 @@
 const commentDao = require("../dao/commentDao");
-const accountDao = require("../dao/accountDAO"); // Import the user DAO to fetch user details
+const accountDao = require("../dao/accountDao"); // Import the user DAO to fetch user details
 const { logger } = require("../utils/logger");
 
 /**
@@ -143,7 +143,7 @@ const getCommentsByLoadSorted = async (parentID, loads) => {
 
   // When the number of comments don't meet load capacity
   else if (commentsSorted.length <= 8 + (loadNum - 1) * 8) {
-    return commentsSorted;
+    return [commentsSorted, commentsSorted.length];
   }
   // more than 8 comments
   else {
@@ -151,7 +151,7 @@ const getCommentsByLoadSorted = async (parentID, loads) => {
       0,
       8 + (loadNum - 1) * 8
     );
-    return commentsSortedByDenom;
+    return [commentsSortedByDenom, commentsSorted.length];
   }
 };
 
@@ -194,4 +194,5 @@ const getCommentsSortedByParent = async (parentID) => {
 module.exports = {
   updateComment,
   deleteComment,
+  getCommentsByLoadSorted,
 };

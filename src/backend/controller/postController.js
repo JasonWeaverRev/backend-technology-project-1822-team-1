@@ -130,20 +130,35 @@ postRouter.delete("/:postId", verifyAdminToken, async (req, res) => {
 
 /**
  * Get a list of posts, sorted in descending order, 6 at a time
- *
- * :page = 1: 6 posts
- * :page = 2: 12 posts
- * :page = 3: 18 posts
+ * 
+ * :page = 1: 4 posts
+ * :page = 2: 8 posts
+ * :page = 3: 12 posts
  */
-postRouter.get("/landing", async (req, res) => {
-  const { page } = req.query;
-
+postRouter.get('/landing', async (req, res) => {
+  const{page} = req.query;
+  
   try {
-    const posts = await postService.getPostsSorted(page);
-    res.status(201).setHeader("Access-Control-Allow-Origin", "*").json(posts);
+      const postReturn = await postService.getPostsSorted(page);
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.status(201).json(postReturn);
+
   } catch (err) {
-    res.status(err.status || 400).json({ message: err.message });
+      res.status(err.status || 400).json({message: err.message});
   }
 });
+
+postRouter.get('/:username', async (req, res) => {
+  const username = req.params.username;
+
+  try {
+    const userPosts = await postService.getPostsByWrittenBy(username);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(201).json(userPosts);
+
+  } catch (err) {
+    res.status(err.status || 400).json({message: err.message});
+  }
+})
 
 module.exports = postRouter;

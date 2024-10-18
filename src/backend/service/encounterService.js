@@ -63,7 +63,7 @@ const getMonstersByChallengeRating = async (challengeRating) => {
         intelligence: monsterDetails.data.intelligence,
         wisdom: monsterDetails.data.wisdom,
         charisma: monsterDetails.data.charisma,
-        image: monsterDetails.data.image,
+        image: `${dndApiUrlPath}${monsterDetails.data.image}`,
         monsterPage: monsterDetails.data.name.includes(",")
           ? `${dndBeyondUrlPath}${monsterDetails.data.name
               .split(",")[0]
@@ -266,6 +266,22 @@ const removeCampaign = async (username, encounter_id) => {
   return data;
 };
 
+const getCampaignByTitle = async (campaign_title) => {
+  if (!campaign_title) {
+    throw { status: 400, message: "Campaign title must be provided" };
+  }
+
+  try {
+    const campaigns = await encounterDao.getCampaignByTitle(campaign_title);
+
+    return campaigns;
+
+  } catch (err) {
+    console.error('Error in getCampaignByTitle Service:', err);
+    throw { status: err.status || 500, message: err.message || "Internal server error" };
+  }
+};
+
 module.exports = {
   getMonstersByChallengeRating,
   createNewEncounter,
@@ -275,4 +291,5 @@ module.exports = {
   removeCampaign,
   editEncounterById,
   deleteEncounterById,
+  getCampaignByTitle
 };

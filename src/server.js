@@ -2,7 +2,6 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const cors = require("cors");
 
 // Local project import
 const { logger } = require("./backend/utils/logger");
@@ -10,10 +9,12 @@ const postRouter = require("./backend/controller/postController.js");
 const commentRouter = require("./backend/controller/commentController");
 const accountController = require("./backend/controller/accountController.js");
 const encounterController = require("./backend/controller/encounterController.js");
+const cors = require("cors");
 
 /**
  * Server Port and general setup
  */
+
 const PORT = process.env.PORT || 4000;
 app.use(express.json());
 
