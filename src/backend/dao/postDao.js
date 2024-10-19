@@ -184,7 +184,7 @@ const getPostsByWrittenBy = async (username) => {
       "#written_by": "written_by",
     },
     ExpressionAttributeValues: {
-      ":written_by": written_by,
+      ":written_by": username,
     },
   });
 
