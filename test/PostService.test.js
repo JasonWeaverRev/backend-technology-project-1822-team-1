@@ -1,10 +1,10 @@
 // Setup post service and post dao to test post service
 const PostService = require("../src/backend/service/postService");
-const PostDao = require("../src/backend/dao/postDao.js");
+const postDao = require("../src/backend/dao/postDao.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-jest.mock("../src/backend/dao/postDAO"); //Mock post db
+jest.mock("../src/backend/dao/postDao"); //Mock post db
 jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
 
@@ -40,13 +40,13 @@ describe("PostService Tests", () => {
       };
 
       // when the POST DAO is called through the post service method, mock its return value within the DAO method
-      PostDao.getPostById.mockReturnValue(mockPost);
+      postDao.getPostById.mockReturnValue(mockPost);
 
       // Call upon the method being tested using the established mock values
       const result = await PostService.getPostById(testPostId);
 
       // Expects
-      expect(PostDao.getPostById).toHaveBeenCalledWith(testPostId); // ensure that the DAO is being called with the correct post_id
+      expect(postDao.getPostById).toHaveBeenCalledWith(testPostId); // ensure that the DAO is being called with the correct post_id
       expect(result).toEqual(mockPost); // ensure that the existing post was found properly
     });
 
@@ -54,7 +54,7 @@ describe("PostService Tests", () => {
     it("Test 2. Should return null if the post id is invalid", async () => {
       const mockPostId = "test_id";
 
-      PostDao.getPostById.mockReturnValue(null);
+      postDao.getPostById.mockReturnValue(null);
 
       const result = await PostService.getPostById(mockPostId);
 
@@ -87,7 +87,7 @@ describe("PostService Tests", () => {
 
     //Test 4. Post id is invalid/Post does not exist
     it("Test 4. Should throw an error if the given post id does not match an existing post", async () => {
-      PostDao.getPostById.mockReturnValue(null);
+      postDao.getPostById.mockReturnValue(null);
 
       try {
         const result = await PostService.deletePostById(mockPostId);
@@ -100,13 +100,13 @@ describe("PostService Tests", () => {
 
     //Test 5. Post id is valid: successfully deletes a post
     it("Test 5. Should return back '1' if a post was succesfully deleted", async () => {
-      PostDao.getPostById.mockReturnValue(mockPost);
-      PostDao.deletePostById.mockReturnValue(true);
+      postDao.getPostById.mockReturnValue(mockPost);
+      postDao.deletePostById.mockReturnValue(true);
 
       const result = await PostService.deletePostById(mockPostId);
 
-      expect(PostDao.getPostById).toHaveBeenCalledWith(mockPostId);
-      expect(PostDao.deletePostById).toHaveBeenCalledWith(
+      expect(postDao.getPostById).toHaveBeenCalledWith(mockPostId);
+      expect(postDao.deletePostById).toHaveBeenCalledWith(
         mockPost.post_id,
         mockPost.creation_time
       );
@@ -115,8 +115,8 @@ describe("PostService Tests", () => {
 
     //Test 6. Post id is valid: unexpected deletion error
     it("Test 6. Should return an error if the post could not be deleted from unknown circumstances", async () => {
-      PostDao.getPostById.mockReturnValue(mockPost);
-      PostDao.deletePostById.mockReturnValue(null);
+      postDao.getPostById.mockReturnValue(mockPost);
+      postDao.deletePostById.mockReturnValue(null);
 
       try {
         const result = await PostService.deletePostById(mockPostId);
@@ -129,94 +129,107 @@ describe("PostService Tests", () => {
   });
 });
 
+/**
+ * ==========================================
+ * Like/Dislike Functionality
+ * ==========================================
+ */
 
- /**
-   * ==========================================
-   * Like/Dislike Functionality 
-   * ==========================================
-   */
+// postService.test.js
+const postService = require("../src/backend/service/postService");
+const postDao = require("../src/backend/dao/postDao");
 
+jest.mock("../src/backend/dao/postDao");
 
- // postService.test.js
-const postService = require('../src/backend/service/postService');
-const postDAO = require('../src/backend/dao/postDAO');
+describe("Post Service - Dislike Post", () => {
+  const mockPost = {
+    post_id: "test-post-id",
+    creation_time: "2024-09-26T20:13:48.133Z",
+    liked_by: [],
+    disliked_by: [],
+  };
+  const username = "test-user";
 
-jest.mock('../src/backend/dao/postDAO');
+  test("Should dislike post if user has not interacted before", async () => {
+    // Arrange: Mock DAO responses
+    postService.getPostById = jest.fn().mockResolvedValue(mockPost);
+    postDao.dislikePost = jest.fn().mockResolvedValue(1);
 
-describe('Post Service - Dislike Post', () => {
-    const mockPost = {
-        post_id: 'test-post-id',
-        creation_time: '2024-09-26T20:13:48.133Z',
-        liked_by: [],
-        disliked_by: [],
-    };
-    const username = 'test-user';
+    // Act: Call the service
+    const result = await postService.dislikePost(mockPost.post_id, username);
 
-    test('Should dislike post if user has not interacted before', async () => {
-        // Arrange: Mock DAO responses
-        postService.getPostById = jest.fn().mockResolvedValue(mockPost);
-        postDAO.dislikePost = jest.fn().mockResolvedValue(1);
+    // Assert: Ensure proper behavior
+    expect(result).toEqual({ status: 200, message: "Disliked successfully." });
+    expect(postDao.dislikePost).toHaveBeenCalledWith(
+      mockPost.post_id,
+      mockPost.creation_time,
+      username
+    );
+  });
 
-        // Act: Call the service
-        const result = await postService.dislikePost(mockPost.post_id, username);
+  test("Should undislike post if user has already disliked it", async () => {
+    // Arrange: Mock DAO responses
+    postService.getPostById = jest.fn().mockResolvedValue(mockPost);
+    postDao.dislikePost = jest.fn().mockResolvedValue(3);
 
-        // Assert: Ensure proper behavior
-        expect(result).toEqual({ status: 200, message: 'Disliked successfully.' });
-        expect(postDAO.dislikePost).toHaveBeenCalledWith(mockPost.post_id, mockPost.creation_time, username);
+    // Act: Call the service
+    const result = await postService.dislikePost(mockPost.post_id, username);
+
+    // Assert: Ensure proper behavior
+    expect(result).toEqual({
+      status: 200,
+      message: "Undisliked successfully.",
     });
+    expect(postDao.dislikePost).toHaveBeenCalledWith(
+      mockPost.post_id,
+      mockPost.creation_time,
+      username
+    );
+  });
 
-    test('Should undislike post if user has already disliked it', async () => {
-        // Arrange: Mock DAO responses
-        postService.getPostById = jest.fn().mockResolvedValue(mockPost);
-        postDAO.dislikePost = jest.fn().mockResolvedValue(3);
+  test("Should switch from like to dislike if user liked the post", async () => {
+    // Arrange: Mock DAO responses
+    postService.getPostById = jest.fn().mockResolvedValue(mockPost);
+    postDao.dislikePost = jest.fn().mockResolvedValue(2);
 
-        // Act: Call the service
-        const result = await postService.dislikePost(mockPost.post_id, username);
+    // Act: Call the service
+    const result = await postService.dislikePost(mockPost.post_id, username);
 
-        // Assert: Ensure proper behavior
-        expect(result).toEqual({ status: 200, message: 'Undisliked successfully.' });
-        expect(postDAO.dislikePost).toHaveBeenCalledWith(mockPost.post_id, mockPost.creation_time, username);
-    });
+    // Assert: Ensure proper behavior
+    expect(result).toEqual({ status: 200, message: "Disliked successfully." });
+    expect(postDao.dislikePost).toHaveBeenCalledWith(
+      mockPost.post_id,
+      mockPost.creation_time,
+      username
+    );
+  });
 
-    test('Should switch from like to dislike if user liked the post', async () => {
-        // Arrange: Mock DAO responses
-        postService.getPostById = jest.fn().mockResolvedValue(mockPost);
-        postDAO.dislikePost = jest.fn().mockResolvedValue(2);
+  test("Should return 404 if post is not found", async () => {
+    // Arrange: Post not found
+    postService.getPostById = jest.fn().mockResolvedValue(null);
 
-        // Act: Call the service
-        const result = await postService.dislikePost(mockPost.post_id, username);
+    // Act: Call the service
+    try {
+      await postService.dislikePost("invalid-post-id", username);
+    } catch (error) {
+      // Assert: Ensure proper error is thrown
+      expect(error.status).toBe(404);
+      expect(error.message).toBe("Post with id invalid-post-id not found.");
+    }
+  });
 
-        // Assert: Ensure proper behavior
-        expect(result).toEqual({ status: 200, message: 'Disliked successfully.' });
-        expect(postDAO.dislikePost).toHaveBeenCalledWith(mockPost.post_id, mockPost.creation_time, username);
-    });
+  test("Should throw a 500 error if DAO fails", async () => {
+    // Arrange: Mock DAO failure
+    postService.getPostById = jest.fn().mockResolvedValue(mockPost);
+    postDao.dislikePost = jest.fn().mockResolvedValue(-1);
 
-    test('Should return 404 if post is not found', async () => {
-        // Arrange: Post not found
-        postService.getPostById = jest.fn().mockResolvedValue(null);
-
-        // Act: Call the service
-        try {
-            await postService.dislikePost('invalid-post-id', username);
-        } catch (error) {
-            // Assert: Ensure proper error is thrown
-            expect(error.status).toBe(404);
-            expect(error.message).toBe('Post with id invalid-post-id not found.');
-        }
-    });
-
-    test('Should throw a 500 error if DAO fails', async () => {
-        // Arrange: Mock DAO failure
-        postService.getPostById = jest.fn().mockResolvedValue(mockPost);
-        postDAO.dislikePost = jest.fn().mockResolvedValue(-1);
-
-        // Act: Call the service
-        try {
-            await postService.dislikePost(mockPost.post_id, username);
-        } catch (error) {
-            // Assert: Ensure proper error is thrown
-            expect(error.status).toBe(500);
-            expect(error.message).toBe('Failed to dislike the post.');
-        }
-    });
+    // Act: Call the service
+    try {
+      await postService.dislikePost(mockPost.post_id, username);
+    } catch (error) {
+      // Assert: Ensure proper error is thrown
+      expect(error.status).toBe(500);
+      expect(error.message).toBe("Failed to dislike the post.");
+    }
+  });
 });
