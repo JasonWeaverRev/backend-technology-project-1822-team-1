@@ -175,27 +175,28 @@ const getPostsByParentId = async (parentID) => {
 }
 
 const getPostsByWrittenBy = async (username) => {
-
+  const written_by = username;
   const command = new QueryCommand({
     TableName,
     IndexName: "user_by_creation_time-index",
-    KeyConditionExpression: "#id = :id",
+    KeyConditionExpression: "#written_by = :written_by", // GSI's partition key
     ExpressionAttributeNames: {
-      "#id": "written_by"
+      "#written_by": "written_by",
     },
     ExpressionAttributeValues: {
-      ":id": username
-    }
+      ":written_by": written_by,
+    },
   });
 
   try {
     const data = await documentClient.send(command);
-    return data;
+    console.log(data.Items);
+    return data.Items; // Return items from the query
   } catch (err) {
-    console.error(err);
-    logger.error(err);
+    console.error("Error in getPostsByWrittenBy:", err);
+    throw err;
   }
-}
+};
 
 
 /**

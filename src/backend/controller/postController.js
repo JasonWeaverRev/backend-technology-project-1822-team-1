@@ -150,6 +150,7 @@ postRouter.get('/landing', async (req, res) => {
 
 postRouter.get('/:username', async (req, res) => {
   const username = req.params.username;
+  console.log(username);
 
   try {
     const userPosts = await postService.getPostsByWrittenBy(username);

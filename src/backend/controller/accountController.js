@@ -54,7 +54,7 @@ router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
         const userProfile = {
           email: user.email.S,
           username: user.username.S,
-          about_me: user.about_me.S,
+          about_me: user.about_me?.S ?? "",
           role: user.role.S,
           creation_time: user.creation_time.S
       };
