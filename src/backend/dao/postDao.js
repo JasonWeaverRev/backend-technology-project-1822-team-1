@@ -169,6 +169,31 @@ const getPostsByParentId = async (parentID) => {
   }
 };
 
+const getPostsByWrittenBy = async (username) => {
+  const written_by = username;
+  const command = new QueryCommand({
+    TableName,
+    IndexName: "user_by_creation_time-index",
+    KeyConditionExpression: "#written_by = :written_by", // GSI's partition key
+    ExpressionAttributeNames: {
+      "#written_by": "written_by",
+    },
+    ExpressionAttributeValues: {
+      ":written_by": username,
+    },
+  });
+
+  // Send command to the DB
+  try {
+    const data = await documentClient.send(command);
+    console.log(data.Items);
+    return data.Items; // Return items from the query
+  } catch (err) {
+    console.error("Error in getPostsByWrittenBy:", err);
+    throw err;
+  }
+};
+
 /**
  * Retrieves the newest created post
  */
