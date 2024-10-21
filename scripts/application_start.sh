@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /home/ubuntu/MyExpressApp
-node index.js > /dev/null 2>&1 &
+node src/server.js > /dev/null 2>&1 &
