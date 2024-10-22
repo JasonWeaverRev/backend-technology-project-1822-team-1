@@ -1,5 +1,6 @@
 // Setup post service and post dao to test post service
 const PostService = require("../src/backend/service/postService");
+const postService = require("../src/backend/service/postService");
 const postDao = require("../src/backend/dao/postDao.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -136,8 +137,6 @@ describe("PostService Tests", () => {
  */
 
 // postService.test.js
-const postService = require("../src/backend/service/postService");
-const postDao = require("../src/backend/dao/postDao");
 
 jest.mock("../src/backend/dao/postDao");
 

@@ -263,9 +263,6 @@ async function likePost(post_id, creation_time, username) {
     const likedBy = post.liked_by || [];
     const dislikedBy = post.disliked_by || [];
 
-    console.log("Liked By:", likedBy);
-    console.log("Disliked By:", dislikedBy);
-
     // Check if user already liked the post
     if (likedBy.includes(username)) {
       const index = likedBy.indexOf(username);
@@ -280,11 +277,7 @@ async function likePost(post_id, creation_time, username) {
             post_id: post_id,
             creation_time: creation_time,
           },
-          UpdateExpression:
-            "SET likes = likes - :inc REMOVE liked_by[" + index + "]",
-          ExpressionAttributeValues: {
-            ":inc": 1,
-          },
+          UpdateExpression: `REMOVE liked_by[${index}]`,
         })
       );
 
@@ -306,11 +299,10 @@ async function likePost(post_id, creation_time, username) {
             creation_time: creation_time,
           },
           UpdateExpression:
-            "SET likes = likes + :inc, liked_by = list_append(if_not_exists(liked_by, :emptyList), :user) REMOVE disliked_by[" +
+            "SET liked_by = list_append(if_not_exists(liked_by, :emptyList), :user) REMOVE disliked_by[" +
             index +
             "]",
           ExpressionAttributeValues: {
-            ":inc": 2, // Undo dislike (-1) and add like (+1) = total +2
             ":user": [username],
             ":emptyList": [],
           },
@@ -320,9 +312,9 @@ async function likePost(post_id, creation_time, username) {
       return 2; // Liked successfully after disliking
     }
 
+    // First-time like (user is in neither liked_by nor disliked_by)
     console.log(`First-time like for user ${username}`);
 
-    // First-time like (user is in neither liked_by nor disliked_by)
     await documentClient.send(
       new UpdateCommand({
         TableName,
@@ -331,9 +323,8 @@ async function likePost(post_id, creation_time, username) {
           creation_time: creation_time,
         },
         UpdateExpression:
-          "SET likes = likes + :inc, liked_by = list_append(if_not_exists(liked_by, :emptyList), :user)",
+          "SET liked_by = list_append(if_not_exists(liked_by, :emptyList), :user)",
         ExpressionAttributeValues: {
-          ":inc": 1, // Increment likes
           ":user": [username],
           ":emptyList": [],
         },
@@ -373,9 +364,6 @@ async function dislikePost(post_id, creation_time, username) {
     const likedBy = post.liked_by || [];
     const dislikedBy = post.disliked_by || [];
 
-    console.log(`Liked By: ${likedBy}`);
-    console.log(`Disliked By: ${dislikedBy}`);
-
     // Check if user already disliked the post
     if (dislikedBy.includes(username)) {
       const index = dislikedBy.indexOf(username);
@@ -390,11 +378,7 @@ async function dislikePost(post_id, creation_time, username) {
             post_id: post_id,
             creation_time: creation_time,
           },
-          UpdateExpression:
-            "SET likes = likes + :inc REMOVE disliked_by[" + index + "]",
-          ExpressionAttributeValues: {
-            ":inc": 1,
-          },
+          UpdateExpression: `REMOVE disliked_by[${index}]`,
         })
       );
 
@@ -416,11 +400,10 @@ async function dislikePost(post_id, creation_time, username) {
             creation_time: creation_time,
           },
           UpdateExpression:
-            "SET likes = likes - :inc, disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user) REMOVE liked_by[" +
+            "SET disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user) REMOVE liked_by[" +
             index +
             "]",
           ExpressionAttributeValues: {
-            ":inc": 2, // Undo like (+1) and add dislike (-1) = total -2
             ":user": [username],
             ":emptyList": [],
           },
@@ -430,9 +413,9 @@ async function dislikePost(post_id, creation_time, username) {
       return 2; // Disliked successfully after liking
     }
 
+    // First-time dislike (user is in neither liked_by nor disliked_by)
     console.log(`First-time dislike for user ${username}`);
 
-    // First-time dislike (user is in neither liked_by nor disliked_by)
     await documentClient.send(
       new UpdateCommand({
         TableName,
@@ -441,9 +424,8 @@ async function dislikePost(post_id, creation_time, username) {
           creation_time: creation_time,
         },
         UpdateExpression:
-          "SET likes = likes - :inc, disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user)",
+          "SET disliked_by = list_append(if_not_exists(disliked_by, :emptyList), :user)",
         ExpressionAttributeValues: {
-          ":inc": 1, // Decrement likes
           ":user": [username],
           ":emptyList": [],
         },
@@ -467,4 +449,5 @@ module.exports = {
   removeParent,
   likePost,
   dislikePost,
+  getPostsByWrittenBy,
 };
