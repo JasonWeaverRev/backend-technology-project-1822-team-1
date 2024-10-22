@@ -18,8 +18,8 @@ router.get("/monsters", async (req, res) => {
   }
 });
 
-router.get("/user", verifyToken, async (req, res) => {
-  const username = req.user.username;
+router.get("/:username", async (req, res) => {
+  const username = req.params.username;
 
   try {
     const encounters = await encounterService.getEncountersByUsername(username);
