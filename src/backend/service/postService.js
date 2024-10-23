@@ -335,24 +335,35 @@ async function likePost(post_id, username) {
   }
 
   const result = await postDao.likePost(post_id, post.creation_time, username);
+  console.log("Like DAO result:", result);
 
-  // 3: Unliked successfully
   if (result === 3) {
-    return 3; // Unliked
-  }
-  // 2: Liked successfully
-  else if (result === 2) {
-    return 2; // Liked
-  }
-  // Anything else should be considered an error
-  else if (result !== 1) {
+    return { status: 200, message: "Unliked successfully." };
+  } else if (result === 2) {
+    return { status: 200, message: "Liked successfully." };
+  } else if (result !== 1) {
     throw {
       status: 500,
-      message: "Failed to like the post.",
+      message: "Failed to Like the post.",
     };
   }
+  // // 3: Unliked successfully
+  // if (result === 3) {
+  //   return 3; // Unliked
+  // }
+  // // 2: Liked successfully
+  // else if (result === 2) {
+  //   return 2; // Liked
+  // }
+  // // Anything else should be considered an error
+  // else if (result !== 1) {
+  //   throw {
+  //     status: 500,
+  //     message: "Failed to like the post.",
+  //   };
+  // }
 
-  return 1; // Success (default case for first-time liking)
+  return { status: 200, message: "Liked successfully." }; // Success (default case for first-time liking)
 }
 
 /**
