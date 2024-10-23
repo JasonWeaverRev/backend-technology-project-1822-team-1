@@ -138,7 +138,7 @@ const createNewEncounter = async (monsters, title, username, setting) => {
       saves: 0,
       creation_time: new Date().toISOString(),
       created_by: username,
-      campaign_title: "",
+      // campaign_title: "",
       setting: setting ? setting : "",
     };
 
