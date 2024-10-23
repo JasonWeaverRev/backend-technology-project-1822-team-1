@@ -202,7 +202,7 @@ const getPostsSorted = async (loads) => {
  * @returns 
  */
 const getLikesByPostId = async (postID) => {
-  const post = await postDAO.getPostById(postID);
+  const post = await postDao.getPostById(postID);
 
   return (post.liked_by.length - post.disliked_by.length);
 }
