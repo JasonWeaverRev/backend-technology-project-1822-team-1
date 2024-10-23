@@ -182,10 +182,26 @@ const processByUsername = async (user) => {
   return processedUser;
 };
 
+async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
+  const emailExist = await AccountDao.isEmailTaken(email);
+  if (!email || !emailExist) {
+    throw { status: 401, message: "Invalid user" };
+  }
+
+  try {
+    const result = await AccountDao.uploadProfilePicAndUpdateDB(email, file_name, mime, data);
+    return result;
+  } catch (error) {
+    console.error("Error in service layer: ", error);
+    throw error;
+  }
+}
+
 module.exports = {
   getUserByEmail,
   getUserByUsername,
   registerUser,
   loginUser,
   updateAboutMe,
+  uploadProfilePicAndUpdateDB
 };
