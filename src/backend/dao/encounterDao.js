@@ -42,8 +42,11 @@ const createEncounter = async (encounter) => {
       Item: encounter,
     });
 
+    console.log(encounter);
+
     await documentClient.send(command);
   } catch (err) {
+    console.error(err);
     throw { status: 500, message: "Error creating new encounter" };
   }
 };
