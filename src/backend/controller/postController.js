@@ -53,13 +53,10 @@ postRouter.get("/posts/likes/:postId", async (req, res) => {
 postRouter.post("/", verifyToken, async (req, res) => {
   try {
     const data = await postService.createPost(req.body, req.user);
-    res
-      .status(201)
-      .setHeader("Access-Control-Allow-Origin", "*")
-      .json({
-        message: `Successfully created new post!`,
-        PostInformation: req.body,
-      });
+    res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
+      message: `Successfully created new post!`,
+      PostInformation: req.body,
+    });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -77,26 +74,14 @@ postRouter.post("/like", verifyToken, async (req, res) => {
   }
 
   try {
-    // Call the service to like/unlike the post and store the result
     const result = await postService.likePost(post_id, username);
+    console.log("Like service result:", result);
 
-    // Handle the response based on the result value
-    if (result === 1) {
-      return res
-        .status(200)
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .json({ message: "Post liked successfully." });
-    } else if (result === 3) {
-      return res
-        .status(200)
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .json({ message: "Post unliked successfully." });
-    } else {
-      return res.status(500).json({ message: "Failed to update like status." });
-    }
+    return res
+      .status(result.status)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ message: result.message });
   } catch (err) {
-    // Send error status and message if something goes wrong
-    console.log(err);
     res.status(err.status || 500).json({ message: err.message });
   }
 });
@@ -137,13 +122,10 @@ postRouter.post("/:postId", verifyToken, async (req, res) => {
       req.params.postId,
       req.user
     );
-    res
-      .status(201)
-      .setHeader("Access-Control-Allow-Origin", "*")
-      .json({
-        message: `Successfully created new post!`,
-        PostInformation: req.body,
-      });
+    res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
+      message: `Successfully created new post!`,
+      PostInformation: req.body,
+    });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
@@ -167,11 +149,12 @@ postRouter.delete("/:postId", verifyAdminToken, async (req, res) => {
 
 /**
  * Get a list of posts, sorted in descending order, 6 at a time
- * 
+ *
  * :page = 1: 4 posts
  * :page = 2: 8 posts
  * :page = 3: 12 posts
  */
+<<<<<<< HEAD
 postRouter.get('/landing', async (req, res) => {
   const { page } = req.query;
 
@@ -179,23 +162,30 @@ postRouter.get('/landing', async (req, res) => {
     const postReturn = await postService.getPostsSorted(page);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.status(201).json(postReturn);
+=======
+postRouter.get("/landing", async (req, res) => {
+  const { page } = req.query;
+>>>>>>> 47dea04672eab9fbd129bb1b69afbf2c47cedbf7
 
-  } catch (err) {
-    res.status(err.status || 400).json({ message: err.message });
-  }
-});
+    try {
+      const postReturn = await postService.getPostsSorted(page);
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.status(201).json(postReturn);
+    } catch (err) {
+      res.status(err.status || 400).json({ message: err.message });
+    }
+  });
 
-postRouter.get('/:username', async (req, res) => {
+postRouter.get("/:username", async (req, res) => {
   const username = req.params.username;
 
   try {
     const userPosts = await postService.getPostsByWrittenBy(username);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.status(201).json(userPosts);
-
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
-})
+});
 
 module.exports = postRouter;

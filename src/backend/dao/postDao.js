@@ -308,7 +308,7 @@ async function likePost(post_id, creation_time, username) {
           },
         })
       );
-
+      console.log("Returning 2");
       return 2; // Liked successfully after disliking
     }
 
