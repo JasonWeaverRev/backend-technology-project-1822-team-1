@@ -48,16 +48,6 @@ router.get("/email", async (req, res) => {
 // get user data based on their Auth token
 router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
   const username = req.user.username;
-
-    try {
-        const user = await accountService.getUserByUsername(username);
-        const userProfile = {
-          email: user.email.S,
-          username: user.username.S,
-          about_me: user.about_me?.S ?? "",
-          role: user.role.S,
-          creation_time: user.creation_time.S,
-      };
   try {
     const user = await accountService.getUserByUsername(username);
     const userProfile = {
@@ -92,7 +82,7 @@ router.get("/profile/:username", async (req, res) => {
       about_me: user.about_me?.S ?? "",
       role: user.role.S,
       creation_time: user.creation_time.S,
-      profile_pic: user.profile_pic?.S ?? ""
+      profile_pic: user.profile_pic?.S ?? "",
     };
 
     return res.status(200).json({ userProfile });
@@ -144,7 +134,7 @@ router.patch("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
   }
 });
 
-router.patch('/profile-pic', AuthMiddleware.verifyToken, async (req, res) => {
+router.patch("/profile-pic", AuthMiddleware.verifyToken, async (req, res) => {
   const email = req.user.email;
   const username = req.user.username;
   const file_name = `${username}-profile-pic`;
@@ -155,7 +145,12 @@ router.patch('/profile-pic', AuthMiddleware.verifyToken, async (req, res) => {
   }
 
   try {
-    const result = await accountService.uploadProfilePicAndUpdateDB(email, file_name, mime, data);
+    const result = await accountService.uploadProfilePicAndUpdateDB(
+      email,
+      file_name,
+      mime,
+      data
+    );
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error in controller layer: ", error);

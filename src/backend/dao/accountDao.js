@@ -1,7 +1,4 @@
-const {
-  DynamoDBClient,
-  QueryCommand,
-} = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, QueryCommand } = require("@aws-sdk/client-dynamodb");
 const {
   DynamoDBDocumentClient,
   GetCommand,
@@ -9,7 +6,11 @@ const {
   UpdateCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
-const { GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const bucketClient = new S3Client({ region: "us-east-1" });
 
@@ -69,20 +70,20 @@ async function isEmailTaken(email) {
 async function updateAboutMe(email, text) {
   const command = new UpdateCommand({
     TableName,
-    Key: {email},
-    UpdateExpression: 'SET about_me = :text',
+    Key: { email },
+    UpdateExpression: "SET about_me = :text",
     ExpressionAttributeValues: {
-        ':text': text
+      ":text": text,
     },
-    ReturnValues: "ALL_NEW"
-  })
+    ReturnValues: "ALL_NEW",
+  });
 
   try {
     const data = await documentClient.send(command);
-    return {email, text};
+    return { email, text };
   } catch (err) {
     console.error("Error updating About Me section: ", err);
-    throw {status: 500, message: "Error updating About Me"};
+    throw { status: 500, message: "Error updating About Me" };
   }
 }
 
@@ -132,7 +133,7 @@ const getUserByUsername = async (username) => {
 const getUserRoleByUsername = async (username) => {
   console.log("getUserRoleByUsername called with username:", username);
 
-  if (typeof username !== 'string') {
+  if (typeof username !== "string") {
     console.error("Username is not a string. Converting to string.");
     username = String(username);
   }
@@ -159,7 +160,7 @@ const getUserRoleByUsername = async (username) => {
       return null;
     }
 
-    const userRole = result.Items[0]['role'];
+    const userRole = result.Items[0]["role"];
     console.log("User role retrieved:", userRole);
     return userRole;
   } catch (err) {
@@ -170,14 +171,19 @@ const getUserRoleByUsername = async (username) => {
 
 async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
   // Convert base64 to buffer
-  const buffer = Buffer.from(data, 'base64');
+  const buffer = Buffer.from(data, "base64");
   const file_ext = mime.split("/")[1];
   const bucketName = "dungeon-delver-bucket";
   const objectName = `profile_pics/${file_name}.${file_ext}`;
 
   try {
     // Upload image to S3
-    const response = await uploadImageToBucket(bucketName, objectName, mime, buffer);
+    const response = await uploadImageToBucket(
+      bucketName,
+      objectName,
+      mime,
+      buffer
+    );
     console.log("in the dao layer: ", response);
 
     // Generate pre-signed URL
@@ -194,43 +200,43 @@ async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
 }
 
 // helper function to upload image to S3 bucket
-async function uploadImageToBucket(Bucket, Key, mime, buffer){
-  console.log('Bucket:', Bucket);
-  console.log('Key:', Key);
-  console.log('MIME Type:', mime);
-  console.log('Buffer Size:', buffer.length);
+async function uploadImageToBucket(Bucket, Key, mime, buffer) {
+  console.log("Bucket:", Bucket);
+  console.log("Key:", Key);
+  console.log("MIME Type:", mime);
+  console.log("Buffer Size:", buffer.length);
 
   const command = new PutObjectCommand({
-      Bucket,
-      Key,
-      Body: buffer,
-      ContentType: mime,
-  })
+    Bucket,
+    Key,
+    Body: buffer,
+    ContentType: mime,
+  });
 
-  try{
-      const response = await bucketClient.send(command);
-      return response;
-  }catch(err){
-      console.error(err);
+  try {
+    const response = await bucketClient.send(command);
+    return response;
+  } catch (err) {
+    console.error(err);
   }
 }
 
 // helper function to generate pre-signed url
-async function getPreSignedUrl(Bucket, Key){
-  const command = new GetObjectCommand({Bucket, Key});
-  return getSignedUrl(bucketClient, command, {expiresIn: 3600});
+async function getPreSignedUrl(Bucket, Key) {
+  const command = new GetObjectCommand({ Bucket, Key });
+  return getSignedUrl(bucketClient, command, { expiresIn: 3600 });
 }
 
 // helper function updating profile pic field in DB
 async function updateUserProfilePic(email, presignedURL) {
   const command = new UpdateCommand({
     TableName,
-    Key: {email},
+    Key: { email },
     UpdateExpression: "SET profile_pic = :profilePicURL",
     ExpressionAttributeValues: {
       ":profilePicURL": presignedURL,
     },
-    ReturnValues: "UPDATED_NEW"
+    ReturnValues: "UPDATED_NEW",
   });
 
   try {
@@ -238,7 +244,7 @@ async function updateUserProfilePic(email, presignedURL) {
     return data;
   } catch (err) {
     console.error("Error updating user profile picture: ", err);
-    throw {status: 500, message: "Error updating profile picture"};
+    throw { status: 500, message: "Error updating profile picture" };
   }
 }
 
@@ -251,5 +257,6 @@ module.exports = {
   //addPostToUserForumPosts,
   //deletePostFromUserForums,
   updateAboutMe,
-  uploadProfilePicAndUpdateDB
+  uploadProfilePicAndUpdateDB,
+  getPreSignedUrl,
 };
