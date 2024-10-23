@@ -174,7 +174,7 @@ async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
   const buffer = Buffer.from(data, 'base64');
   const file_ext = mime.split("/")[1];
   const bucketName = "dungeon-delver-bucket";
-  const objectName = `profile_pics/${file_name}_${Date.now()}.${file_ext}`;
+  const objectName = `profile_pics/${file_name}.${file_ext}`;
 
   try {
     // Upload image to S3

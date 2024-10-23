@@ -56,7 +56,7 @@ router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
           username: user.username.S,
           about_me: user.about_me?.S ?? "",
           role: user.role.S,
-          creation_time: user.creation_time.S
+          creation_time: user.creation_time.S,
       };
 
       return res.status(200).json({ userProfile });
@@ -83,7 +83,8 @@ router.get("/profile/:username", async (req, res) => {
         username: user.username.S,
         about_me: user.about_me?.S ?? "",
         role: user.role.S,
-        creation_time: user.creation_time.S
+        creation_time: user.creation_time.S,
+        profile_pic: user.profile_pic?.S ?? ""
     };
 
     return res.status(200).json({ userProfile });
