@@ -154,27 +154,17 @@ postRouter.delete("/:postId", verifyAdminToken, async (req, res) => {
  * :page = 2: 8 posts
  * :page = 3: 12 posts
  */
-<<<<<<< HEAD
-postRouter.get('/landing', async (req, res) => {
+postRouter.get("/landing", async (req, res) => {
   const { page } = req.query;
 
   try {
     const postReturn = await postService.getPostsSorted(page);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.status(201).json(postReturn);
-=======
-postRouter.get("/landing", async (req, res) => {
-  const { page } = req.query;
->>>>>>> 47dea04672eab9fbd129bb1b69afbf2c47cedbf7
-
-    try {
-      const postReturn = await postService.getPostsSorted(page);
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.status(201).json(postReturn);
-    } catch (err) {
-      res.status(err.status || 400).json({ message: err.message });
-    }
-  });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
 
 postRouter.get("/:username", async (req, res) => {
   const username = req.params.username;
