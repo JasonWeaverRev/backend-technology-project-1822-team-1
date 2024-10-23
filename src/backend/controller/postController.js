@@ -11,6 +11,42 @@ const {
   verifyAdminToken,
 } = require("../middleware/authMiddleware");
 
+
+/**
+ * Get a post by its id
+ */
+postRouter.get("/posts/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getPostById(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+/**
+ * Get a post's likes by its id
+ */
+postRouter.get("/posts/likes/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getLikesByPostId(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+
 /**
  * Add a new post
  */
@@ -60,6 +96,7 @@ postRouter.post("/like", verifyToken, async (req, res) => {
     }
   } catch (err) {
     // Send error status and message if something goes wrong
+    console.log(err);
     res.status(err.status || 500).json({ message: err.message });
   }
 });
@@ -136,15 +173,15 @@ postRouter.delete("/:postId", verifyAdminToken, async (req, res) => {
  * :page = 3: 12 posts
  */
 postRouter.get('/landing', async (req, res) => {
-  const{page} = req.query;
-  
+  const { page } = req.query;
+
   try {
-      const postReturn = await postService.getPostsSorted(page);
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.status(201).json(postReturn);
+    const postReturn = await postService.getPostsSorted(page);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(201).json(postReturn);
 
   } catch (err) {
-      res.status(err.status || 400).json({message: err.message});
+    res.status(err.status || 400).json({ message: err.message });
   }
 });
 
@@ -157,7 +194,7 @@ postRouter.get('/:username', async (req, res) => {
     res.status(201).json(userPosts);
 
   } catch (err) {
-    res.status(err.status || 400).json({message: err.message});
+    res.status(err.status || 400).json({ message: err.message });
   }
 })
 
