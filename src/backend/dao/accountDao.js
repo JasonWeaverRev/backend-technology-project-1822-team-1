@@ -92,7 +92,7 @@ const getUserByEmail = async (email) => {
       TableName,
       Key: { email },
     });
-
+    console.log(email);
     const data = await documentClient.send(command);
 
     return data.Item || null;
@@ -103,9 +103,9 @@ const getUserByEmail = async (email) => {
 };
 
 /**
- * 
- * @param {*} username 
- * @returns 
+ *
+ * @param {*} username
+ * @returns
  */
 const getUserByUsername = async (username) => {
   try {
@@ -117,7 +117,7 @@ const getUserByUsername = async (username) => {
         "#username": "username",
       },
       ExpressionAttributeValues: {
-        ":username": {S: username}
+        ":username": { S: username },
       },
     });
 
@@ -128,7 +128,6 @@ const getUserByUsername = async (username) => {
     throw { status: 500, message: "Error retrieving user by username" };
   }
 };
-
 
 const getUserRoleByUsername = async (username) => {
   console.log("getUserRoleByUsername called with username:", username);
