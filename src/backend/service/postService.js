@@ -4,7 +4,7 @@
 const uuid = require("uuid");
 
 // Local module imports
-const postDAO = require("../dao/postDao");
+const postDao = require("../dao/postDao");
 const { logger } = require("../utils/logger");
 
 /**
@@ -30,7 +30,7 @@ async function deletePostById(postID) {
     const childData = await removeParents(postID);
 
     // Delete the post
-    let data = await postDAO.deletePostById(
+    let data = await postDao.deletePostById(
       foundPost.post_id,
       foundPost.creation_time
     );
@@ -76,7 +76,7 @@ async function createPost(postContents, user) {
       liked_by: [user.username],
       disliked_by: [],
     };
-    let data = await postDAO.createPost(newPost);
+    let data = await postDao.createPost(newPost);
 
     return data;
   }
@@ -111,7 +111,7 @@ async function createReply(replyCont, parent_id, user) {
         disliked_by: [],
       };
 
-      let data = await postDAO.createPost(reply);
+      let data = await postDao.createPost(reply);
 
       return data;
     }
@@ -213,7 +213,7 @@ const getLikesByPostId = async (postID) => {
  * @returns the newest added post
  */
 const getNewestPost = async () => {
-  return await postDAO.getNewestPost();
+  return await postDao.getNewestPost();
 };
 
 /**
@@ -229,7 +229,7 @@ const getNewestPost = async () => {
  * @returns the post, or null if the post does not exist
  */
 async function getPostById(postID) {
-  return await postDAO.getPostById(postID);
+  return await postDao.getPostById(postID);
 }
 
 /**
@@ -238,7 +238,7 @@ async function getPostById(postID) {
  * @returns An array containing every post
  */
 const getAllPosts = async () => {
-  return await postDAO.getAllPosts();
+  return await postDao.getAllPosts();
 };
 
 /**
@@ -247,7 +247,7 @@ const getAllPosts = async () => {
  * @returns list of all posts, sorted by creation time
  */
 const getAllPostsSorted = async () => {
-  const posts = await postDAO.getAllPosts();
+  const posts = await postDao.getAllPosts();
   const postTimeList = [];
   const sortedPosts = [];
 
@@ -278,12 +278,12 @@ const getAllPostsSorted = async () => {
  */
 async function removeParents(parentPostID) {
   //Get list of children
-  const repList = await postDAO.getPostsByParentId(parentPostID);
+  const repList = await postDao.getPostsByParentId(parentPostID);
 
   //Remove parents from children one-by-one
   if (repList) {
     repList.forEach(async (replyPost, i) => {
-      await postDAO.removeParent(replyPost);
+      await postDao.removeParent(replyPost);
     });
   }
 
@@ -346,7 +346,7 @@ async function likePost(post_id, username) {
     };
   }
 
-  const result = await postDAO.likePost(post_id, post.creation_time, username);
+  const result = await postDao.likePost(post_id, post.creation_time, username);
 
   // 3: Unliked successfully
   if (result === 3) {
@@ -383,7 +383,7 @@ async function dislikePost(post_id, username) {
   }
 
   // Delegate to DAO
-  const result = await postDAO.dislikePost(
+  const result = await postDao.dislikePost(
     post_id,
     post.creation_time,
     username
@@ -418,7 +418,7 @@ async function getPostsByWrittenBy(username) {
     };
   }
 
-  const result = await postDAO.getPostsByWrittenBy(username);
+  const result = await postDao.getPostsByWrittenBy(username);
   return result;
 }
 

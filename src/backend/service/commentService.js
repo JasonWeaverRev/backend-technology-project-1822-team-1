@@ -194,5 +194,5 @@ const getCommentsSortedByParent = async (parentID) => {
 module.exports = {
   updateComment,
   deleteComment,
-  getCommentsByLoadSorted
+  getCommentsByLoadSorted,
 };

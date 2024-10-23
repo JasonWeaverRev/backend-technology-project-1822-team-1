@@ -4,14 +4,14 @@ const {
   GetCommand,
   UpdateCommand,
   DeleteCommand,
-  QueryCommand
+  QueryCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
 const client = new DynamoDBClient({ region: "us-east-1" });
 const documentClient = DynamoDBDocumentClient.from(client);
 
-const TableName = 'Delver_Forum_Posts';
+const TableName = "Delver_Forum_Posts";
 
 /**
  * Get a comment by post_id and creation_time
@@ -22,7 +22,9 @@ const getCommentById = async (commentID, creationTime) => {
     return null;
   }
 
-  console.log(`Fetching comment with ID: ${commentID} and creation time: ${creationTime}`);
+  console.log(
+    `Fetching comment with ID: ${commentID} and creation time: ${creationTime}`
+  );
 
   try {
     const command = new GetCommand({
@@ -64,21 +66,22 @@ const updateCommentByUser = async (commentID, commentCreationTime, body) => {
         post_id: commentID,
         creation_time: commentCreationTime,
       },
-      UpdateExpression: 'SET #body = :body',
+      UpdateExpression: "SET #body = :body",
       ExpressionAttributeNames: {
-        '#body': 'body',
+        "#body": "body",
       },
       ExpressionAttributeValues: {
-        ':body': body,
+        ":body": body,
       },
-      ConditionExpression: 'attribute_exists(post_id) AND attribute_exists(creation_time)',
+      ConditionExpression:
+        "attribute_exists(post_id) AND attribute_exists(creation_time)",
     });
 
     await documentClient.send(command);
     console.log("Comment updated successfully.");
     return 1; // Successfully updated
   } catch (err) {
-    if (err.name === 'ConditionalCheckFailedException') {
+    if (err.name === "ConditionalCheckFailedException") {
       console.error("Comment does not exist.");
       return 0; // Comment not found
     }
@@ -91,7 +94,9 @@ const updateCommentByUser = async (commentID, commentCreationTime, body) => {
  * Delete a comment
  */
 const deleteCommentByUser = async (commentID, commentCreationTime) => {
-  console.log(`Deleting comment with ID: ${commentID} and creation time: ${commentCreationTime}`);
+  console.log(
+    `Deleting comment with ID: ${commentID} and creation time: ${commentCreationTime}`
+  );
 
   try {
     const command = new DeleteCommand({
@@ -100,14 +105,15 @@ const deleteCommentByUser = async (commentID, commentCreationTime) => {
         post_id: commentID,
         creation_time: commentCreationTime,
       },
-      ConditionExpression: 'attribute_exists(post_id) AND attribute_exists(creation_time)',
+      ConditionExpression:
+        "attribute_exists(post_id) AND attribute_exists(creation_time)",
     });
 
     await documentClient.send(command);
     console.log("Comment deleted successfully.");
     return 1; // Successfully deleted
   } catch (err) {
-    if (err.name === 'ConditionalCheckFailedException') {
+    if (err.name === "ConditionalCheckFailedException") {
       console.error("Comment does not exist.");
       return 0; // Comment not found
     }
@@ -119,7 +125,12 @@ const deleteCommentByUser = async (commentID, commentCreationTime) => {
 /**
  * Remove comment reference from parent post's replies
  */
-const removeCommentFromParent = async (parentID, parentCreationTime, commentID, commentCreationTime) => {
+const removeCommentFromParent = async (
+  parentID,
+  parentCreationTime,
+  commentID,
+  commentCreationTime
+) => {
   try {
     const command = new UpdateCommand({
       TableName,
@@ -127,18 +138,21 @@ const removeCommentFromParent = async (parentID, parentCreationTime, commentID, 
         post_id: parentID,
         creation_time: parentCreationTime,
       },
-      UpdateExpression: 'DELETE replies :commentKey',
+      UpdateExpression: "DELETE replies :commentKey",
       ExpressionAttributeValues: {
-        ':commentKey': documentClient.createSet([`${commentID}#${commentCreationTime}`]),
+        ":commentKey": documentClient.createSet([
+          `${commentID}#${commentCreationTime}`,
+        ]),
       },
-      ConditionExpression: 'attribute_exists(post_id) AND attribute_exists(creation_time)',
+      ConditionExpression:
+        "attribute_exists(post_id) AND attribute_exists(creation_time)",
     });
 
     await documentClient.send(command);
     console.log("Comment reference removed from parent post.");
     return 1;
   } catch (err) {
-    if (err.name === 'ConditionalCheckFailedException') {
+    if (err.name === "ConditionalCheckFailedException") {
       console.error("Parent post does not exist.");
       return 0; // Parent not found
     }
@@ -149,7 +163,7 @@ const removeCommentFromParent = async (parentID, parentCreationTime, commentID, 
 
 /**
  * Retrieves a list of all comments attached to a specific post
- * 
+ *
  * @param {*} parentID ID of the parent to get comment replies from
  * @returns List of comments with same parent id
  */
@@ -169,18 +183,19 @@ const getCommentsByParent = async (parentID) => {
 
     const data = await documentClient.send(command);
     return data.Items;
-
   } catch (err) {
     console.error(err);
-    throw { status: 500, message: "Error retrieving comments by their parent posts "};
+    throw {
+      status: 500,
+      message: "Error retrieving comments by their parent posts ",
+    };
   }
 };
-
 
 module.exports = {
   updateCommentByUser,
   deleteCommentByUser,
   getCommentById,
   removeCommentFromParent,
-  getCommentsByParent
+  getCommentsByParent,
 };

@@ -138,7 +138,7 @@ POST	/api/forums/:[postID]	        							Create a comment
 					Body: {
 						"Body": "Message Goes Here"
 					}
-PUT		/api/forums/comments										Update an comment
+PATCH	/api/forums/comments										Update an comment
 					Body: {
 						"comment_id": "d0-29-49-8c7-d693d",
 						"comment_creation_time": "24-10-084:10.36Z",
