@@ -48,7 +48,6 @@ router.get("/email", async (req, res) => {
 // get user data based on their Auth token
 router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
   const username = req.user.username;
-
   try {
     const user = await accountService.getUserByUsername(username);
     const userProfile = {
@@ -83,6 +82,7 @@ router.get("/profile/:username", async (req, res) => {
       about_me: user.about_me?.S ?? "",
       role: user.role.S,
       creation_time: user.creation_time.S,
+      profile_pic: user.profile_pic?.S ?? "",
     };
 
     return res.status(200).json({ userProfile });
@@ -131,6 +131,30 @@ router.patch("/about-me", AuthMiddleware.verifyToken, async (req, res) => {
     res.status(200).setHeader("Access-Control-Allow-Origin", "*").json(result);
   } catch (err) {
     return res.status(400).json({ message: err.message });
+  }
+});
+
+router.patch("/profile-pic", AuthMiddleware.verifyToken, async (req, res) => {
+  const email = req.user.email;
+  const username = req.user.username;
+  const file_name = `${username}-profile-pic`;
+  const { mime, data } = req.body.image;
+
+  if (!email || !file_name || !mime || !data) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  try {
+    const result = await accountService.uploadProfilePicAndUpdateDB(
+      email,
+      file_name,
+      mime,
+      data
+    );
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in controller layer: ", error);
+    return res.status(500).json({ message: error.message || "Server error" });
   }
 });
 

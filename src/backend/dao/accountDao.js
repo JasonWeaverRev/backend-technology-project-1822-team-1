@@ -1,15 +1,18 @@
-const {
-  DynamoDBClient,
-  QueryCommand,
-  ScanCommand,
-} = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, QueryCommand } = require("@aws-sdk/client-dynamodb");
 const {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
   UpdateCommand,
-  DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
+
+const {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const bucketClient = new S3Client({ region: "us-east-1" });
 
 const client = new DynamoDBClient({ region: "us-east-1" });
 
@@ -80,12 +83,8 @@ async function updateAboutMe(email, text) {
     return { email, text };
   } catch (err) {
     console.error("Error updating About Me section: ", err);
-    return null;
+    throw { status: 500, message: "Error updating About Me" };
   }
-}
-
-async function updateProfilePic(email, image) {
-  // need to look into Amazon S3
 }
 
 const getUserByEmail = async (email) => {
@@ -170,6 +169,85 @@ const getUserRoleByUsername = async (username) => {
   }
 };
 
+async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
+  // Convert base64 to buffer
+  const buffer = Buffer.from(data, "base64");
+  const file_ext = mime.split("/")[1];
+  const bucketName = "dungeon-delver-bucket";
+  const objectName = `profile_pics/${file_name}.${file_ext}`;
+
+  try {
+    // Upload image to S3
+    const response = await uploadImageToBucket(
+      bucketName,
+      objectName,
+      mime,
+      buffer
+    );
+    console.log("in the dao layer: ", response);
+
+    // Generate pre-signed URL
+    const presignedUrl = await getPreSignedUrl(bucketName, objectName);
+
+    // Update user profile pic in DynamoDB
+    const updateResponse = await updateUserProfilePic(email, presignedUrl);
+
+    return { updateResponse, presignedUrl };
+  } catch (error) {
+    console.error("Error in profile pic upload and DB update: ", error);
+    throw error;
+  }
+}
+
+// helper function to upload image to S3 bucket
+async function uploadImageToBucket(Bucket, Key, mime, buffer) {
+  console.log("Bucket:", Bucket);
+  console.log("Key:", Key);
+  console.log("MIME Type:", mime);
+  console.log("Buffer Size:", buffer.length);
+
+  const command = new PutObjectCommand({
+    Bucket,
+    Key,
+    Body: buffer,
+    ContentType: mime,
+  });
+
+  try {
+    const response = await bucketClient.send(command);
+    return response;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// helper function to generate pre-signed url
+async function getPreSignedUrl(Bucket, Key) {
+  const command = new GetObjectCommand({ Bucket, Key });
+  return getSignedUrl(bucketClient, command, { expiresIn: 3600 });
+}
+
+// helper function updating profile pic field in DB
+async function updateUserProfilePic(email, presignedURL) {
+  const command = new UpdateCommand({
+    TableName,
+    Key: { email },
+    UpdateExpression: "SET profile_pic = :profilePicURL",
+    ExpressionAttributeValues: {
+      ":profilePicURL": presignedURL,
+    },
+    ReturnValues: "UPDATED_NEW",
+  });
+
+  try {
+    const data = await documentClient.send(command);
+    return data;
+  } catch (err) {
+    console.error("Error updating user profile picture: ", err);
+    throw { status: 500, message: "Error updating profile picture" };
+  }
+}
+
 module.exports = {
   getUserByEmail,
   getUserByUsername,
@@ -179,4 +257,6 @@ module.exports = {
   //addPostToUserForumPosts,
   //deletePostFromUserForums,
   updateAboutMe,
+  uploadProfilePicAndUpdateDB,
+  getPreSignedUrl,
 };
