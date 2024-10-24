@@ -24,7 +24,16 @@ function loggerMiddleware(req, res, next) {
 }
 
 app.use(loggerMiddleware);
-app.use(cors());
+
+app.use(
+  cors({
+    origin:
+      "http://1822-team-1-website-production.s3-website-us-east-1.amazonaws.com/", // Set this to your deployed frontend's URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Authorization", "Content-Type"],
+  })
+);
+
 app.options("*", cors()); // Allow preflight requests from any origin
 
 app.use((req, res, next) => {
