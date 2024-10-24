@@ -83,8 +83,6 @@ const getMonstersByChallengeRating = async (challengeRating) => {
       randomMonsterData.push(newMonster);
     }
 
-    console.log(randomMonsterData);
-
     return randomMonsterData;
   } catch (err) {
     throw err.status ? err : { status: 500, message: "Internal server error" };
@@ -106,6 +104,7 @@ const getEncounterById = async (id) => {
     if (!encounter) {
       throw { status: 404, message: "Encounter with this id does not exist" };
     }
+
     return encounter;
   } catch (err) {
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
@@ -141,8 +140,6 @@ const createNewEncounter = async (monsters, title, username, setting) => {
       // campaign_title: "",
       setting: setting ? setting : "",
     };
-
-    console.log(newEncounter);
 
     await encounterDao.createEncounter(newEncounter);
 
@@ -193,7 +190,6 @@ const editEncounterById = async (
 
     return encounter;
   } catch (err) {
-    console.log(err);
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
   }
 };
@@ -283,7 +279,6 @@ const getCampaignByTitle = async (campaign_title) => {
 
     return campaigns;
   } catch (err) {
-    console.error("Error in getCampaignByTitle Service:", err);
     throw {
       status: err.status || 500,
       message: err.message || "Internal server error",

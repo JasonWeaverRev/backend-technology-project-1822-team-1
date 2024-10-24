@@ -16,7 +16,7 @@ const cors = require("cors");
  */
 
 const PORT = process.env.PORT || 4000;
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: "5mb" }));
 
 function loggerMiddleware(req, res, next) {
   logger.info(`Incoming ${req.method} : ${req.url}`);
