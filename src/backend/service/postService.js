@@ -196,6 +196,18 @@ const getPostsSorted = async (loads) => {
 };
 
 /**
+ * Retrieves the number of likes a post has
+ * 
+ * @param {*} postID 
+ * @returns 
+ */
+const getLikesByPostId = async (postID) => {
+  const post = await postDao.getPostById(postID);
+
+  return (post.liked_by.length - post.disliked_by.length);
+}
+
+/**
  * Retrieves the newest added post to the forums for page/post sorting
  *
  * @returns the newest added post
@@ -404,6 +416,11 @@ async function dislikePost(post_id, username) {
   return { status: 200, message: "Disliked successfully." };
 }
 
+/**
+ * 
+ * @param {*} username 
+ * @returns 
+ */
 async function getPostsByWrittenBy(username) {
   if (!username) {
     throw {
@@ -427,5 +444,6 @@ module.exports = {
   getNewestPost,
   likePost,
   dislikePost,
-  getPostsByWrittenBy,
+  getLikesByPostId,
+  getPostsByWrittenBy
 };

@@ -68,17 +68,17 @@ const getMonstersByChallengeRating = async (challengeRating) => {
         image: monsterDetails.data.image
           ? `${dndApiUrlPath}${monsterDetails.data.image}`
           : accountDao.getPreSignedUrl(
-              "dungeon-delver-bucket",
-              `profile_pics/${monsterDetails.data.type}.${file_ext}`
-            ),
+            "dungeon-delver-bucket",
+            `profile_pics/${monsterDetails.data.type}.${file_ext}`
+          ),
         monsterPage: monsterDetails.data.name.includes(",")
           ? `${dndBeyondUrlPath}${monsterDetails.data.name
-              .split(",")[0]
-              .trim()}`
+            .split(",")[0]
+            .trim()}`
           : `${dndBeyondUrlPath}${monsterDetails.data.name.replaceAll(
-              " ",
-              "-"
-            )}`,
+            " ",
+            "-"
+          )}`,
       };
       randomMonsterData.push(newMonster);
     }

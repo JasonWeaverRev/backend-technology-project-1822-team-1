@@ -11,6 +11,42 @@ const {
   verifyAdminToken,
 } = require("../middleware/authMiddleware");
 
+
+/**
+ * Get a post by its id
+ */
+postRouter.get("/posts/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getPostById(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+/**
+ * Get a post's likes by its id
+ */
+postRouter.get("/posts/likes/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getLikesByPostId(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+
 /**
  * Add a new post
  */
