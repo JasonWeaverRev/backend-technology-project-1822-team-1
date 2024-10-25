@@ -18,6 +18,11 @@ const cors = require("cors");
 const PORT = process.env.PORT || 4000;
 app.use(express.json({ limit: "5mb" }));
 
+if (!process.env.JWT_SECRET) {
+  console.error("Critical environment variables are missing.");
+  process.exit(1); // Exit the application if critical variables are missing
+}
+
 function loggerMiddleware(req, res, next) {
   logger.info(`Incoming ${req.method} : ${req.url}`);
   next();
