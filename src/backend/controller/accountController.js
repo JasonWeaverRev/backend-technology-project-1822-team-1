@@ -62,7 +62,7 @@ router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
     return res.status(200).json({ userProfile });
   } catch (error) {
     console.error("Error fetching user by username:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error: profile" });
   }
 });
 
@@ -89,7 +89,7 @@ router.get("/profile/:username", async (req, res) => {
     return res.status(200).json({ userProfile });
   } catch (error) {
     console.error("Error fetching user by username:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error: profile by username" });
   }
 });
 
@@ -161,7 +161,7 @@ router.patch("/profile-pic", AuthMiddleware.verifyToken, async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error in controller layer: ", error);
-    return res.status(500).json({ message: error.message || "Server error" });
+    return res.status(500).json({ message: error.message || "Server error: profile pic" });
   }
 });
 

@@ -47,7 +47,7 @@ commentRouter.delete(
       }
     } catch (err) {
       console.error("Error deleting comment:", err);
-      res.status(err.status || 500).json({ message: "Internal Server Error" });
+      res.status(err.status || 500).json({ message: "Internal Server Error: deleting comment" });
     }
   }
 );
@@ -163,7 +163,7 @@ commentRouter.patch("/", verifyToken, validateComment, async (req, res) => {
     }
   } catch (err) {
     console.error("Error updating comment:", err);
-    res.status(err.status || 500).json({ message: "Internal Server Error" });
+    res.status(err.status || 500).json({ message: "Internal Server Error: update comment" });
   }
 });
 
