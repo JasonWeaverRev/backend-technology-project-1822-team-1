@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const accountService = require("../service/accountService");
 const AuthMiddleware = require("../middleware/authMiddleware");
+const secret = process.env.JWT_SECRET;
 
 /*
     DDUser Object Model
@@ -106,7 +107,13 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// POST user login
 router.post("/login", async (req, res) => {
+
+  if (!secret) {
+    res.status(500).json({ message: "SECRET KEY UNAVAILABLE" })
+  }
+
   const { identifier, password } = req.body;
 
   try {
