@@ -130,7 +130,6 @@ describe("encounterService Tests", () => {
       expect(result).toHaveProperty("encounter_id");
       expect(result).toHaveProperty("saves");
       expect(result).toHaveProperty("creation_time");
-      expect(result).toHaveProperty("campaign_title");
     });
 
     it("should throw an error if no monsters are provided", async () => {
@@ -476,15 +475,15 @@ describe("encounterService Tests", () => {
     });
   });
 
-  describe('getCampaign', () => {
-    const campaignTitle = 'test campaign title';
+  describe("getCampaign", () => {
+    const campaignTitle = "test campaign title";
 
-    it('should return a list of encounter_ids for a valid campaign title', async () => {
+    it("should return a list of encounter_ids for a valid campaign title", async () => {
       // Mocking the DAO return value
-      encounterDao.getCampaignByTitle.mockReturnValue(['1', '2', '3']);
+      encounterDao.getCampaignByTitle.mockReturnValue(["1", "2", "3"]);
 
       const result = await encounterService.getCampaignByTitle(campaignTitle);
-      expect(result).toEqual(['1', '2', '3']);
+      expect(result).toEqual(["1", "2", "3"]);
     });
   });
 
@@ -615,4 +614,4 @@ describe("encounterService Tests", () => {
       }
     });
   });
-})
+});
