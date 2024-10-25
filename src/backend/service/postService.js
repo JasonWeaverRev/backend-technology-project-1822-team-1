@@ -174,7 +174,7 @@ const getPostsSorted = async (loads) => {
   }
 
   // When the amount of pages exceeds the posts content capacity
-  else if (postsSorted.length <= 4 + (loadNum - 2) * 4) {
+  else if (postsSorted.length <= 6 + (loadNum - 2) * 6) {
     logger.info(
       `Failed get posts sorted for landing page: Page number exceeds amount of posts that can be displayed`
     );
@@ -185,12 +185,12 @@ const getPostsSorted = async (loads) => {
   }
 
   // When the number of posts don't meet load capacity
-  else if (postsSorted.length <= 4 + (loadNum - 1) * 4) {
+  else if (postsSorted.length <= 6 + (loadNum - 1) * 6) {
     return [postsSorted, postsSorted.length];
   }
   // more than 4 posts
   else {
-    const postsSortedByDenom = postsSorted.slice(0, 4 + (loadNum - 1) * 4);
+    const postsSortedByDenom = postsSorted.slice(0, 6 + (loadNum - 1) * 6);
     return [postsSortedByDenom, postsSorted.length];
   }
 };
