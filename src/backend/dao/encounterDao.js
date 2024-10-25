@@ -27,10 +27,8 @@ const getEncounterById = async (encounter_id) => {
     });
 
     const data = await documentClient.send(command);
-
     return data.Item || null;
   } catch (err) {
-    console.log(err);
     throw { status: 500, message: "Error retrieving encounter by id" };
   }
 };
@@ -71,7 +69,6 @@ const getEncountersByUsername = async (username) => {
 
     return processedItems || [];
   } catch (err) {
-    console.error(err);
     throw { status: 500, message: "Error retrieving encounters by username" };
   }
 };
@@ -82,10 +79,6 @@ const editEncounterById = async (encounter) => {
   const monsters = encounter.monsters;
   const setting = encounter.setting;
 
-  console.log(encounter_id);
-  console.log(encounter_title);
-  console.log(monsters);
-  console.log(setting);
   try {
     // const command = new PutCommand({
     //   TableName,
@@ -109,7 +102,7 @@ const editEncounterById = async (encounter) => {
 
     return data;
   } catch (err) {
-    throw { status: 500, message: "Error retrieving encounters by username" };
+    throw { status: 500, message: "Error updating encounters by id" };
   }
 };
 
@@ -149,7 +142,6 @@ const getBatchEncountersbyId = async (encounter_ids) => {
 
     return batchResponse.Responses[TableName] || [];
   } catch (err) {
-    console.error(err);
     throw { status: 500, message: "Error retrieving encounters in batch" };
   }
 };
@@ -158,22 +150,20 @@ const getCampaignByTitle = async (campaign_title) => {
   try {
     const command = new QueryCommand({
       TableName,
-      IndexName: 'campaign_title-encounter_id-index',
-      KeyConditionExpression: '#campaign_title = :campaign_title',
+      IndexName: "campaign_title-encounter_id-index",
+      KeyConditionExpression: "#campaign_title = :campaign_title",
       ExpressionAttributeNames: {
         "#campaign_title": "campaign_title",
       },
       ExpressionAttributeValues: {
-        ':campaign_title': { S: campaign_title }
-      }
+        ":campaign_title": { S: campaign_title },
+      },
     });
 
     const data = await documentClient.send(command);
-    const encounterIds = data.Items.map(item => item.encounter_id.S);
+    const encounterIds = data.Items.map((item) => item.encounter_id.S);
     return encounterIds;
-
   } catch (err) {
-    console.error('Error in getCampaign DAO:', err);
     throw { status: 500, message: "Internal server error" };
   }
 };
@@ -195,7 +185,6 @@ const createCampaign = async (encounter_id, campaign_title) => {
     const data = await documentClient.send(command);
     return data?.Attributes;
   } catch (err) {
-    console.error("Error in createCampaign DAO:", err);
     throw { status: 500, message: "Internal server error" };
   }
 };
@@ -213,7 +202,6 @@ const removeCampaign = async (encounter_id) => {
     const data = await documentClient.send(command);
     return data.Attributes;
   } catch (err) {
-    console.error("Error in removeCampaign DAO:", err);
     throw { status: 500, message: "Internal server error" };
   }
 };
@@ -227,5 +215,5 @@ module.exports = {
   removeCampaign,
   editEncounterById,
   deleteEncounterById,
-  getCampaignByTitle
+  getCampaignByTitle,
 };

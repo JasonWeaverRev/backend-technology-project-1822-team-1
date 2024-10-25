@@ -18,20 +18,6 @@ router.get("/monsters", async (req, res) => {
   }
 });
 
-router.get("/:username", async (req, res) => {
-  const username = req.params.username;
-
-  try {
-    const encounters = await encounterService.getEncountersByUsername(username);
-    res
-      .status(200)
-      .setHeader("Access-Control-Allow-Origin", "*")
-      .json({ encounters });
-  } catch (err) {
-    res.status(err.status || 400).json({ message: err.message });
-  }
-});
-
 router.get("/encounter", async (req, res) => {
   const encounter_id = req.query.encounter_id;
 
@@ -68,8 +54,8 @@ router.post("/encounter", verifyToken, async (req, res) => {
   }
 });
 
-router.get('/campaign', verifyToken, async (req, res) => {
-  const { campaign_title } = req.query; 
+router.get("/campaign", verifyToken, async (req, res) => {
+  const { campaign_title } = req.query;
 
   if (!campaign_title) {
     return res.status(400).json({ message: "Campaign title must be provided" });
@@ -83,15 +69,16 @@ router.get('/campaign', verifyToken, async (req, res) => {
     }
 
     return res.status(200).json(campaigns);
-
   } catch (err) {
-    return res.status(err.status || 500).json({ message: err.message || "Internal server error" });
+    return res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal server error" });
   }
 });
 
 // Router to set/delete campaign_title from an Encounter
 // Ex. URL) http://localhost:3000/api/encounters/campaigns?encounter_id=123
-router.patch('/campaign', verifyToken, async (req, res) => {
+router.patch("/campaign", verifyToken, async (req, res) => {
   const { encounter_id } = req.query;
   const { action, campaign_title } = req.body;
   const username = req.user.username;
@@ -164,6 +151,20 @@ router.delete("/encounter", verifyToken, async (req, res) => {
       .status(200)
       .setHeader("Access-Control-Allow-Origin", "*")
       .json({ encounter });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+router.get("/:username", async (req, res) => {
+  const username = req.params.username;
+
+  try {
+    const encounters = await encounterService.getEncountersByUsername(username);
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ encounters });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
   }
