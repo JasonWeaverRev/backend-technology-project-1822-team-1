@@ -41,9 +41,10 @@ const createEncounter = async (encounter) => {
       TableName,
       Item: encounter,
     });
-
+    console.log(encounter);
     await documentClient.send(command);
   } catch (err) {
+    console.error(err);
     throw { status: 500, message: "Error creating new encounter" };
   }
 };
@@ -153,6 +154,7 @@ const getBatchEncountersbyId = async (encounter_ids) => {
 
 const getCampaignByTitle = async (campaign_title) => {
   try {
+    console.log("dao layer: ", campaign_title)
     const command = new QueryCommand({
       TableName,
       IndexName: 'campaign_title-encounter_id-index',

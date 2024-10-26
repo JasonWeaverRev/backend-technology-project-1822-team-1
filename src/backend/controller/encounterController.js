@@ -68,7 +68,10 @@ router.post("/encounter", verifyToken, async (req, res) => {
   }
 });
 
-router.get('/campaign', verifyToken, async (req, res) => {
+router.get('/campaign', async (req, res) => {
+  console.log("Reached the campaign endpoint in encounterController");
+console.log("Query params received:", req.query);
+
   const { campaign_title } = req.query; 
 
   if (!campaign_title) {

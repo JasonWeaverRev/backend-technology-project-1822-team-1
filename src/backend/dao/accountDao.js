@@ -19,6 +19,7 @@ const client = new DynamoDBClient({ region: "us-east-1" });
 const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "Dungeon_Delver_Users";
+const BucketName = "dungeon-delver-bucket";
 
 /*
     DDUser Object Model
@@ -124,7 +125,16 @@ const getUserByUsername = async (username) => {
 
     const data = await documentClient.send(command);
 
-    return data.Items[0] || null;
+    const user = data.Items[0] || null;
+
+    // Generate the presigned URL for the profile picture
+    if (user && user.profile_pic) {
+      const presignedUrl = await getPreSignedUrl(BucketName, user.profile_pic.S);
+      user.profile_pic = presignedUrl;
+    }
+
+    return user;
+
   } catch (err) {
     throw { status: 500, message: "Error retrieving user by username" };
   }
@@ -173,24 +183,22 @@ async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
   // Convert base64 to buffer
   const buffer = Buffer.from(data, "base64");
   const file_ext = mime.split("/")[1];
-  const bucketName = "dungeon-delver-bucket";
   const objectName = `profile_pics/${file_name}.${file_ext}`;
 
   try {
     // Upload image to S3
     const response = await uploadImageToBucket(
-      bucketName,
+      BucketName,
       objectName,
       mime,
       buffer
     );
-    console.log("in the dao layer: ", response);
 
     // Generate pre-signed URL
-    const presignedUrl = await getPreSignedUrl(bucketName, objectName);
+    const presignedUrl = await getPreSignedUrl(BucketName, objectName);
 
     // Update user profile pic in DynamoDB
-    const updateResponse = await updateUserProfilePic(email, presignedUrl);
+    const updateResponse = await updateUserProfilePic(email, objectName);
 
     return { updateResponse, presignedUrl };
   } catch (error) {
@@ -201,11 +209,6 @@ async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
 
 // helper function to upload image to S3 bucket
 async function uploadImageToBucket(Bucket, Key, mime, buffer) {
-  console.log("Bucket:", Bucket);
-  console.log("Key:", Key);
-  console.log("MIME Type:", mime);
-  console.log("Buffer Size:", buffer.length);
-
   const command = new PutObjectCommand({
     Bucket,
     Key,
@@ -228,13 +231,13 @@ async function getPreSignedUrl(Bucket, Key) {
 }
 
 // helper function updating profile pic field in DB
-async function updateUserProfilePic(email, presignedURL) {
+async function updateUserProfilePic(email, objectName) {
   const command = new UpdateCommand({
     TableName,
     Key: { email },
-    UpdateExpression: "SET profile_pic = :profilePicURL",
+    UpdateExpression: "SET profile_pic = :objectName",
     ExpressionAttributeValues: {
-      ":profilePicURL": presignedURL,
+      ":objectName": objectName,
     },
     ReturnValues: "UPDATED_NEW",
   });
