@@ -3,7 +3,6 @@ const { logger } = require("../utils/logger");
 const axios = require("axios");
 const uuid = require("uuid");
 const encounterDao = require("../dao/encounterDao");
-const accountDao = require("../dao/accountDao");
 
 const dndApiUrlPath = "https://www.dnd5eapi.co";
 const dndBeyondUrlPath = "https://www.dndbeyond.com/monsters/";
@@ -19,12 +18,6 @@ const file_ext = "jpeg";
  1-30
  */
 const monsterAmount = 5;
-
-// const DELETE_THIS_HARDCODE_MONSTERS = [
-//   {
-//     monster: "Kobold",
-//   },
-// ];
 
 /**
  *
@@ -65,20 +58,18 @@ const getMonstersByChallengeRating = async (challengeRating) => {
         intelligence: monsterDetails.data.intelligence,
         wisdom: monsterDetails.data.wisdom,
         charisma: monsterDetails.data.charisma,
+        type: monsterDetails.data.type,
         image: monsterDetails.data.image
           ? `${dndApiUrlPath}${monsterDetails.data.image}`
-          : accountDao.getPreSignedUrl(
-            "dungeon-delver-bucket",
-            `profile_pics/${monsterDetails.data.type}.${file_ext}`
-          ),
+          : "",
         monsterPage: monsterDetails.data.name.includes(",")
           ? `${dndBeyondUrlPath}${monsterDetails.data.name
-            .split(",")[0]
-            .trim()}`
+              .split(",")[0]
+              .trim()}`
           : `${dndBeyondUrlPath}${monsterDetails.data.name.replaceAll(
-            " ",
-            "-"
-          )}`,
+              " ",
+              "-"
+            )}`,
       };
       randomMonsterData.push(newMonster);
     }
