@@ -148,7 +148,6 @@ const getBatchEncountersbyId = async (encounter_ids) => {
 
 const getCampaignByTitle = async (campaign_title) => {
   try {
-    console.log("dao layer: ", campaign_title)
     const command = new QueryCommand({
       TableName,
       IndexName: "campaign_title-encounter_id-index",
@@ -162,8 +161,9 @@ const getCampaignByTitle = async (campaign_title) => {
     });
 
     const data = await documentClient.send(command);
-    const encounterIds = data.Items.map((item) => item.encounter_id.S);
-    return encounterIds;
+    const processedItems = data.Items.map((item) => unmarshall(item));
+    console.log("processed items: ", processedItems);
+    return processedItems;
   } catch (err) {
     throw { status: 500, message: "Internal server error" };
   }

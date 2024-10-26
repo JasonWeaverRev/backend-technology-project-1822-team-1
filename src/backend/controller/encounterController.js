@@ -54,15 +54,17 @@ router.post("/encounter", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/campaign", verifyToken, async (req, res) => {
-  const { campaign_title } = req.query;
+router.get("/campaign/:created_by/:campaign_title", async (req, res) => {
+  const { created_by, campaign_title } = req.params;
+  console.log("campaign title: ", campaign_title);
 
   if (!campaign_title) {
     return res.status(400).json({ message: "Campaign title must be provided" });
   }
 
   try {
-    const campaigns = await encounterService.getCampaignByTitle(campaign_title);
+    const campaigns = await encounterService.getCampaignByTitle(campaign_title, created_by);
+    console.log("campaigns: ", campaigns);
 
     if (!campaigns || campaigns.length === 0) {
       throw { status: 404, message: "Campaign not found" };
