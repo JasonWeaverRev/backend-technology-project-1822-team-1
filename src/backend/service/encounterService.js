@@ -260,7 +260,7 @@ const removeCampaign = async (username, encounter_id) => {
   return data;
 };
 
-const getCampaignByTitle = async (campaign_title) => {
+const getCampaignByTitle = async (campaign_title, created_by) => {
   if (!campaign_title) {
     throw { status: 400, message: "Campaign title must be provided" };
   }
@@ -268,8 +268,16 @@ const getCampaignByTitle = async (campaign_title) => {
   try {
     const campaigns = await encounterDao.getCampaignByTitle(campaign_title);
 
-    return campaigns;
+    const filteredCampaigns = campaigns.filter(encounter => encounter.created_by === created_by);
+    console.log("filtered campaigns: ", filteredCampaigns);
+
+    if (filteredCampaigns.length === 0) {
+      throw { status: 404, message: "Campaign not found for this user" };
+    }
+
+    return filteredCampaigns;
   } catch (err) {
+    console.log("Service Layer: ", err);
     throw {
       status: err.status || 500,
       message: err.message || "Internal server error",
