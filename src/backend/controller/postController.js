@@ -52,10 +52,13 @@ postRouter.get("/posts/likes/:postId", async (req, res) => {
  */
 postRouter.post("/", verifyToken, async (req, res) => {
   try {
-    const data = await postService.createPost(req.body, req.user);
+
+    const { title, body, encounterId } = req.body;
+    console.log("MADE IT THIS FAR");
+    const data = await postService.createPost(title, body, req.user, encounterId);
     res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
       message: `Successfully created new post!`,
-      data,
+      data
     });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });

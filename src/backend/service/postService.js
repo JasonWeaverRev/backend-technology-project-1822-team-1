@@ -65,20 +65,29 @@ async function deletePostById(postID) {
  * @param {*} postContents contents of the post, including title (optional?) and body
  * @returns meta data of the post creation if successful, or null otherwise
  */
-async function createPost(postContents, user) {
-  if (validatePost(postContents, user)) {
+async function createPost(title, body, user, encounterId) {
+  if (validatePost(title, body, user)) {
+
+    let tempEncountId = "";
+
+    if (encounterId) {
+      tempEncountId = encounterId;
+    }
+
     // Add the new post information
     newPost = {
       post_id: uuid.v4(),
-      ...postContents,
+      title: title,
+      body: body,
       written_by: user.username,
       creation_time: new Date().toISOString(),
       liked_by: [user.username],
-      disliked_by: []
+      disliked_by: [],
+      encounter: tempEncountId
     };
     let data = await postDao.createPost(newPost);
 
-    return newPost.post_id;
+    return [newPost.post_id, newPost.encounter];
   }
 
   // Invalid post
@@ -299,12 +308,12 @@ async function removeParents(parentPostID) {
  * @param {*} postContents
  * @returns true if the post is valid for creation, false otherwise
  */
-function validatePost(postContents, user) {
+function validatePost(title, body, user) {
   return (
-    postContents.title &&
-    postContents.body &&
+    title &&
+    body &&
     user.username &&
-    postContents.body.length > 0
+    body.length > 0
   );
 }
 
