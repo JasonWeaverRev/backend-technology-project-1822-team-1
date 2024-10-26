@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const accountService = require("../service/accountService");
 const AuthMiddleware = require("../middleware/authMiddleware");
+const secret = process.env.JWT_SECRET;
 
 /*
     DDUser Object Model
@@ -62,7 +63,7 @@ router.get("/profile", AuthMiddleware.verifyToken, async (req, res) => {
     return res.status(200).json({ userProfile });
   } catch (error) {
     console.error("Error fetching user by username:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: error });
   }
 });
 
@@ -89,7 +90,9 @@ router.get("/profile/:username", async (req, res) => {
     return res.status(200).json({ userProfile });
   } catch (error) {
     console.error("Error fetching user by username:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ message: "Internal server error: profile by username" });
   }
 });
 
@@ -107,7 +110,12 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// POST user login
 router.post("/login", async (req, res) => {
+  if (!secret) {
+    res.status(500).json({ message: "SECRET KEY UNAVAILABLE" });
+  }
+
   const { identifier, password } = req.body;
 
   try {
@@ -155,7 +163,9 @@ router.patch("/profile-pic", AuthMiddleware.verifyToken, async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error in controller layer: ", error);
-    return res.status(500).json({ message: error.message || "Server error" });
+    return res
+      .status(500)
+      .json({ message: error.message || "Server error: profile pic" });
   }
 });
 

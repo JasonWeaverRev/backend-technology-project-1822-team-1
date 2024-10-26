@@ -3,7 +3,6 @@ const { logger } = require("../utils/logger");
 const axios = require("axios");
 const uuid = require("uuid");
 const encounterDao = require("../dao/encounterDao");
-const accountDao = require("../dao/accountDao");
 
 const dndApiUrlPath = "https://www.dnd5eapi.co";
 const dndBeyondUrlPath = "https://www.dndbeyond.com/monsters/";
@@ -19,12 +18,6 @@ const file_ext = "jpeg";
  1-30
  */
 const monsterAmount = 5;
-
-// const DELETE_THIS_HARDCODE_MONSTERS = [
-//   {
-//     monster: "Kobold",
-//   },
-// ];
 
 /**
  *
@@ -65,12 +58,10 @@ const getMonstersByChallengeRating = async (challengeRating) => {
         intelligence: monsterDetails.data.intelligence,
         wisdom: monsterDetails.data.wisdom,
         charisma: monsterDetails.data.charisma,
+        type: monsterDetails.data.type,
         image: monsterDetails.data.image
           ? `${dndApiUrlPath}${monsterDetails.data.image}`
-          : accountDao.getPreSignedUrl(
-              "dungeon-delver-bucket",
-              `profile_pics/${monsterDetails.data.type}.${file_ext}`
-            ),
+          : "",
         monsterPage: monsterDetails.data.name.includes(",")
           ? `${dndBeyondUrlPath}${monsterDetails.data.name
               .split(",")[0]
@@ -82,8 +73,6 @@ const getMonstersByChallengeRating = async (challengeRating) => {
       };
       randomMonsterData.push(newMonster);
     }
-
-    console.log(randomMonsterData);
 
     return randomMonsterData;
   } catch (err) {
@@ -106,6 +95,7 @@ const getEncounterById = async (id) => {
     if (!encounter) {
       throw { status: 404, message: "Encounter with this id does not exist" };
     }
+
     return encounter;
   } catch (err) {
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
@@ -138,11 +128,9 @@ const createNewEncounter = async (monsters, title, username, setting) => {
       saves: 0,
       creation_time: new Date().toISOString(),
       created_by: username,
-      //campaign_title: "",
+      // campaign_title: "",
       setting: setting ? setting : "",
     };
-
-    console.log(newEncounter);
 
     await encounterDao.createEncounter(newEncounter);
 
@@ -193,7 +181,6 @@ const editEncounterById = async (
 
     return encounter;
   } catch (err) {
-    console.log(err);
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
   }
 };
@@ -283,7 +270,6 @@ const getCampaignByTitle = async (campaign_title) => {
 
     return campaigns;
   } catch (err) {
-    console.error("Error in getCampaignByTitle Service:", err);
     throw {
       status: err.status || 500,
       message: err.message || "Internal server error",

@@ -11,15 +11,54 @@ const {
   verifyAdminToken,
 } = require("../middleware/authMiddleware");
 
+
+/**
+ * Get a post by its id
+ */
+postRouter.get("/posts/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getPostById(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+/**
+ * Get a post's likes by its id
+ */
+postRouter.get("/posts/likes/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getLikesByPostId(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
+
 /**
  * Add a new post
  */
 postRouter.post("/", verifyToken, async (req, res) => {
   try {
-    const data = await postService.createPost(req.body, req.user);
+
+    const { title, body, encounterId } = req.body;
+    console.log("MADE IT THIS FAR");
+    const data = await postService.createPost(title, body, req.user, encounterId);
     res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
       message: `Successfully created new post!`,
-      PostInformation: req.body,
+      data
     });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });
@@ -114,9 +153,9 @@ postRouter.delete("/:postId", verifyAdminToken, async (req, res) => {
 /**
  * Get a list of posts, sorted in descending order, 6 at a time
  *
- * :page = 1: 4 posts
- * :page = 2: 8 posts
- * :page = 3: 12 posts
+ * :page = 1: 6 posts
+ * :page = 2: 12 posts
+ * :page = 3: 18 posts
  */
 postRouter.get("/landing", async (req, res) => {
   const { page } = req.query;
