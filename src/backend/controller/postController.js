@@ -55,7 +55,7 @@ postRouter.post("/", verifyToken, async (req, res) => {
     const data = await postService.createPost(req.body, req.user);
     res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
       message: `Successfully created new post!`,
-      PostInformation: req.body,
+      data,
     });
   } catch (err) {
     res.status(err.status || 400).json({ message: err.message });

@@ -74,11 +74,11 @@ async function createPost(postContents, user) {
       written_by: user.username,
       creation_time: new Date().toISOString(),
       liked_by: [user.username],
-      disliked_by: [],
+      disliked_by: []
     };
     let data = await postDao.createPost(newPost);
 
-    return data;
+    return newPost.post_id;
   }
 
   // Invalid post
@@ -108,7 +108,7 @@ async function createReply(replyCont, parent_id, user) {
         creation_time: new Date().toISOString(),
         parent_id,
         liked_by: [user.username],
-        disliked_by: [],
+        disliked_by: []
       };
 
       let data = await postDao.createPost(reply);
