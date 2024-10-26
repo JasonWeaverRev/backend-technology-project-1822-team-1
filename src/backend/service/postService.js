@@ -65,20 +65,29 @@ async function deletePostById(postID) {
  * @param {*} postContents contents of the post, including title (optional?) and body
  * @returns meta data of the post creation if successful, or null otherwise
  */
-async function createPost(postContents, user) {
-  if (validatePost(postContents, user)) {
+async function createPost(title, body, user, encounterId) {
+  if (validatePost(title, body, user)) {
+
+    let tempEncountId = "";
+
+    if (encounterId) {
+      tempEncountId = encounterId;
+    }
+
     // Add the new post information
     newPost = {
       post_id: uuid.v4(),
-      ...postContents,
+      title: title,
+      body: body,
       written_by: user.username,
       creation_time: new Date().toISOString(),
       liked_by: [user.username],
       disliked_by: [],
+      encounter: tempEncountId
     };
     let data = await postDao.createPost(newPost);
 
-    return data;
+    return [newPost.post_id, newPost.encounter];
   }
 
   // Invalid post
@@ -108,7 +117,7 @@ async function createReply(replyCont, parent_id, user) {
         creation_time: new Date().toISOString(),
         parent_id,
         liked_by: [user.username],
-        disliked_by: [],
+        disliked_by: []
       };
 
       let data = await postDao.createPost(reply);
@@ -174,7 +183,7 @@ const getPostsSorted = async (loads) => {
   }
 
   // When the amount of pages exceeds the posts content capacity
-  else if (postsSorted.length <= 4 + (loadNum - 2) * 4) {
+  else if (postsSorted.length <= 6 + (loadNum - 2) * 6) {
     logger.info(
       `Failed get posts sorted for landing page: Page number exceeds amount of posts that can be displayed`
     );
@@ -185,12 +194,12 @@ const getPostsSorted = async (loads) => {
   }
 
   // When the number of posts don't meet load capacity
-  else if (postsSorted.length <= 4 + (loadNum - 1) * 4) {
+  else if (postsSorted.length <= 6 + (loadNum - 1) * 6) {
     return [postsSorted, postsSorted.length];
   }
   // more than 4 posts
   else {
-    const postsSortedByDenom = postsSorted.slice(0, 4 + (loadNum - 1) * 4);
+    const postsSortedByDenom = postsSorted.slice(0, 6 + (loadNum - 1) * 6);
     return [postsSortedByDenom, postsSorted.length];
   }
 };
@@ -299,12 +308,12 @@ async function removeParents(parentPostID) {
  * @param {*} postContents
  * @returns true if the post is valid for creation, false otherwise
  */
-function validatePost(postContents, user) {
+function validatePost(title, body, user) {
   return (
-    postContents.title &&
-    postContents.body &&
+    title &&
+    body &&
     user.username &&
-    postContents.body.length > 0
+    body.length > 0
   );
 }
 
