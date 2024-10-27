@@ -25,7 +25,7 @@ function loggerMiddleware(req, res, next) {
 
 app.use(loggerMiddleware);
 app.use(cors());
-app.options("*", cors()); // Allow preflight requests from any origin
+app.use(cors({ origin: '*' })); // Allow preflight requests from any origin
 
 app.use((req, res, next) => {
   console.log("Request received:");
