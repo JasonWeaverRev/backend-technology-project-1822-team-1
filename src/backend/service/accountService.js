@@ -145,7 +145,7 @@ const loginUser = async (identifier, password) => {
         role: processedUser.role,
       },
       secret,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     console.log(processedUser);
@@ -189,7 +189,12 @@ async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
   }
 
   try {
-    const result = await AccountDao.uploadProfilePicAndUpdateDB(email, file_name, mime, data);
+    const result = await AccountDao.uploadProfilePicAndUpdateDB(
+      email,
+      file_name,
+      mime,
+      data
+    );
     return result;
   } catch (error) {
     console.error("Error in service layer: ", error);
@@ -203,5 +208,5 @@ module.exports = {
   registerUser,
   loginUser,
   updateAboutMe,
-  uploadProfilePicAndUpdateDB
+  uploadProfilePicAndUpdateDB,
 };
