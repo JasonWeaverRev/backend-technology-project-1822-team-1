@@ -221,6 +221,7 @@ async function uploadImageToBucket(Bucket, Key, mime, buffer) {
     return response;
   } catch (err) {
     console.error(err);
+    throw new Error("Failed to upload image to S3");
   }
 }
 
