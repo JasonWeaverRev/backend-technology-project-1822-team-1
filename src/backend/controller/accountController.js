@@ -160,6 +160,7 @@ router.patch("/profile-pic", AuthMiddleware.verifyToken, async (req, res) => {
       mime,
       data
     );
+    console.log(result)
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error in controller layer: ", error);
