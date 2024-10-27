@@ -55,8 +55,8 @@ router.post("/encounter", verifyToken, async (req, res) => {
 });
 
 router.get("/campaign/:created_by/:campaign_title", async (req, res) => {
+  console.log('Received request:', req.params);
   const { created_by, campaign_title } = req.params;
-  console.log("campaign title: ", campaign_title);
 
   if (!campaign_title) {
     return res.status(400).json({ message: "Campaign title must be provided" });
