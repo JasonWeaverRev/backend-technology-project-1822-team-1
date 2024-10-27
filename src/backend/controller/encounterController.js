@@ -58,6 +58,7 @@ router.get("/campaign/:created_by/:campaign_title", async (req, res) => {
   console.log('Received request:', req.params);
   const { created_by, campaign_title } = req.params;
 
+
   if (!campaign_title) {
     return res.status(400).json({ message: "Campaign title must be provided" });
   }
