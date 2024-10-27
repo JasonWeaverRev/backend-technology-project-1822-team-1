@@ -19,7 +19,7 @@ const client = new DynamoDBClient({ region: "us-east-1" });
 const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "Dungeon_Delver_Users";
-const BucketName = "dungeon-delver-bucket";
+const BucketName = "dungeon-delver-bucket-t1";
 
 /*
     DDUser Object Model
