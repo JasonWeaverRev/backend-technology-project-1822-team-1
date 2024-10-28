@@ -614,4 +614,116 @@ describe("encounterService Tests", () => {
       }
     });
   });
+
+  describe("createCampaign", () => {
+    it("Should throw error for missing title", async () => {
+      const mockUsername = "username";
+      const mockEncounter = "12345";
+      const mockTitle = null;
+
+      try {
+        await encounterService.createCampaign(mockUsername, mockEncounter, mockTitle);
+      } catch (error) {
+        expect(error.status).toBe(400);
+        expect(error.message).toBe("Campaign Title must be provided");
+      }
+    });
+
+    it("Should throw error for invalid Encounter", async () => {
+      const mockUsername = "username";
+      const mockEncounter = "12345";
+      const mockTitle = "mock title";
+
+      encounterDao.getEncounterById.mockResolvedValue(null);
+
+      try {
+        await encounterService.createCampaign(mockUsername, mockEncounter, mockTitle);
+      } catch (error) {
+        expect(error.status).toBe(404);
+        expect(error.message).toBe("Invalid Encounter ID");
+      }
+    });
+
+    it("Should throw error if user does not own the encounter", async () => {
+      const mockUsername = "username";
+      const mockEncounter = "12345";
+      const mockTitle = "mock title";
+
+      encounterDao.getEncounterById.mockResolvedValue({created_by: "not user"});
+
+      try {
+        await encounterService.createCampaign(mockUsername, mockEncounter, mockTitle);
+      } catch (error) {
+        expect(error.status).toBe(404);
+        expect(error.message).toBe("Users can only add their own Encounters to Campaigns");
+      }
+    });
+
+    it("Should return altered encounter on success", async () => {
+      const mockUsername = "username";
+      const mockEncounter = "12345";
+      const mockTitle = "mock title";
+
+      encounterDao.getEncounterById.mockResolvedValue({created_by: "username"});
+      encounterDao.createCampaign.mockResolvedValue({mockEncounter});
+
+      
+      const result = await encounterService.createCampaign(mockUsername, mockEncounter, mockTitle);
+      expect(result.mockEncounter).toEqual(mockEncounter);
+    });
+  });
+
+  describe("removeCampaign", () => {
+    it("Should throw error for missing encounter", async () => {
+      const mockUsername = "username";
+      const mockEncounter = null;
+
+      try {
+        await encounterService.removeCampaign(mockUsername, mockEncounter);
+      } catch (error) {
+        expect(error.status).toBe(404);
+        expect(error.message).toBe("Encounter ID must be provided");
+      }
+    })
+
+    it("Should throw error for missing username", async () => {
+      const mockUsername = null;
+      const mockEncounter = "12345";
+
+      try {
+        await encounterService.removeCampaign(mockUsername, mockEncounter);
+      } catch (error) {
+        expect(error.status).toBe(404);
+        expect(error.message).toBe("Username must be provided");
+      }
+    })
+
+    it("Should throw error for invalid Encounter", async () => {
+      const mockUsername = "username";
+      const mockEncounter = "12345";
+
+      encounterDao.getEncounterById.mockResolvedValue(null);
+
+      try {
+        await encounterService.removeCampaign(mockUsername, mockEncounter);
+      } catch (error) {
+        expect(error.status).toBe(404);
+        expect(error.message).toBe("Invalid Encounter ID");
+      }
+    })
+
+    it("Should throw error if user does not own Encounter", async () => {
+      const mockUsername = "username";
+      const mockEncounter = "12345";
+
+      encounterDao.getEncounterById.mockResolvedValue({created_by: "not user"});
+
+      try {
+        await encounterService.removeCampaign(mockUsername, mockEncounter);
+      } catch (error) {
+        expect(error.status).toBe(400);
+        expect(error.message).toBe("Users cannot delete other user's campaigns");
+      }
+    })
+  })
 });

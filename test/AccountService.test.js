@@ -267,6 +267,21 @@ describe("accountService Tests", () => {
       
     });
   });
+
+  describe("uploadProfilePicAndUpdateDB", () => {
+    it("Should throw error if email is missing", async () => {
+      const mockUserEmail = null;
+      accountDao.isEmailTaken.mockReturnValue(false);
+
+      try {
+        const result = await accountService.uploadProfilePicAndUpdateDB(mockUserEmail, "a", "b", "c");
+      } catch (error) {
+        expect(error.message).toBe(
+          "Invalid user"
+        );
+      }
+    })
+  })
 });
 
 describe("User Service - loginUser", () => {
