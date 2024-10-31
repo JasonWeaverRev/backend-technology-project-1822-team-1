@@ -55,6 +55,7 @@ User Profile
 Method	Endpoint	    	 					Description
 GET	/api/accounts/profile						View a user’s profile
 PUT	/api/accounts/profile						Update a user’s profile
+PATCH	/api/accounts/about-me						Update a user's About Me
 ```
 Encounters
 ```
@@ -64,6 +65,7 @@ GET	/api/encounters/encounter					Get single encounter by id
 GET	/api/encounters/user						Get all encounters by a user
 GET	/api/encounters/monsters?challenge_rating=[challenge rating] 	Get random monsters by challenge rating
 PUT	/api/encounters/encounter					Update an existing encounter
+PATCH	/api/encounters/campaigns?encounter_id=[encounter_id]		Assign/Remove an encounter's campaign title
 DELETE	/api/encounters/encounter					Delete an encounter
 ```
 Forum
