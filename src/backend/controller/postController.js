@@ -5,138 +5,207 @@ const express = require("express");
 const postRouter = express.Router();
 
 // Local project imports
-const postService = require('../service/postService');
-const {verifyToken, verifyAdminToken} = require('../middleware/authMiddleware');
+const postService = require("../service/postService");
+const {
+  verifyToken,
+  verifyAdminToken,
+} = require("../middleware/authMiddleware");
+
 
 /**
- * Delete a specific post through Admin
+ * Get a post by its id
  */
-postRouter.delete('/', verifyAdminToken, async (req, res) => {
-    
-    const {post_id} = req.body;
-
-    try {
-        await postService.deletePostById(post_id);
-
-        res.status(200).json({message: `Successfully deleted the post!`});
-    } catch(err) {
-        res.status(err.status || 400).json({ message: err.message });
-    }
-
+postRouter.get("/posts/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getPostById(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
 });
+
+/**
+ * Get a post's likes by its id
+ */
+postRouter.get("/posts/likes/:postId", async (req, res) => {
+  try {
+    const postData = await postService.getLikesByPostId(
+      req.params.postId,
+    );
+    res
+      .status(201)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json(postData);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
+
 
 /**
  * Add a new post
  */
-postRouter.post('/', verifyToken, async (req, res) => {
-
-    try {
-        const data = await postService.createPost(req.body, req.user);
-        res.status(201).json({message: `Successfully created new post!`, PostInformation: req.body});
-
-    } catch (err) {
-        res.status(err.status || 400).json({message: err.message});
-    }
+postRouter.post("/", verifyToken, async (req, res) => {
+  try {
+    const data = await postService.createPost(req.body, req.user);
+    res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
+      message: `Successfully created new post!`,
+      PostInformation: req.body,
+    });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
 });
 
 /**
  * Like a post
  */
-postRouter.post('/like', verifyToken, async (req, res) => {
+postRouter.post("/like", verifyToken, async (req, res) => {
   const { post_id } = req.body;
   const username = req.user.username;
 
   if (!post_id) {
-    return res.status(400).json({ message: 'post_id is required.' });
+    return res.status(400).json({ message: "post_id is required." });
   }
 
   try {
-    // Call the service to like/unlike the post and store the result
     const result = await postService.likePost(post_id, username);
+    console.log("Like service result:", result);
 
-    // Handle the response based on the result value
-    if (result === 1) {
-      return res.status(200).json({ message: 'Post liked successfully.' });
-    } else if (result === 3) {
-      return res.status(200).json({ message: 'Post unliked successfully.' });
-    } else {
-      return res.status(500).json({ message: 'Failed to update like status.' });
-    }
+    return res
+      .status(result.status)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ message: result.message });
   } catch (err) {
-    // Send error status and message if something goes wrong
     res.status(err.status || 500).json({ message: err.message });
   }
 });
 
-  
-  /**
-   * Dislike a post
-   */
-  postRouter.post('/dislike', verifyToken, async (req, res) => {
-    const { post_id } = req.body;
-    const username = req.user.username;
-  
-    if (!post_id) {
-      return res.status(400).json({ message: 'post_id is required.' });
-    }
-  
-    try {
-      const result = await postService.dislikePost(post_id, username);
-      console.log('Dislike service result:', result);
-  
-      return res.status(result.status).json({ message: result.message });
-    } catch (err) {
-      res.status(err.status || 500).json({ message: err.message });
-    }
-  });
-  
-  //end of post interaction
+/**
+ * Dislike a post
+ */
+postRouter.post("/dislike", verifyToken, async (req, res) => {
+  const { post_id } = req.body;
+  const username = req.user.username;
 
-  
+  if (!post_id) {
+    return res.status(400).json({ message: "post_id is required." });
+  }
+
+  try {
+    const result = await postService.dislikePost(post_id, username);
+    console.log("Dislike service result:", result);
+
+    return res
+      .status(result.status)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ message: result.message });
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
+//end of post interaction
+
 /**
  * Add a new reply comment
  */
-postRouter.post('/:postId', verifyToken, async (req, res) => {
-    
-    try {
-        const data = await postService.createReply(req.body, req.params.postId, req.user);
-        res.status(201).json({message: `Successfully created new post!`, PostInformation: req.body});
-
-    } catch (err) {
-        res.status(err.status || 400).json({message: err.message});
-    }
+postRouter.post("/:postId", verifyToken, async (req, res) => {
+  try {
+    const data = await postService.createReply(
+      req.body,
+      req.params.postId,
+      req.user
+    );
+    res.status(201).setHeader("Access-Control-Allow-Origin", "*").json({
+      message: `Successfully created new post!`,
+      PostInformation: req.body,
+    });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
 });
 
 /**
- * Get all posts in the forums table, sorted in ascending order of their creation time []
+ * Delete a specific post through Admin
  */
-postRouter.get('/filters', async (req, res) => {
-    
-    try {
-        const data = await postService.getAllPostsSorted();
-        res.status(201).json(data);
+postRouter.delete("/:postId", verifyAdminToken, async (req, res) => {
+  try {
+    await postService.deletePostById(req.params.postId);
 
-    } catch (err) {
-        res.status(err.status || 400).json({message: err.message});
-    }
+    res
+      .status(200)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .json({ message: `Successfully deleted the post!` });
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
 });
 
 /**
- * Gets all posts from the forums
+ * Get a list of posts, sorted in descending order, 6 at a time
+ *
+ * :page = 1: 4 posts
+ * :page = 2: 8 posts
+ * :page = 3: 12 posts
+ * 
+ *   ApplicationStop:
+    - location: application_stop.sh
+      timeout: 300
+      runas: root
+
+      #!bin/bash
+echo "Stopping application" >> /tmp/deployment.log
+
+
+# Find the PID of the node process running the server
+PID=$(pgrep -f "node src/server.js")
+
+# Check if a PID was found
+if [ -z "$PID" ]; then
+    # No process found, log it
+    echo "No process found for node src/server.js" >> /tmp/deployment.log
+else
+    # Process found, attempt to kill it
+    echo "Found process with PID: $PID. Stopping it..." >> /tmp/deployment.log
+    sudo kill $PID
+
+    # Check if the kill command was successful
+    if [ $? -eq 0 ]; then
+        echo "Successfully stopped process with PID: $PID" >> /tmp/deployment.log
+    else
+        echo "Failed to stop process with PID: $PID" >> /tmp/deployment.log
+    fi
+fi
+
  */
-postRouter.get('/', async (req, res) => {
+postRouter.get("/landing", async (req, res) => {
+  const { page } = req.query;
 
-    try {
-        const data = await postService.getAllPosts();
-        res.status(201).json(data);
-    } catch (err) {
-        res.status(err.status || 400).json({message: err.message});
-    }
-
+  try {
+    const postReturn = await postService.getPostsSorted(page);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(201).json(postReturn);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
 });
 
+postRouter.get("/:username", async (req, res) => {
+  const username = req.params.username;
 
-
-
+  try {
+    const userPosts = await postService.getPostsByWrittenBy(username);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(201).json(userPosts);
+  } catch (err) {
+    res.status(err.status || 400).json({ message: err.message });
+  }
+});
 
 module.exports = postRouter;

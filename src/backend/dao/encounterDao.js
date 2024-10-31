@@ -27,10 +27,8 @@ const getEncounterById = async (encounter_id) => {
     });
 
     const data = await documentClient.send(command);
-
     return data.Item || null;
   } catch (err) {
-    console.log(err);
     throw { status: 500, message: "Error retrieving encounter by id" };
   }
 };
@@ -42,8 +40,11 @@ const createEncounter = async (encounter) => {
       Item: encounter,
     });
 
+    console.log(encounter);
+
     await documentClient.send(command);
   } catch (err) {
+    console.error(err);
     throw { status: 500, message: "Error creating new encounter" };
   }
 };
@@ -68,23 +69,40 @@ const getEncountersByUsername = async (username) => {
 
     return processedItems || [];
   } catch (err) {
-    console.error(err);
     throw { status: 500, message: "Error retrieving encounters by username" };
   }
 };
 
 const editEncounterById = async (encounter) => {
+  const encounter_id = encounter.encounter_id;
+  const encounter_title = encounter.encounter_title;
+  const monsters = encounter.monsters;
+  const setting = encounter.setting;
+
   try {
-    const command = new PutCommand({
+    // const command = new PutCommand({
+    //   TableName,
+    //   Item: encounter,
+    // });
+
+    const command = new UpdateCommand({
       TableName,
-      Item: encounter,
+      Key: { encounter_id },
+      UpdateExpression:
+        "SET encounter_title = :encounter_title, monsters = :monsters, setting = :setting",
+      ExpressionAttributeValues: {
+        ":encounter_title": encounter_title,
+        ":monsters": monsters,
+        ":setting": setting,
+      },
+      ReturnValues: "ALL_NEW",
     });
 
     const data = await documentClient.send(command);
 
     return data;
   } catch (err) {
-    throw { status: 500, message: "Error retrieving encounters by username" };
+    throw { status: 500, message: "Error updating encounters by id" };
   }
 };
 
@@ -124,8 +142,67 @@ const getBatchEncountersbyId = async (encounter_ids) => {
 
     return batchResponse.Responses[TableName] || [];
   } catch (err) {
-    console.error(err);
     throw { status: 500, message: "Error retrieving encounters in batch" };
+  }
+};
+
+const getCampaignByTitle = async (campaign_title) => {
+  try {
+    const command = new QueryCommand({
+      TableName,
+      IndexName: "campaign_title-encounter_id-index",
+      KeyConditionExpression: "#campaign_title = :campaign_title",
+      ExpressionAttributeNames: {
+        "#campaign_title": "campaign_title",
+      },
+      ExpressionAttributeValues: {
+        ":campaign_title": { S: campaign_title },
+      },
+    });
+
+    const data = await documentClient.send(command);
+    const encounterIds = data.Items.map((item) => item.encounter_id.S);
+    return encounterIds;
+  } catch (err) {
+    throw { status: 500, message: "Internal server error" };
+  }
+};
+
+// assigns a campaign_title to an Encounter -- used if we only want 1 campaign per encounter
+const createCampaign = async (encounter_id, campaign_title) => {
+  try {
+    const command = new UpdateCommand({
+      TableName,
+      Key: { encounter_id },
+      UpdateExpression: "SET campaign_title = :campaign_title",
+      ExpressionAttributeValues: {
+        ":campaign_title": campaign_title,
+      },
+
+      ReturnValues: "ALL_NEW",
+    });
+
+    const data = await documentClient.send(command);
+    return data?.Attributes;
+  } catch (err) {
+    throw { status: 500, message: "Internal server error" };
+  }
+};
+
+// removes campaign_title assignment to an encounter -- used if we only want 1 campaign per encounter
+const removeCampaign = async (encounter_id) => {
+  try {
+    const command = new UpdateCommand({
+      TableName,
+      Key: { encounter_id },
+      UpdateExpression: "REMOVE campaign_title",
+      ReturnValues: "ALL_NEW",
+    });
+
+    const data = await documentClient.send(command);
+    return data.Attributes;
+  } catch (err) {
+    throw { status: 500, message: "Internal server error" };
   }
 };
 
@@ -134,6 +211,9 @@ module.exports = {
   getBatchEncountersbyId,
   createEncounter,
   getEncountersByUsername,
+  createCampaign,
+  removeCampaign,
   editEncounterById,
   deleteEncounterById,
+  getCampaignByTitle,
 };

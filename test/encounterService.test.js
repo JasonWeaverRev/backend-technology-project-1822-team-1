@@ -130,7 +130,6 @@ describe("encounterService Tests", () => {
       expect(result).toHaveProperty("encounter_id");
       expect(result).toHaveProperty("saves");
       expect(result).toHaveProperty("creation_time");
-      expect(result).toHaveProperty("campaign_title");
     });
 
     it("should throw an error if no monsters are provided", async () => {
@@ -320,7 +319,175 @@ describe("encounterService Tests", () => {
     });
   });
 
-  describe("createNewEncounter", () => {
+  describe("createCampaign", () => {
+    it("Should throw Error for missing campaign title", async () => {
+      const testUsername = "testUser";
+      const testEncId = 123;
+      const testCmpTitle = "";
+
+      try {
+        const result = await encounterService.createCampaign(
+          testUsername,
+          testEncId,
+          testCmpTitle
+        );
+      } catch (err) {
+        expect(err.message).toBe("Campaign Title must be provided");
+      }
+    });
+
+    it("Should throw Error for invalid encounter", async () => {
+      const testUsername = "testUser";
+      const testEncId = 123;
+      const testCmpTitle = "test title";
+
+      try {
+        encounterDao.getEncounterById.mockReturnValue(null);
+        const result = await encounterService.createCampaign(
+          testUsername,
+          testEncId,
+          testCmpTitle
+        );
+      } catch (err) {
+        expect(err.message).toBe("Invalid Encounter ID");
+      }
+    });
+
+    it("Should throw Error if User is not the creator of the encounter", async () => {
+      const testUsername = "testUser";
+      const testEncId = 123;
+      const testCmpTitle = "test title";
+
+      try {
+        encounterDao.getEncounterById.mockReturnValue({
+          created_by: "notTestUser",
+        });
+        const result = await encounterService.createCampaign(
+          testUsername,
+          testEncId,
+          testCmpTitle
+        );
+      } catch (err) {
+        expect(err.message).toBe(
+          "Users can only add their own Encounters to Campaigns"
+        );
+      }
+    });
+
+    it("Should return updated Encounter", async () => {
+      const testUsername = "testUser";
+      const testEncId = 123;
+      const testCmpTitle = "test title";
+
+      encounterDao.getEncounterById.mockReturnValue({
+        created_by: "testUser",
+      });
+      encounterDao.createCampaign.mockReturnValue({
+        created_by: "testUser",
+        campaign_title: "test title",
+      });
+      const result = await encounterService.createCampaign(
+        testUsername,
+        testEncId,
+        testCmpTitle
+      );
+      expect(result.created_by).toEqual(testUsername);
+      expect(result.campaign_title).toEqual(testCmpTitle);
+    });
+  });
+
+  describe("removeCampaign", () => {
+    it("Should throw Error for missing username", async () => {
+      const testUsername = "";
+      const testEncId = 123;
+
+      try {
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
+      } catch (err) {
+        expect(err.message).toBe("Username must be provided");
+      }
+    });
+
+    it("Should throw Error for missing Encounter ID", async () => {
+      const testUsername = "testUser";
+      const testEncId = "";
+
+      try {
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
+      } catch (err) {
+        expect(err.message).toBe("Encounter ID must be provided");
+      }
+    });
+
+    it("Should throw Error for invalid Encounter ID", async () => {
+      const testUsername = "testUser";
+      const testEncId = "123";
+      encounterDao.getEncounterById.mockReturnValue(false);
+      try {
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
+      } catch (err) {
+        expect(err.message).toBe("Invalid Encounter ID");
+      }
+    });
+
+    it("Should throw Error for unowned Encounter", async () => {
+      const testUsername = "testUser";
+      const testEncId = "123";
+      encounterDao.getEncounterById.mockReturnValue({
+        created_by: "notTestUser",
+      });
+      try {
+        const result = await encounterService.removeCampaign(
+          testUsername,
+          testEncId
+        );
+      } catch (err) {
+        expect(err.message).toBe("Users cannot delete other user's campaigns");
+      }
+    });
+
+    it("Should return udpated Encounter", async () => {
+      const testUsername = "testUser";
+      const testEncId = "123";
+      encounterDao.getEncounterById.mockReturnValue({
+        created_by: "testUser",
+      });
+      encounterDao.removeCampaign.mockReturnValue({
+        created_by: "testUser",
+        encounter_id: "123",
+      });
+
+      const result = await encounterService.removeCampaign(
+        testUsername,
+        testEncId
+      );
+      expect(result.created_by).toBe("testUser");
+      expect(result.encounter_id).toBe("123");
+    });
+  });
+
+  describe("getCampaign", () => {
+    const campaignTitle = "test campaign title";
+
+    it("should return a list of encounter_ids for a valid campaign title", async () => {
+      // Mocking the DAO return value
+      encounterDao.getCampaignByTitle.mockReturnValue(["1", "2", "3"]);
+
+      const result = await encounterService.getCampaignByTitle(campaignTitle);
+      expect(result).toEqual(["1", "2", "3"]);
+    });
+  });
+
+  describe("UpdateNewEncounter", () => {
     it("should edit an encounter correctly", async () => {
       const oldEncounter = {
         encounter_id: "1",
@@ -341,16 +508,14 @@ describe("encounterService Tests", () => {
 
       const result = await encounterService.editEncounterById(
         "1",
-        null,
+        undefined,
         "New Title",
         "testuser",
         "New Setting"
       );
 
       expect(encounterDao.getEncounterById).toHaveBeenCalledWith("1");
-      expect(encounterDao.editEncounterById).toHaveBeenCalledWith(
-        editedEncounter
-      );
+
       expect(result.encounter_title).toBe("New Title");
       expect(result.setting).toBe("New Setting");
     });

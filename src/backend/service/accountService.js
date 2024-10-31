@@ -1,4 +1,3 @@
-
 const AccountDao = require("../dao/accountDao");
 const encounterDao = require("../dao/encounterDao");
 const bcrypt = require("bcrypt");
@@ -95,6 +94,22 @@ async function registerUser(user) {
   return registeredUser;
 }
 
+async function updateAboutMe(email, new_about_me) {
+  const emailTaken = await AccountDao.isEmailTaken(email);
+  if (!emailTaken) {
+    throw new Error("Account does not exist");
+  }
+
+  const update = await AccountDao.updateAboutMe(email, new_about_me);
+  return update;
+}
+
+/**
+ *
+ * @param {*} identifier
+ * @param {*} password
+ * @returns
+ */
 const loginUser = async (identifier, password) => {
   if (!identifier || !password) {
     logger.info(`Failed login attempt: Invalid credentials`);
@@ -167,10 +182,26 @@ const processByUsername = async (user) => {
   return processedUser;
 };
 
+async function uploadProfilePicAndUpdateDB(email, file_name, mime, data) {
+  const emailExist = await AccountDao.isEmailTaken(email);
+  if (!email || !emailExist) {
+    throw { status: 401, message: "Invalid user" };
+  }
+
+  try {
+    const result = await AccountDao.uploadProfilePicAndUpdateDB(email, file_name, mime, data);
+    return result;
+  } catch (error) {
+    console.error("Error in service layer: ", error);
+    throw error;
+  }
+}
+
 module.exports = {
   getUserByEmail,
   getUserByUsername,
   registerUser,
   loginUser,
+  updateAboutMe,
+  uploadProfilePicAndUpdateDB
 };
-

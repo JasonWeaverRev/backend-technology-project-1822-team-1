@@ -3,9 +3,11 @@ const { logger } = require("../utils/logger");
 const axios = require("axios");
 const uuid = require("uuid");
 const encounterDao = require("../dao/encounterDao");
+const accountDao = require("../dao/accountDao");
 
 const dndApiUrlPath = "https://www.dnd5eapi.co";
 const dndBeyondUrlPath = "https://www.dndbeyond.com/monsters/";
+const file_ext = "jpeg";
 
 /**
  * CHALLENGE RATINGS
@@ -24,6 +26,11 @@ const monsterAmount = 5;
 //   },
 // ];
 
+/**
+ *
+ * @param {*} challengeRating
+ * @returns
+ */
 const getMonstersByChallengeRating = async (challengeRating) => {
   try {
     const response = await axios(
@@ -58,20 +65,23 @@ const getMonstersByChallengeRating = async (challengeRating) => {
         intelligence: monsterDetails.data.intelligence,
         wisdom: monsterDetails.data.wisdom,
         charisma: monsterDetails.data.charisma,
-        image: monsterDetails.data.image,
+        image: monsterDetails.data.image
+          ? `${dndApiUrlPath}${monsterDetails.data.image}`
+          : accountDao.getPreSignedUrl(
+            "dungeon-delver-bucket",
+            `profile_pics/${monsterDetails.data.type}.${file_ext}`
+          ),
         monsterPage: monsterDetails.data.name.includes(",")
           ? `${dndBeyondUrlPath}${monsterDetails.data.name
-              .split(",")[0]
-              .trim()}`
+            .split(",")[0]
+            .trim()}`
           : `${dndBeyondUrlPath}${monsterDetails.data.name.replaceAll(
-              " ",
-              "-"
-            )}`,
+            " ",
+            "-"
+          )}`,
       };
       randomMonsterData.push(newMonster);
     }
-
-    console.log(randomMonsterData);
 
     return randomMonsterData;
   } catch (err) {
@@ -79,6 +89,11 @@ const getMonstersByChallengeRating = async (challengeRating) => {
   }
 };
 
+/**
+ *
+ * @param {*} id
+ * @returns
+ */
 const getEncounterById = async (id) => {
   if (!id || id.trim() === "") {
     throw { status: 400, message: "Must provide id for the encounter" };
@@ -89,6 +104,7 @@ const getEncounterById = async (id) => {
     if (!encounter) {
       throw { status: 404, message: "Encounter with this id does not exist" };
     }
+
     return encounter;
   } catch (err) {
     throw err.status ? err : { status: 500, messsage: "Internal server error" };
@@ -121,11 +137,9 @@ const createNewEncounter = async (monsters, title, username, setting) => {
       saves: 0,
       creation_time: new Date().toISOString(),
       created_by: username,
-      campaign_title: "",
+      // campaign_title: "",
       setting: setting ? setting : "",
     };
-
-    console.log(newEncounter);
 
     await encounterDao.createEncounter(newEncounter);
 
@@ -161,13 +175,16 @@ const editEncounterById = async (
       throw { status: 403, message: "Cannot edit encounters of other users" };
     }
 
-    encounter.encounter_title = encounter_title
-      ? encounter_title
-      : encounter.encounter_title;
+    encounter.encounter_title =
+      !encounter_title || encounter_title.trim() === ""
+        ? encounter.encounter_title
+        : encounter_title;
 
-    encounter.monsters = monsters ? monsters : encounter.monsters;
+    encounter.monsters =
+      !monsters || monsters.length > 0 ? monsters : encounter.monsters;
 
-    encounter.setting = setting ? setting : encounter.setting;
+    encounter.setting =
+      !setting || setting.trim() === "" ? encounter.setting : setting;
 
     await encounterDao.editEncounterById(encounter);
 
@@ -197,11 +214,86 @@ const deleteEncounterById = async (encounter_id, username) => {
   }
 };
 
+const createCampaign = async (username, encounter_id, campaign_title) => {
+  if (!campaign_title) {
+    throw { status: 400, message: "Campaign Title must be provided" };
+  }
+
+  const encounter = await encounterDao.getEncounterById(encounter_id);
+  if (!encounter) {
+    throw { status: 404, message: "Invalid Encounter ID" };
+  }
+
+  if (encounter.created_by !== username) {
+    throw {
+      status: 404,
+      message: "Users can only add their own Encounters to Campaigns",
+    };
+  }
+
+  const data = await encounterDao.createCampaign(encounter_id, campaign_title);
+  if (!data) {
+    throw { status: 500, message: "Internal server error" };
+  }
+
+  return data;
+};
+
+// remove campaign from an encounter
+const removeCampaign = async (username, encounter_id) => {
+  if (!encounter_id) {
+    throw { status: 404, message: "Encounter ID must be provided" };
+  }
+
+  if (!username) {
+    throw { status: 404, message: "Username must be provided" };
+  }
+
+  const encounter = await encounterDao.getEncounterById(encounter_id);
+  if (!encounter) {
+    throw { status: 404, message: "Invalid Encounter ID" };
+  }
+
+  if (encounter.created_by !== username) {
+    throw {
+      status: 400,
+      message: "Users cannot delete other user's campaigns",
+    };
+  }
+
+  const data = await encounterDao.removeCampaign(encounter_id);
+  if (!data) {
+    throw { status: 500, message: "Internal server error" };
+  }
+
+  return data;
+};
+
+const getCampaignByTitle = async (campaign_title) => {
+  if (!campaign_title) {
+    throw { status: 400, message: "Campaign title must be provided" };
+  }
+
+  try {
+    const campaigns = await encounterDao.getCampaignByTitle(campaign_title);
+
+    return campaigns;
+  } catch (err) {
+    throw {
+      status: err.status || 500,
+      message: err.message || "Internal server error",
+    };
+  }
+};
+
 module.exports = {
   getMonstersByChallengeRating,
   createNewEncounter,
   getEncounterById,
   getEncountersByUsername,
+  createCampaign,
+  removeCampaign,
   editEncounterById,
   deleteEncounterById,
+  getCampaignByTitle,
 };
