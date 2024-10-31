@@ -68,48 +68,23 @@ POST	/api/accounts/login											Log in an existing user
 User Profile
 
 ```
-Method	Endpoint	    	 										Description
-GET		/api/accounts/profile										View a user’s profile
-					Body: {
-						"Username": "User1"
-					}
-
-PUT		/api/accounts/profile										Update a user’s profile
+Method	Endpoint	    	 					Description
+GET	/api/accounts/profile						View a user’s profile
+PUT	/api/accounts/profile						Update a user’s profile
+PATCH	/api/accounts/about-me						Update a user's About Me
 ```
 
 Encounters
 
 ```
-Method	Endpoint													Description
-POST	/api/encounters/encounter									Create a new encounter
-					Body: {
-						"monsters": [monsterData],
-    					"encounter_title": "New Encounter"
-					}
-
-GET		/api/encounters/encounter?encounter_id=[encounter_id]		Get single encounter by id
-
-
-GET		/api/encounters/user										Get all encounters by a user
-					Body: {
-						"insert": "insert"
-					}
-				
-GET		/api/encounters/monsters?challenge_rating={chal_rating}		Get random monsters by challenge rating
-					Body: {
-						"insert": "insert"
-					}
-
-PUT		/api/encounters/encounter									Update an existing encounter
-					Body: {
-						"monsters": [monsterData],
-    					"encounter_title": "Edited Title",
-    					"setting": "Cool new setting",
-    					"encounter_id":"id of the encounter to be updated"
-					}
-
-DELETE	/api/encounters/encounter?encounter_id=[encounter_id]		Delete an encounter
-
+Method	Endpoint							Description
+POST	/api/encounters/encounter					Create a new encounter
+GET	/api/encounters/encounter					Get single encounter by id
+GET	/api/encounters/user						Get all encounters by a user
+GET	/api/encounters/monsters?challenge_rating=[challenge rating] 	Get random monsters by challenge rating
+PUT	/api/encounters/encounter					Update an existing encounter
+PATCH	/api/encounters/campaigns?encounter_id=[encounter_id]		Assign/Remove an encounter's campaign title
+DELETE	/api/encounters/encounter					Delete an encounter
 ```
 
 Forum
@@ -201,7 +176,6 @@ Encounters
 "setting": "This is the current setting of the encounter",
 "creation_time": "2024-10-01T10:00:00Z"
 }
-
 
 ```
 Delver_Forum_Posts
